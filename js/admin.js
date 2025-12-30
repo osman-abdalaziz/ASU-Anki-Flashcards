@@ -15,7 +15,7 @@ function initAdminGuard() {
             // هل المستخدم هو الأدمن؟
             if (user.email !== ADMIN_EMAIL) {
                 showModal('Access Denied!', "⛔ Admins Only!", 'error');
-                window.location.href = "../index.html"; // طرد للموقع الرئيسي
+                window.location.href = "../index"; // طرد للموقع الرئيسي
             } else {
                 // تعبئة بيانات الأدمن في الواجهة
                 const avatar = document.getElementById('mobileUserAvatar');
