@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Browsing Flashcards</title>
+        <!-- Website Favicon -->
+        <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
+        <!-- Google Fonts: Poppins -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet" />
+        <!-- Font Awesome -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="css/styles.css" />
+    </head>
+    <body>
+        <nav>
+            <div class="container">
+                <div class="left-component">
+                    <img src="images/logo.png" alt="ASU | Anki flashcards" />
+                    <div class="links">
+                        <ul>
+                            <li>
+                                <a href="#" class="active">Browse Flashcards</a>
+                            </li>
+                            <li>
+                                <a
+                                    href="https://anki-asu.notion.site/Anki-Tutorials-Ain-shams-Medicine-e02ae973c7db41edb4ef7381495b0912"
+                                    target="_blank"
+                                    >Anki Tutorials</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href="https://forms.gle/2ecntUUKCb9DgC839"
+                                    target="_blank"
+                                    >Join Us</a
+                                >
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div
+                    class="nav-actions"
+                    style="display: flex; align-items: center; gap: 15px">
+                    <button
+                        id="themeToggle"
+                        class="theme-toggle"
+                        aria-pressed="false"
+                        aria-label="Toggle color theme">
+                        <i class="fa-solid fa-moon" aria-hidden="true"></i>
+                    </button>
+                    <div class="ver-devider"></div>
+                    <a href="signin.html" id="loginBtn" class="main-btn">
+                        Sign In
+                        <i
+                            class="fa-solid fa-user fa-fw"
+                            aria-hidden="true"></i>
+                    </a>
+
+                    <div
+                        id="notificationsWrapper"
+                        style="display: none; position: relative">
+                        <button
+                            id="notifBtn"
+                            class="notif-btn"
+                            aria-label="Notifications">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="notifBadge" class="notif-badge"></span>
+                        </button>
+
+                        <div id="notifDropdown" class="notif-dropdown">
+                            <div class="notif-header">
+                                <h3>Notifications</h3>
+                                <span class="mark-read">Mark all as read</span>
+                            </div>
+
+                            <div class="notif-list">
+                                <!-- <div class="notif-item unread">
+                                    <div class="notif-icon bg-blue">
+                                        <i class="fa-solid fa-rocket"></i>
+                                    </div>
+                                    <div class="notif-content">
+                                        <p class="notif-text">
+                                            Welcome to <b>ASU Anki!</b> Start
+                                            downloading your first deck now.
+                                        </p>
+                                    </div>
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="userProfile"
+                        id="userProfile"
+                        style="display: none; position: relative">
+                        <div class="userimg">
+                            <img id="userAvatar" src="" alt="User" />
+                        </div>
+                        <p
+                            id="userName"
+                            style="
+                                padding: 10px 15px;
+                                font-weight: 400;
+                                margin: 0;
+                            ">
+                            User Name
+                        </p>
+                        <div class="dropdown-arrow" id="dropdownArrow">
+                            <i class="fa-solid fa-angle-down"></i>
+                        </div>
+                        <div id="userDropdown" class="dropdown-menu">
+                            <button id="logoutBtn">
+                                Logout
+                                <i
+                                    class="fa-solid fa-right-from-bracket fa-fw"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mobile-menu-box">
+                    <div class="mobile-menu-open" id="mobileMenuOpen">
+                        <i class="fa-solid fa-bars"></i>
+                    </div>
+                    <div
+                        id="mobileNotifWrapper"
+                        style="display: none; position: relative">
+                        <button
+                            id="mobileNotifBtn"
+                            class="notif-btn"
+                            aria-label="Notifications">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="mobileNotifBadge" class="notif-badge"
+                                ></span
+                            >
+                        </button>
+
+                        <div id="mobileNotifDropdown" class="notif-dropdown">
+                            <div class="notif-header">
+                                <h3>Notifications</h3>
+                                <span class="mark-read">Mark all as read</span>
+                            </div>
+
+                            <div class="notif-list">
+                                <!-- <div class="notif-item unread">
+                                    <div class="notif-icon bg-blue">
+                                        <i class="fa-solid fa-rocket"></i>
+                                    </div>
+                                    <div class="notif-content">
+                                        <p class="notif-text">
+                                            Welcome to
+                                            <b>ASU Anki!</b> Start downloading
+                                            your first deck now.
+                                        </p>
+                                    </div>
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        id="themeToggleMobile"
+                        class="theme-toggle"
+                        aria-pressed="false"
+                        aria-label="Toggle color theme (mobile)">
+                        <i class="fa-solid fa-moon" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                <div class="mobile-menu">
+                    <div class="mobile-menu-close" id="mobileMenuClose">
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+
+                    <div class="mobile-links">
+                        <div class="logo"><img src="images/logo.png" alt=""></div>
+                        <ul>
+                            <li class="active">
+                                <a href="#">Browse Flashcards</a>
+                            </li>
+                            <li>
+                                <a
+                                    href="https://anki-asu.notion.site/Anki-Tutorials-Ain-shams-Medicine-e02ae973c7db41edb4ef7381495b0912"
+                                    target="_blank"
+                                    >Anki Tutorials</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href="https://forms.gle/2ecntUUKCb9DgC839"
+                                    target="_blank"
+                                    >Join Us</a
+                                >
+                            </li>
+                        </ul>
+
+                        <div
+                            class="mobile-nav-actions"
+                            style="
+                                display: flex;
+                                align-items: center;
+                                gap: 15px;
+                                margin-top: auto;
+                                margin-bottom: 50px;
+                            ">
+                            <a
+                                href="signin.html"
+                                id="mobileLoginBtn"
+                                class="main-btn">
+                                Sign In
+                                <i
+                                    class="fa-solid fa-user fa-fw"
+                                    aria-hidden="true"></i>
+                            </a>
+                        </div>
+
+                        <div
+                            class="userProfile"
+                            id="mobileUserProfile"
+                            style="display: none; position: relative">
+                            <div
+                                id="mobileUserDropdown"
+                                class="mobile-dropdown-menu">
+                                <button
+                                    id="mobileLogoutBtn"
+                                    class="main-btn"
+                                    style="display: block">
+                                    Logout
+                                    <i
+                                        class="fa-solid fa-right-from-bracket fa-fw"></i>
+                                </button>
+                            </div>
+                            <div class="userProfile-header">
+                                <div class="userimg">
+                                <img id="mobileUserAvatar" src="" alt="User" />
+                            </div>
+                            <p
+                                id="mobileUserName"
+                                style="
+                                    padding: 10px 15px;
+                                    font-weight: 400;
+                                    margin: 0;
+                                    cursor: pointer;
+                                ">
+                                User Name
+                            </p>
+                            <div
+                                class="dropdown-arrow"
+                                id="mobileDropdownArrow">
+                                <i class="fa-solid fa-angle-up"></i>
+                            </div></div>
+                            
+                            
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            <div class="container">
+                <h1>Browse Flash<span>cards</span></h1>
+
+                <div class="search">
+                    <i
+                        class="fa-solid fa-magnifying-glass search-icon"
+                        aria-hidden="true"></i>
+                    <input
+                        type="text"
+                        id="searchInput"
+                        placeholder="Search By Title, Subject, or Creator" />
+                </div>
+
+                <div class="filters">
+                    <div>
+                        <label for="categorySelect">Category:</label>
+                        <select id="categorySelect">
+                            <option value="all">All</option>
+                            <option value="theoretical">Theoretical</option>
+                            <option value="practical">Practical</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="yearSelect">Academic Year:</label>
+                        <select id="yearSelect">
+                            <option value="all">All</option>
+                            <option value="1st Year">1st Year</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <button
+                            type="button"
+                            class="main-btn reset-btn"
+                            id="resetFiltersBtn">
+                            Reset Filters
+                            <i
+                                class="fa-solid fa-rotate-left fa-fw"
+                                aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flashcards-grid" id="flashcardsGrid">
+                    <!-- Flashcards will be dynamically inserted here -->
+                    
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="container">
+                <p>&copy; 2025 ASU Anki Flashcards. All rights reserved.</p>
+                <p>
+                    Made With <i class="fa-solid fa-heart fa-fw"></i> By
+                    <a
+                        href="https://osmanabdalaziz-portfolio.netlify.app/"
+                        target="_blank"
+                        ><img src="images/mylogo_white.png" alt=""
+                    /></a>
+                </p>
+            </div>
+        </footer>
+        <script src="js/theme.js"></script>
+        <script type="module" src="js/main.js"></script>
+    </body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Sign In</title>
+        <!-- Website Favicon -->
+        <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
+        <!-- Google Fonts: Poppins -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet" />
+        <!-- Font Awesome -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer" />
+        <link rel="stylesheet" href="css/styles.css" />
+    </head>
+    <body>
+        <main class="signin-page">
+            <div class="signin-card">
+                <div class="logo">
+                    <img src="images/logo.png" alt="" />
+                </div>
+
+                <h2 class="title">Sign Up</h2>
+                <p class="subtitle">Access to all flashcards and use it!</p>
+
+                <form
+                    class="signin-form"
+                    action="#"
+                    method="POST"
+                    novalidate
+                    id="signupForm">
+                    <button
+                        type="button"
+                        class="google-btn"
+                        aria-label="Sign in with Google">
+                        <!-- Inline Google SVG -->
+                        <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 533.5 544.3"
+                            xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true">
+                            <path
+                                d="M533.5 278.4c0-17.4-1.5-34.3-4.4-50.6H272v95.9h146.9c-6.4 34.7-25.9 64.1-55.3 83.7v69.5h89.4c52.2-48.1 82.5-118.8 82.5-198.5z"
+                                fill="#4285F4" />
+                            <path
+                                d="M272 544.3c74.5 0 137.2-24.6 182.9-66.9l-89.4-69.5c-24.6 16.5-56 26.2-93.5 26.2-71.9 0-132.9-48.6-154.8-113.8H26.6v71.6C71 492.7 164.6 544.3 272 544.3z"
+                                fill="#34A853" />
+                            <path
+                                d="M117.2 325.3c-9.8-29-9.8-60.3 0-89.3V164.4H26.6C-6.4 217.2-6.4 326.9 26.6 379.7l90.6-54.4z"
+                                fill="#FBBC05" />
+                            <path
+                                d="M272 107.7c39.9-.6 78.6 15.3 108 44.2l80.8-80.8C405.9 24 343.3 0 272 0 164.6 0 71 51.6 26.6 129.6l90.6 54.4C139.1 156.3 200.1 107.7 272 107.7z"
+                                fill="#EA4335" />
+                        </svg>
+                        Sign Up with Google
+                    </button>
+                    <div class="divider"><span>or</span></div>
+
+                    <label class="field">
+                        <span class="field-label">Name</span>
+                        <div class="input-wrap">
+                            <input
+                                type="text"
+                                name="name"
+                                placeholder="Enter Your Full Name" />
+                        </div>
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">Email</span>
+                        <div class="input-wrap">
+                            <input
+                                type="email"
+                                name="email"
+                                placeholder="Enter Your Email" />
+                            <i class="fa-solid fa-envelope input-icon"></i>
+                        </div>
+                    </label>
+
+                    <label class="field">
+                        <span class="field-label">Password</span>
+                        <div class="input-wrap">
+                            <input
+                                id="password"
+                                type="password"
+                                name="password"
+                                placeholder="Enter Your Password" />
+                            <button
+                                type="button"
+                                class="input-icon toggle-password"
+                                aria-label="Show password">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </label>
+                    <label class="field">
+                        <span class="field-label">Confirm Password</span>
+                        <div class="input-wrap">
+                            <input
+                                id="confirm-password"
+                                type="password"
+                                name="confirm-password"
+                                placeholder="Enter Your Password Again" />
+                            <button
+                                type="button"
+                                class="input-icon toggle-password"
+                                aria-label="Show password">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                        </div>
+                    </label>
+
+                    <div class="row">
+                        <label class="remember"
+                            ><input type="checkbox" id="terms-conditions" /> I
+                            agree to
+                            <a href="terms.html" target="_blank"
+                                >Terms & Conditions</a
+                            ></label
+                        >
+                    </div>
+
+                    <div id="errorMessage" class="error-message"></div>
+
+                    <button class="main-btn login" type="submit">
+                        Sign Up <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <p class="signup">
+                        Already have an account?
+                        <a href="signin.html">Sign in</a>
+                    </p>
+                </form>
+            </div>
+        </main>
+        <div class="signin-footer">
+            Copyright © 2025 ASU Anki Flashcards. All rights reserved.
+        </div>
+        <script src="js/theme.js"></script>
+        <script type="module" src="js/main.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const toggles = document.querySelectorAll(".toggle-password");
+                if (!toggles || toggles.length === 0) return;
+
+                toggles.forEach((btn) => {
+                    const wrap = btn.closest(".input-wrap");
+                    const input = wrap ? wrap.querySelector("input") : null;
+                    if (!input) return;
+
+                    btn.addEventListener("click", function () {
+                        const isPwd = input.type === "password";
+                        input.type = isPwd ? "text" : "password";
+                        this.setAttribute(
+                            "aria-label",
+                            isPwd ? "Hide password" : "Show password"
+                        );
+                        this.setAttribute("aria-pressed", String(isPwd));
+                        const icon = this.querySelector("i");
+                        if (!icon) return;
+                        icon.classList.toggle("fa-eye");
+                        icon.classList.toggle("fa-eye-slash");
+                        icon.classList.toggle("fa-regular");
+                        icon.classList.toggle("fa-solid");
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
