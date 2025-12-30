@@ -3,7 +3,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/fi
 import { collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
-onAuthStateChanged(auth, (user) => { if (!user || user.email !== ADMIN_EMAIL) window.location.href = "../index.html"; });
+onAuthStateChanged(auth, (user) => { if (!user || user.email !== ADMIN_EMAIL) window.location.href = "../index"; });
 
 const tableBody = document.getElementById('notifTableBody');
 

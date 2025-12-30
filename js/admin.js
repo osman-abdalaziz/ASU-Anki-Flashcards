@@ -28,7 +28,7 @@ function initAdminGuard() {
             }
         } else {
             // غير مسجل دخول
-            window.location.href = "../signin.html";
+            window.location.href = "../signin";
         }
     });
 }

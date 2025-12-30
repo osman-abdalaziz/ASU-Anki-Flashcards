@@ -152,7 +152,7 @@ export function initAuth() {
 // دالة مساعدة للتوجيه بعد النجاح
 function redirectIfSuccess() {
     // إذا كان المستخدم في صفحة الدخول أو التسجيل، نرجعه للصفحة الرئيسية
-    if (window.location.pathname.includes('signin.html') || window.location.pathname.includes('signup.html')) {
-        window.location.href = 'index.html';
+    if (window.location.pathname.includes('signin') || window.location.pathname.includes('signup')) {
+        window.location.href = 'index';
     }
 }

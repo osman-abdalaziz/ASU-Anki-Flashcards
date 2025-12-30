@@ -6,7 +6,7 @@ import { collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gsta
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com"; // 🔴 ضع ايميلك
 onAuthStateChanged(auth, (user) => {
     if (!user || user.email !== ADMIN_EMAIL) {
-        window.location.href = "../index.html";
+        window.location.href = "../index";
     }
 });
 
