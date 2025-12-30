@@ -127,9 +127,9 @@ export function initAuth() {
             const path = window.location.pathname; // معرفة اسم الصفحة الحالية
 
             // هل نحن في صفحة signin.html أو signup.html؟
-            if (path.includes('signin.html') || path.includes('signup.html')) {
+            if (path.includes('signin') || path.includes('signup')) {
                 console.log("المستخدم مسجل دخول بالفعل، جاري التحويل للرئيسية...");
-                window.location.replace('index.html'); // استخدام replace أفضل لأنه لا يحفظ صفحة الدخول في التاريخ (History)
+                window.location.replace('index'); // استخدام replace أفضل لأنه لا يحفظ صفحة الدخول في التاريخ (History)
             }
         } else {
             // ❌ المستخدم زائر
