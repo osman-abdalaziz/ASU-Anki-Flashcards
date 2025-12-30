@@ -6,6 +6,7 @@ let allFlashcards = [];
 
 // مفاتيح التخزين في متصفح الطالب
 const DOWNLOADS_KEY = 'asu_anki_downloads';
+
 const READ_NOTIFS_KEY = 'asu_anki_read_general';
 
 // ==========================================
