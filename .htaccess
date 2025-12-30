@@ -1,10 +1,13 @@
+Options +FollowSymLinks -MultiViews
 RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^([^\.]+)$ $1.html [NC,L]
 
-<FilesMatch "\.(html|css|js|jpg|jpeg|png|gif|ico)$">
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
-    Header set Pragma "no-cache"
-    Header set Expires "0"
-</FilesMatch>
+# 1. إزالة .html من الرابط
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [NC,L]
+
+# 2. تحويل http إلى https (اختياري ومفضل)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ملاحظة: قمت بإزالة جزء Header set لأنه غالباً سبب المشكلة في الاستضافات المجانية
