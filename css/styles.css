@@ -2031,3 +2031,21 @@ footer p a {
 .join-footer {
     margin: 0;
 }
+
+/* في ملف css/styles.css */
+
+.action-btn.hide-btn {
+    background-color: #e67e22; /* برتقالي للإخفاء */
+    color: white;
+}
+.action-btn.hide-btn:hover {
+    background-color: #d35400;
+}
+
+.action-btn.unhide-btn {
+    background-color: #2ecc71; /* أخضر للإظهار */
+    color: white;
+}
+.action-btn.unhide-btn:hover {
+    background-color: #27ae60;
+}

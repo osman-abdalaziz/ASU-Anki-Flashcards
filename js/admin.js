@@ -80,7 +80,8 @@ function setupDeckForm() {
                 category: getVal('category'),
                 version: getVal('version') || "v1.0",
                 lastUpdate: formattedDate, // التاريخ المنسق
-                createdAt: new Date() // للتريب الداخلي
+                createdAt: new Date(), // للتريب الداخلي
+                isHidden: false
             };
 
             // التحقق من الحقول الإجبارية

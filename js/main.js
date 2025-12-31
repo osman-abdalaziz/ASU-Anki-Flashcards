@@ -104,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // إغلاق المودال من زر X
         closeModalBtn.addEventListener("click", () => {
             modal.style.display = "none";
+            document.getElementById("resetMessage").style.display = "none";
         });
 
         // إغلاق المودال عند الضغط خارجه

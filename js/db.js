@@ -81,6 +81,11 @@ export async function loadFlashcards() {
 
         allFlashcards = [];
         querySnapshot.forEach((doc) => {
+            // 🔥🔥🔥 الفلتر السحري 🔥🔥🔥
+            // إذا كان الكارت مخفياً (isHidden == true)، لا تضفه للمصفوفة
+            if (data.isHidden === true) {
+                return; // تخطي هذا الكارت (Skip)
+            }
             allFlashcards.push({ id: doc.id, ...doc.data() });
         });
 

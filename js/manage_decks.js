@@ -29,6 +29,17 @@ async function loadDecks() {
             const yearVal = data.year ? data.year.toLowerCase() : '';
             const catVal = data.category ? data.category.toLowerCase() : '';
 
+            // 🔥 1. تحديد حالة الزر (هل هو مخفي الآن أم ظاهر؟)
+            const isHidden = data.isHidden === true; // تأكد أنها boolean
+
+            // 🔥 2. تصميم الزر بناءً على الحالة
+            // إذا كان مخفياً: زر أخضر (Unhide)
+            // إذا كان ظاهراً: زر برتقالي (Hide)
+            const hideBtnClass = isHidden ? 'unhide-btn' : 'hide-btn';
+            const hideBtnText = isHidden ? 'Unhide' : 'Hide';
+            const hideBtnIcon = isHidden ? 'fa-eye' : 'fa-eye-slash';
+            const hideBtnAction = isHidden ? false : true; // القيمة الجديدة التي سنرسلها
+
             const row = `
                 <tr data-year="${yearVal}" data-category="${catVal}"> 
                     <td>${data.title}</td>
@@ -39,6 +50,9 @@ async function loadDecks() {
                     <td>
                         <button class="action-btn edit" onclick="window.openEditModal('${docSnap.id}', '${data.title}', '${data.downloadUrl}', '${data.imageUrl}', '${data.version}')">
                             Edit <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button class="action-btn ${hideBtnClass}" onclick="window.toggleDeckVisibility('${docSnap.id}', ${isHidden})">
+                            ${hideBtnText} <i class="fa-solid ${hideBtnIcon}"></i>
                         </button>
                         <button class="action-btn delete" onclick="window.deleteDeck('${docSnap.id}')">
                             Delete <i class="fa-solid fa-trash"></i>
@@ -182,3 +196,31 @@ function filterDecks() {
 if (searchInput) searchInput.addEventListener('keyup', filterDecks);
 if (yearSelect) yearSelect.addEventListener('change', filterDecks);
 if (catSelect) catSelect.addEventListener('change', filterDecks);
+
+window.toggleDeckVisibility = async (id, currentStatus) => {
+    const newStatus = !currentStatus; // عكس الحالة الحالية
+    const actionText = newStatus ? "Hidden" : "Visible"; // للنصوص التوضيحية
+
+    try {
+        const deckRef = doc(db, "decks", id);
+
+        // تحديث الحقل في قاعدة البيانات
+        await updateDoc(deckRef, {
+            isHidden: newStatus
+        });
+
+        // رسالة نجاح
+        showModal(
+            "Status Updated!",
+            `The deck is now ${actionText}.`,
+            "success"
+        );
+
+        // إعادة تحميل الجدول لرؤية التغيير
+        loadDecks();
+
+    } catch (error) {
+        console.error("Error updating visibility:", error);
+        showModal("Error", "Failed to update status.", "error");
+    }
+};
