@@ -136,11 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (result.success) {
                     msgBox.className = "reset-message reset-success";
                     // مسح الحقل بعد ثواني وإغلاق المودال
-                    setTimeout(() => {
-                        modal.style.display = "none";
-                        msgBox.style.display = "none";
-                        resetForm.reset();
-                    }, 3000);
+
+                    resetForm.reset();
                 } else {
                     msgBox.className = "reset-message reset-error";
                 }
