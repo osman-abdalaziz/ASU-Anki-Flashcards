@@ -1,83 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Admin | Notifications</title>
-        <!-- Website Favicon -->
-        <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
-        <!-- Google Fonts: Poppins -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-            rel="stylesheet" />
-        <!-- Font Awesome -->
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer" />
-        <link rel="stylesheet" href="../css/styles.css" />
-    </head>
-    <body>
-        <main class="dashboard-container">
-            <aside>
-                <div class="admin-logo">
-                    <img src="../images/logo.png" alt="" />
-                </div>
-                <ul class="admin-nav">
-                    <li>
-                    <a href="index.html"><i class="fa-solid fa-plus fa-fw"></i> Add New Deck
-                        </a>
-                </li>
-                <li>
-                    <a href="manage_decks.html" class=""><i class="fa-solid fa-box fa-fw"></i> Decks
-                        Management</a>
-                </li>
-                <li>
-                    <a href="notifications.html"  class="active">
-                        <i class="fas fa-plus fa-fw"></i>
-                        Add Notifications</a>
-                </li>
-                <li>
-                    <a href="manage_notifications.html">
-                        <i class="fas fa-bell fa-fw"></i>
-                        Notifications Manage</a>
-                </li>
-                </ul>
-            </aside>
-            <section class="dashboard-main">
-                <nav>
-                    <div class="search">
-                    <i
-                        class="fa-solid fa-magnifying-glass search-icon"
-                        aria-hidden="true"></i>
-                    <input
-                        type="text"
-                        id="searchInput"
-                        placeholder="Search..." />
-                </div>  
 
-                    <div class="nav-actions">
-                        <div class="userProfile-header">
-                                <div class="userimg">
-                                <img id="mobileUserAvatar" src="" alt="User" />
-                            </div>
-                            <p
-                                id="mobileUserName"
-                                style="
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin | Notifications</title>
+    <!-- Website Favicon -->
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body>
+    <main class="dashboard-container">
+        <aside>
+            <div class="admin-logo">
+                <a href="../index.html"><img src="../images/logo.png" alt="" /></a>
+            </div>
+            <ul class="admin-nav">
+                <li>
+                    <a id="decksDropbtn" href="#" class="decksDropar"><i class="fa-solid fa-angle-down fa-fw"></i>
+                        Decks Management
+                    </a>
+                </li>
+                <div id="decksDrop" class="decksDrop">
+                    <a href="index.html" class=""><i class="fa-solid fa-plus fa-fw"></i> Add New Deck</a>
+                    <a href="manage_decks.html" class=""><i class="fa-solid fa-box fa-fw"></i> Decks
+                        Table</a>
+                </div>
+
+                <li>
+                    <a id="notiDropbtn" href="#" class="notiDropar active"><i class="fa-solid fa-angle-up fa-fw"></i>
+                        Notification Manage
+                    </a>
+                </li>
+                <div id="notiDrop" class="decksDrop active">
+                    <a href="notifications.html" class="active"><i class="fa-solid fa-plus fa-fw"></i> Add
+                        Notifications</a>
+                    <a href="manage_notifications.html" class=""><i class="fa-solid fa-box fa-fw"></i> Notifications
+                        Table</a>
+                </div>
+            </ul>
+        </aside>
+        <section class="dashboard-main">
+            <nav>
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+                    <input type="text" id="searchInput" placeholder="Search..." />
+                </div>
+
+                <div class="nav-actions">
+                    <div class="userProfile-header">
+                        <div class="userimg">
+                            <img id="mobileUserAvatar" src="" alt="User" />
+                        </div>
+                        <p id="mobileUserName" style="
                                     padding: 10px 15px;
                                     font-weight: 400;
                                     margin: 0;
                                 ">
-                                User Name
-                            </p>
+                            User Name
+                        </p>
                     </div>
-                </nav>
+            </nav>
 
-                <div class="dashboard-content">
-                    <div class="container">
+            <div class="dashboard-content">
+                <div class="container">
                     <h1 class="dashboard-title">Add New <span>Notification</span></h1>
 
                     <form action="" class="decks-form">
@@ -119,37 +114,35 @@
                         </div>
                     </form>
                     <button class="main-btn submit-deck" type="submit">
-                            Push Notification <i class="fa-solid fa-plus fa-fw"></i></button>
+                        Push Notification <i class="fa-solid fa-plus fa-fw"></i></button>
                 </div>
-                </div>
-
-                <footer>
-            <div class="container">
-                <p>&copy; 2025 ASU Anki Flashcards. All rights reserved.</p>
-                <p>
-                    Made With <i class="fa-solid fa-heart fa-fw"></i> By
-                    <a
-                        href="https://osmanabdalaziz-portfolio.netlify.app/"
-                        target="_blank"
-                        ><img src="../images/mylogo_white.png" alt=""
-                    /></a>
-                </p>
             </div>
-        </footer>
-            </section>
-        </main>
-        <div id="customModal" class="modal-overlay">
-    <div class="modal-box">
-        <div class="modal-icon">
-            <i id="modalIconClass" class="fa-solid fa-check"></i>
+
+            <footer>
+                <div class="container">
+                    <p>&copy; 2025 ASU Anki Flashcards. All rights reserved.</p>
+                    <p>
+                        Made With <i class="fa-solid fa-heart fa-fw"></i> By
+                        <a href="https://osmanabdalaziz-portfolio.netlify.app/" target="_blank"><img
+                                src="../images/mylogo_white.png" alt="" /></a>
+                    </p>
+                </div>
+            </footer>
+        </section>
+    </main>
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon">
+                <i id="modalIconClass" class="fa-solid fa-check"></i>
+            </div>
+            <h3 id="modalTitle">Success!</h3>
+            <p id="modalMessage">Operation completed successfully.</p>
+            <button id="modalOkBtn">OK</button>
         </div>
-        <h3 id="modalTitle">Success!</h3>
-        <p id="modalMessage">Operation completed successfully.</p>
-        <button id="modalOkBtn">OK</button>
     </div>
-</div>
-        <script type="module" src="../js/admin_notifications.js"></script>
-        <script type="module" src="../js/main.js"></script>
-        <!-- <script type="module" src="../js/theme.js"></script> -->
-    </body>
+    <script type="module" src="../js/admin_notifications.js"></script>
+    <script type="module" src="../js/main.js"></script>
+    <!-- <script type="module" src="../js/theme.js"></script> -->
+</body>
+
 </html>

@@ -296,7 +296,7 @@ function renderCards(cardsList) {
                 <li>Subject: ${data.module}</li>
                 <li>Study Year: ${data.year}</li>
                 <li>Category: ${data.category || 'Theoretical'}</li>
-                <li>Creator: ${"Dr. " + (data.creator || 'Unknown')}</li>
+                <li>Creator: ${(data.creator || 'Unknown')}</li>
             </ul>
             <p class="meta">
                 <span class="date">Last Update: ${data.lastUpdate || 'Unknown'}</span>

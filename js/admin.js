@@ -75,7 +75,7 @@ function setupDeckForm() {
                 module: getVal('module'),
                 creator: getVal('creator') || "Dr. Ahmed",
                 downloadUrl: getVal('downloadUrl'),
-                imageUrl: getVal('thumbnailUrl') || "../images/modules/2.png",
+                imageUrl: getVal('thumbnailUrl'),
                 year: getVal('year'),
                 category: getVal('category'),
                 version: getVal('version') || "v1.0",

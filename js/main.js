@@ -173,6 +173,35 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const decks = document.getElementById('decksDropbtn');
+    const decksArrow = document.querySelector('.decksDropar i');
+    if (decks) {
+        decks.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            toggleDropdown("decksDrop");
+
+            if (decksArrow) {
+                decksArrow.classList.toggle('fa-angle-up');
+                decksArrow.classList.toggle('fa-angle-down');
+            }
+        });
+    }
+    const noti = document.getElementById('notiDropbtn');
+    const notiarrw = document.querySelector('.notiDropar i');
+    if (noti) {
+        noti.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            toggleDropdown("notiDrop");
+
+            if (notiarrw) {
+                notiarrw.classList.toggle('fa-angle-up');
+                notiarrw.classList.toggle('fa-angle-down');
+            }
+        });
+    }
+
     // ربط زر الخروج
 
     const logoutBtn = document.getElementById('logoutBtn');

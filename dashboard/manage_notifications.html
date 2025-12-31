@@ -22,27 +22,32 @@
     <main class="dashboard-container">
         <aside>
             <div class="admin-logo">
-                <img src="../images/logo.png" alt="" />
+                <a href="../index.html"><img src="../images/logo.png" alt="" /></a>
             </div>
             <ul class="admin-nav">
                 <li>
-                    <a href="index.html"><i class="fa-solid fa-plus fa-fw"></i> Add New Deck
+                    <a id="decksDropbtn" href="#" class="decksDropar"><i class="fa-solid fa-angle-down fa-fw"></i>
+                        Decks Management
                     </a>
                 </li>
-                <li>
+                <div id="decksDrop" class="decksDrop">
+                    <a href="index.html" class=""><i class="fa-solid fa-plus fa-fw"></i> Add New Deck</a>
                     <a href="manage_decks.html" class=""><i class="fa-solid fa-box fa-fw"></i> Decks
-                        Management</a>
-                </li>
+                        Table</a>
+                </div>
+
                 <li>
-                    <a href="notifications.html">
-                        <i class="fas fa-plus fa-fw"></i>
-                        Add Notifications</a>
+                    <a id="notiDropbtn" href="#" class="notiDropar active"><i class="fa-solid fa-angle-up fa-fw"></i>
+                        Notification Manage
+                    </a>
                 </li>
-                <li>
-                    <a href="manage_notifications.html" class="active">
-                        <i class="fas fa-bell fa-fw"></i>
-                        Notifications Manage</a>
-                </li>
+                <div id="notiDrop" class="decksDrop active">
+                    <a href="notifications.html" class=""><i class="fa-solid fa-plus fa-fw"></i> Add
+                        Notifications</a>
+                    <a href="manage_notifications.html" class="active"><i class="fa-solid fa-box fa-fw"></i>
+                        Notifications
+                        Table</a>
+                </div>
             </ul>
         </aside>
         <section class="dashboard-main">

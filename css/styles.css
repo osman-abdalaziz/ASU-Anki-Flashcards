@@ -1851,8 +1851,12 @@ footer p a {
     margin-top: 10px;
     overflow-x: auto;
     background: var(--card-color);
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
     /*padding: 20px;*/
-    /* box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); */
 }
 
 .data-table {
@@ -1875,12 +1879,24 @@ footer p a {
 
 .data-table th {
     background-color: var(--sec-background-color);
-    color: #3498db;
-    font-weight: 600;
+    color: var(--main-color);
+    font-weight: 400;
+}
+
+.data-table th:not(:last-child) {
+    border-right: 1px solid var(--ver-tag-color);
+}
+
+.data-table tr {
+    background-color: var(--card-color);
+}
+
+.data-table tr:nth-child(odd) {
+    background-color: #2a2a2a;
 }
 
 .data-table tr:hover {
-    background-color: #2a2a2a;
+    background-color: #343434;
 }
 
 .action-btn {
@@ -1915,7 +1931,7 @@ footer p a {
 }
 
 /* ===========================
-   Edit Modal (Form inside Modal)
+    Edit Modal (Form inside Modal)
    =========================== */
 .edit-modal-overlay {
     position: fixed;
@@ -1968,4 +1984,41 @@ footer p a {
     font-weight: 500;
     margin: 0 0 10px;
     font-size: 24px;
+}
+
+.decksDrop {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.decksDrop a {
+    text-decoration: none;
+    padding: 15px 12px 15px 30px;
+    color: var(--text-color);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    transition: 0.3s ease-in-out;
+    -webkit-transition: 0.3s ease-in-out;
+    -moz-transition: 0.3s ease-in-out;
+    -ms-transition: 0.3s ease-in-out;
+    -o-transition: 0.3s ease-in-out;
+}
+
+.decksDrop a.active,
+.decksDrop a:hover {
+    background-color: var(--ver-tag-color);
+}
+
+.decksDrop a i {
+    color: var(--main-color);
+}
+
+.decksDrop.active {
+    display: flex;
+    animation: fadeIn 0.3s;
+    -webkit-animation: fadeIn 0.3s;
 }

@@ -34,6 +34,7 @@ async function loadDecks() {
                     <td>${data.title}</td>
                     <td>${data.module}</td>
                     <td>${data.year}</td>
+                    <td>${data.lastUpdate}</td>
                     <td>${data.version}</td>
                     <td>
                         <button class="action-btn edit" onclick="window.openEditModal('${docSnap.id}', '${data.title}', '${data.downloadUrl}', '${data.imageUrl}', '${data.version}')">
