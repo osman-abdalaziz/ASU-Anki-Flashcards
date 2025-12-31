@@ -26,13 +26,27 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = signupForm.querySelector('input[name="password"]').value;
             const confirmPassword = signupForm.querySelector('input[name="confirm-password"]').value;
 
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                showError("Please enter a valid email in English (e.g. name@domain.com).");
+                return;
+            }
+
+            // 2. تحقق من الاسم (يسمح بالعربي والإنجليزي، ولكن يمنع الأرقام والرموز)
+            // ويشترط أن يكون الاسم 3 حروف على الأقل
+            const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]{3,30}$/;
+            if (!nameRegex.test(name)) {
+                showError("Please enter a real name (letters only, at least 3 chars).");
+                return;
+            }
+
             // تحقق بسيط
             if (password !== confirmPassword) {
                 showError("Passwords do not match.");
                 return;
             }
-            if (password.length < 6) {
-                showError("The password must be at least 6 characters long.");
+            if (password.length < 8) {
+                showError("The password must be at least 8 characters long.");
                 return;
             }
             if (!document.getElementById('terms-conditions').checked) {

@@ -124,4 +124,50 @@ export function toggleNotifications(dropdownId, notifBadge) {
             badge.style.display = 'none';
         }
     }
-} 
+}
+
+// في ملف js/ui.js
+
+export function showModal(title, message, type = 'success', onClose = null) {
+    const overlay = document.getElementById('customModal');
+    // حماية: في حال نسيت وضع كود HTML في الصفحة
+    if (!overlay) {
+        alert(message);
+        if (onClose) onClose();
+        return;
+    }
+
+    const box = overlay.querySelector('.modal-box');
+    const titleEl = document.getElementById('modalTitle');
+    const msgEl = document.getElementById('modalMessage');
+    const iconEl = document.getElementById('modalIconClass');
+    const btn = document.getElementById('modalOkBtn');
+
+    // تعبئة النصوص
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+
+    // تنظيف الكلاسات القديمة وتحديد اللون
+    box.className = 'modal-box';
+    if (type === 'success') {
+        box.classList.add('success');
+        iconEl.className = 'fa-solid fa-check';
+    } else if (type === 'error') {
+        box.classList.add('error');
+        iconEl.className = 'fa-solid fa-xmark';
+    } else {
+        box.classList.add('info');
+        iconEl.className = 'fa-solid fa-info';
+    }
+
+    // إظهار المودل
+    overlay.classList.add('active');
+
+    // 🔥 هذا هو الحل: تنفيذ التوجيه فقط عند الضغط على الزر
+    btn.onclick = () => {
+        overlay.classList.remove('active'); // إخفاء المودل
+        if (onClose) {
+            onClose(); // تنفيذ دالة الانتقال (التوجيه)
+        }
+    };
+}

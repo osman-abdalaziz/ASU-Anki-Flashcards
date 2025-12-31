@@ -5,11 +5,12 @@ import {
     createUserWithEmailAndPassword, // دالة إنشاء الحساب
     signInWithEmailAndPassword,     // دالة تسجيل الدخول
     updateProfile,// دالة تحديث الاسم
-    sendPasswordResetEmail // دالة استعادة كلمة المرور
+    sendPasswordResetEmail,  // دالة استعادة كلمة المرور
+    sendEmailVerification
 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { auth, provider } from "./config.js";
-import { updateNavbarUI, showError } from "./ui.js";
+import { updateNavbarUI, showError, showModal } from "./ui.js";
 import { loadFlashcards } from "./db.js"; // <--- جديد
 
 
@@ -39,14 +40,30 @@ export async function handleEmailSignUp(name, email, password) {
         await updateProfile(user, {
             displayName: name
         });
+        // 🔥 3. إرسال رابط التفعيل 🔥
+        await sendEmailVerification(user);
 
         // 3. (الخطوة الجديدة) إجبار المتصفح على تحديث بيانات المستخدم فوراً لضمان حفظ الاسم
         await user.reload();
 
+        await signOut(auth);
+
+        await showModal(
+            "Account Created Successfully! 🎉",
+            "We have sent a verification link to your email. Please check your inbox, activate your account, and then sign in.",
+            "success", // <--- هذا يخلي اللون أخضر ✅
+            () => {
+                // هذا الكود لن يعمل إلا بعد الضغط على OK
+                window.location.href = "signin.html";
+            }
+        );
+
+        // تسجيل الخروج فوراً ليقوم بالتفعيل أولاً
+
         console.log("Account Created:", user.email);
 
         // 4. التوجيه
-        redirectIfSuccess();
+        // redirectIfSuccess();
         return true;
 
     } catch (error) {
@@ -54,7 +71,7 @@ export async function handleEmailSignUp(name, email, password) {
         if (error.code === 'auth/email-already-in-use') {
             showError("This email is already registered.");
         } else if (error.code === 'auth/weak-password') {
-            showError("The password must be at least 6 characters long.");
+            showError("The password must be at least 8 characters long.");
         } else if (error.code === 'auth/invalid-email') {
             showError("The email address is not valid.");
         } else {
@@ -64,16 +81,42 @@ export async function handleEmailSignUp(name, email, password) {
     }
 }
 
+let isLoggingIn = false;
+
 // =============================
 // 3. تسجيل الدخول (الإيميل)
 // =============================
 export async function handleEmailSignIn(email, password) {
     try {
-        await signInWithEmailAndPassword(auth, email, password);
+        isLoggingIn = true;
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        if (!user.emailVerified) {
+
+            // 1. نظهر المودل للمستخدم ونخبره بالمشكلة
+            await showModal(
+                "Verification Required 🔒",
+                "Please check your inbox or (Spam) and verify your email to access the library.",
+                "error",
+                async () => {
+                    // عند ضغط OK، نضمن أنه خرج تماماً
+                    await signOut(auth);
+                }
+            );
+
+            // 2. 🛑 مهم جداً: نسجل خروجه فوراً في الخلفية لكي لا يعتبره النظام "متصلاً"
+            await signOut(auth);
+
+            // 3. نوقف الدالة هنا ونرجع false لنمنع الانتقال للصفحة التالية
+            return false;
+        }
         console.log("Logged In Successfully");
+
         redirectIfSuccess();
         return true;
     } catch (error) {
+        isLoggingIn = false;
         console.error("SignIn Error:", error.code);
         if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
             showError(" Invalid email or password.");
@@ -119,17 +162,24 @@ export async function handleLogout() {
 
 export function initAuth() {
     onAuthStateChanged(auth, (user) => {
+
         updateNavbarUI(user);
 
         // 2. الحماية: إعادة التوجيه إذا كان مسجل الدخول ويحاول دخول صفحات التسجيل
         if (user) {
+            if (!user.emailVerified) {
+                signOut(auth);
+                return;
+            }
             loadFlashcards(); // <--- جديد: تحميل الكروت بعد تسجيل الدخول
             const path = window.location.pathname; // معرفة اسم الصفحة الحالية
 
             // هل نحن في صفحة signin.html أو signup.html؟
             if (path.includes('signin') || path.includes('signup')) {
-                console.log("المستخدم مسجل دخول بالفعل، جاري التحويل للرئيسية...");
-                window.location.replace('index'); // استخدام replace أفضل لأنه لا يحفظ صفحة الدخول في التاريخ (History)
+                if (!isLoggingIn) { // 👈 شرط جديد: فقط إذا لم يكن يسجل الدخول حالياً
+                    console.log("User already logged in, redirecting...");
+                    window.location.replace('index.html');
+                }
             }
         } else {
             // ❌ المستخدم زائر
