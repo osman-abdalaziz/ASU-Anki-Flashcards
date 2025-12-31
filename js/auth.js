@@ -50,7 +50,7 @@ export async function handleEmailSignUp(name, email, password) {
 
         await showModal(
             "Account Created Successfully! 🎉",
-            "We have sent a verification link to your email. Please check your inbox, activate your account, and then sign in.",
+            "We have sent a verification link to your email. Please check your inbox or (Spam), activate your account, and then sign in.",
             "success", // <--- هذا يخلي اللون أخضر ✅
             () => {
                 // هذا الكود لن يعمل إلا بعد الضغط على OK
