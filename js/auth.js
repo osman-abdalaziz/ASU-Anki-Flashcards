@@ -96,7 +96,7 @@ export async function handleEmailSignIn(email, password) {
 
             // رسالة ذكية تحتوي على رابط إعادة الإرسال
             const messageHTML = `
-                Please check your inbox to activate your account.<br>
+                Please check your inbox or (Spam) to activate your account.<br>
                 <span style="font-size: 0.85rem; color: var(--text-secondary-color);">
                     Didn't receive it? 
                     <a href="#" onclick="window.resendVerificationEmail(event)" 
