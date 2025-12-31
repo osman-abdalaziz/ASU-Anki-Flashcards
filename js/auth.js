@@ -198,10 +198,10 @@ export function initAuth() {
         } else {
             // ❌ المستخدم زائر
             // يمكنك هنا إفراغ الشبكة أو إظهار رسالة "يجب التسجيل"
-            const grid = document.getElementById('flashcardsGrid');
+            const grid = document.getElementById('page-content');
             if (grid) {
                 grid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 60px;">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px; width: 100%; height: 100%; display:flex; justify-content:center; flex-direction:column; align-items:center;">
                         <i class="fa-solid fa-lock" style="font-size: 4rem; color: var(--text-color); margin-bottom: 20px;"></i>
                         <h2 style="color: var(--text-color)">Content Locked</h2>
                         <p style="color: var(--text-secondary-color); margin-bottom: 30px;">You must be signed in to access the flashcards library.</p>

@@ -2,35 +2,54 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Open Graph meta tags -->
-    <meta property="og:title" content="ASU Anki Flashcards" />
-    <meta property="og:description"
-        content="The ultimate platform for ASU medical students. Browse, download, and track Anki decks for all academic years and modules in one place." />
-    <meta property="og:image" content="https://i.ibb.co/kgNrJm8N/preveiw.png" />
-
-    <meta property="og:url" content="https://asu-anki.netlify.app/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="ASU Anki" />
-    <title>Browsing Flashcards</title>
-    <!-- Website Favicon -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Us | ASU Anki Team</title>
     <link rel="icon" type="image/x-icon" href="images/favicon.ico" />
-    <!-- Google Fonts: Poppins -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="css/styles.css" />
+    <style>
+        main {
+            padding: 0;
+        }
+
+        .join-container {
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            /* padding: 20px; */
+        }
+
+        .join-icon {
+            font-size: 4rem;
+            color: var(--main-color);
+            /* لون أخضر للأمل والمشاركة */
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <span itemprop="image" itemscope itemtype="image/png">
-        <link itemprop="url" href="https://i.ibb.co/kgNrJm8N/preveiw.png" />
-    </span>
     <nav>
         <div class="container">
             <div class="left-component">
@@ -38,13 +57,13 @@
                 <div class="links">
                     <ul>
                         <li>
-                            <a href="index.html" class="active">Browse Flashcards</a>
+                            <a href="index.html">Browse Flashcards</a>
                         </li>
                         <li>
                             <a href="tutorials.html">Anki Tutorials</a>
                         </li>
                         <li>
-                            <a href="join.html">Join Us</a>
+                            <a href="join.html" class="active">Join Us</a>
                         </li>
                     </ul>
                 </div>
@@ -83,10 +102,10 @@
                         <img id="userAvatar" src="" alt="User" />
                     </div>
                     <p id="userName" style="
-                                padding: 10px 15px;
-                                font-weight: 400;
-                                margin: 0;
-                            ">
+                                    padding: 10px 15px;
+                                    font-weight: 400;
+                                    margin: 0;
+                                ">
                         User Name
                     </p>
                     <div class="dropdown-arrow" id="dropdownArrow">
@@ -118,17 +137,17 @@
 
                         <div class="notif-list">
                             <!-- <div class="notif-item unread">
-                                    <div class="notif-icon bg-blue">
-                                        <i class="fa-solid fa-rocket"></i>
-                                    </div>
-                                    <div class="notif-content">
-                                        <p class="notif-text">
-                                            Welcome to
-                                            <b>ASU Anki!</b> Start downloading
-                                            your first deck now.
-                                        </p>
-                                    </div>
-                                </div> -->
+                                        <div class="notif-icon bg-blue">
+                                            <i class="fa-solid fa-rocket"></i>
+                                        </div>
+                                        <div class="notif-content">
+                                            <p class="notif-text">
+                                                Welcome to
+                                                <b>ASU Anki!</b> Start downloading
+                                                your first deck now.
+                                            </p>
+                                        </div>
+                                    </div> -->
                         </div>
                     </div>
                 </div>
@@ -146,24 +165,24 @@
                 <div class="mobile-links">
                     <div class="logo"><img src="images/logo.png" alt=""></div>
                     <ul>
-                        <li class="active">
+                        <li>
                             <a href="index.html">Browse Flashcards</a>
                         </li>
                         <li>
                             <a href="tutorials.html">Anki Tutorials</a>
                         </li>
-                        <li>
+                        <li class="active">
                             <a href="join.html">Join Us</a>
                         </li>
                     </ul>
 
                     <div class="mobile-nav-actions" style="
-                                display: flex;
-                                align-items: center;
-                                gap: 15px;
-                                margin-top: auto;
-                                margin-bottom: 50px;
-                            ">
+                                    display: flex;
+                                    align-items: center;
+                                    gap: 15px;
+                                    margin-top: auto;
+                                    margin-bottom: 50px;
+                                ">
                         <a href="signin.html" id="mobileLoginBtn" class="main-btn">
                             Sign In
                             <i class="fa-solid fa-user fa-fw" aria-hidden="true"></i>
@@ -182,11 +201,11 @@
                                 <img id="mobileUserAvatar" src="" alt="User" />
                             </div>
                             <p id="mobileUserName" style="
-                                    padding: 10px 15px;
-                                    font-weight: 400;
-                                    margin: 0;
-                                    cursor: pointer;
-                                ">
+                                        padding: 10px 15px;
+                                        font-weight: 400;
+                                        margin: 0;
+                                        cursor: pointer;
+                                    ">
                                 User Name
                             </p>
                             <div class="dropdown-arrow" id="mobileDropdownArrow">
@@ -200,51 +219,26 @@
             </div>
     </nav>
 
-    <main id="page-content">
-        <div class="container">
-            <h1>Browse Flash<span>cards</span></h1>
+    <main>
+        <div class="container join-container" style="max-width: 650px;">
+            <i class="fa-solid fa-handshake-angle join-icon"></i>
 
-            <div class="search">
-                <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
-                <input type="text" id="searchInput" placeholder="Search By Title, Subject, or Creator" />
-            </div>
+            <h1>Leave a <span style="color: var(--main-color);">Legacy.</span> Help Others.</h1>
 
-            <div class="filters">
-                <div>
-                    <label for="categorySelect">Category:</label>
-                    <select id="categorySelect">
-                        <option value="all">All</option>
-                        <option value="theoretical">Theoretical</option>
-                        <option value="practical">Practical</option>
-                    </select>
-                </div>
+            <p class="coming-soon-text" style="font-size: 1.1rem;">
+                "The best way to find yourself is to lose yourself in the service of others."
+                <br><br>
+                Be part of the team that simplifies medicine for hundreds of students.
+                Whether you are good at Anki, design, or organizing, your contribution matters.
+            </p>
 
-                <div>
-                    <label for="yearSelect">Academic Year:</label>
-                    <select id="yearSelect">
-                        <option value="all">All</option>
-                        <option value="1st Year">1st Year</option>
-                        <option value="2nd Year">2nd Year</option>
-                        <option value="3rd Year">3rd Year</option>
-                    </select>
-                </div>
-
-                <div>
-                    <button type="button" class="main-btn reset-btn" id="resetFiltersBtn">
-                        Reset Filters
-                        <i class="fa-solid fa-rotate-left fa-fw" aria-hidden="true"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="flashcards-grid" id="flashcardsGrid">
-                <!-- Flashcards will be dynamically inserted here -->
-
-            </div>
+            <a href="https://forms.gle/2ecntUUKCb9DgC839" target="_blank" class="main-btn"
+                style=" font-size: 1.1rem; background-color: var(--main-color);">
+                Fill Application Form <i class="fa-solid fa-heart fa-fw"></i>
+            </a>
         </div>
     </main>
-
-    <footer>
+    <footer class="join-footer">
         <div class="container">
             <p>&copy; 2025 ASU Anki Flashcards. All rights reserved.</p>
             <p>
@@ -254,17 +248,6 @@
             </p>
         </div>
     </footer>
-
-    <div id="customModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-icon">
-                <i id="modalIconClass" class="fa-solid fa-check"></i>
-            </div>
-            <h3 id="modalTitle">Success!</h3>
-            <p id="modalMessage">Operation completed successfully.</p>
-            <button id="modalOkBtn">OK</button>
-        </div>
-    </div>
     <script src="js/theme.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>
