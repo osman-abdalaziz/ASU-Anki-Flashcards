@@ -1920,19 +1920,19 @@ footer p a {
 }
 
 .action-btn.edit {
-    background-color: #f1c40f;
+    background-color: #ffb142;
     color: var(--sec-background-color);
 }
 .action-btn.edit:hover {
-    background-color: #d4ac0d;
+    background-color: #cc8e35;
 }
 
 .action-btn.delete {
-    background-color: #e74c3c;
+    background-color: #ff5252;
     color: white;
 }
 .action-btn.delete:hover {
-    background-color: #c0392b;
+    background-color: #b33939;
 }
 
 /* ===========================
@@ -2035,17 +2035,17 @@ footer p a {
 /* في ملف css/styles.css */
 
 .action-btn.hide-btn {
-    background-color: #e67e22; /* برتقالي للإخفاء */
+    background-color: #ff793f; /* برتقالي للإخفاء */
     color: white;
 }
 .action-btn.hide-btn:hover {
-    background-color: #d35400;
+    background-color: #cd6133;
 }
 
 .action-btn.unhide-btn {
-    background-color: #2ecc71; /* أخضر للإظهار */
+    background-color: #33d9b2; /* أخضر للإظهار */
     color: white;
 }
 .action-btn.unhide-btn:hover {
-    background-color: #27ae60;
+    background-color: #218c74;
 }
