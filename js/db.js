@@ -12,50 +12,108 @@ const READ_NOTIFS_KEY = 'asu_anki_read_general';
 // ==========================================
 // 1. دالة جلب الكروت (الأساسية)
 // ==========================================
+// export async function loadFlashcards() {
+//     const grid = document.getElementById('flashcardsGrid');
+//     if (!grid) return;
+
+//     // Spinner
+//     grid.innerHTML = `
+//         <div style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px;">
+//             <span class="spinner" style="width: 40px; height: 40px; border-width: 4px; margin: 0 0 15px 0; border-color:  var(--text-color)  var(--text-color)  var(--text-color) transparent"></span>
+//             <p style="color: var(--text-color); font-size: 0.9rem;">Loading library...</p>
+//         </div>
+//     `;
+
+//     try {
+//         // جلب الكروت من فايربيس
+//         const querySnapshot = await getDocs(collection(db, "decks"));
+
+//         if (querySnapshot.empty) {
+//             grid.innerHTML = '<p style="color: var(--text-color); text-align:center; grid-column: 1/-1;">No flashcards found.</p>';
+//             return;
+//         }
+
+//         allFlashcards = [];
+//         querySnapshot.forEach((doc) => {
+//             allFlashcards.push({ id: doc.id, ...doc.data() });
+//         });
+
+//         // رسم الكروت
+//         renderCards(allFlashcards);
+
+//         // 🔥 تشغيل نظام الإشعارات الموحد بعد جلب البيانات
+//         loadAllNotifications(allFlashcards);
+
+//     } catch (error) {
+//         console.error("Error:", error);
+//         if (error.code === 'permission-denied') {
+//             grid.innerHTML = `
+//                 <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+//                     <i class="fa-solid fa-lock" style="font-size: 3rem; color: var(--text-color); margin-bottom: 20px;"></i>
+//                     <h3>Members Only</h3>
+//                     <p style="color: var(--text-secondary-color); margin-bottom: 20px;">Please sign in to view and download flashcards.</p>
+//                 </div>
+//             `;
+//         } else {
+//             grid.innerHTML = '<p style="color:#ff6b6b; text-align:center; grid-column: 1/-1;">Failed to load data.</p>';
+//         }
+//     }
+// }
+
+// في ملف js/db.js
+
 export async function loadFlashcards() {
     const grid = document.getElementById('flashcardsGrid');
-    if (!grid) return;
 
-    // Spinner
-    grid.innerHTML = `
-        <div style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px;">
-            <span class="spinner" style="width: 40px; height: 40px; border-width: 4px; margin: 0 0 15px 0; border-color:  var(--text-color)  var(--text-color)  var(--text-color) transparent"></span>
-            <p style="color: var(--text-color); font-size: 0.9rem;">Loading library...</p>
-        </div>
-    `;
+    // 1. إظهار "جاري التحميل" فقط إذا كانت الشبكة موجودة في الصفحة
+    if (grid) {
+        grid.innerHTML = `
+            <div style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px;">
+                <span class="spinner" style="width: 40px; height: 40px; border-width: 4px; margin: 0 0 15px 0; border-color:  var(--text-color)  var(--text-color)  var(--text-color) transparent"></span>
+                <p style="color: var(--text-color); font-size: 0.9rem;">Loading library...</p>
+            </div>
+        `;
+    }
 
     try {
-        // جلب الكروت من فايربيس
+        // 2. جلب الكروت دائماً (لأننا نحتاجها لمقارنة الإصدارات في الإشعارات)
         const querySnapshot = await getDocs(collection(db, "decks"));
-
-        if (querySnapshot.empty) {
-            grid.innerHTML = '<p style="color: var(--text-color); text-align:center; grid-column: 1/-1;">No flashcards found.</p>';
-            return;
-        }
 
         allFlashcards = [];
         querySnapshot.forEach((doc) => {
             allFlashcards.push({ id: doc.id, ...doc.data() });
         });
 
-        // رسم الكروت
-        renderCards(allFlashcards);
+        // 🔥🔥🔥 التعديل الجوهري هنا 🔥🔥🔥
+        // نشغل نظام الإشعارات الآن، بغض النظر هل وجدنا كروت أم لا، وبغض النظر عن الصفحة التي نحن فيها
+        // مررنا المصفوفة (حتى لو كانت فارغة) لكي يتمكن النظام من جلب الإشعارات العامة (General Notifications)
+        await loadAllNotifications(allFlashcards);
 
-        // 🔥 تشغيل نظام الإشعارات الموحد بعد جلب البيانات
-        loadAllNotifications(allFlashcards);
+        // 3. الرسم على الشاشة (فقط إذا كانت الشبكة موجودة)
+        if (grid) {
+            if (allFlashcards.length === 0) {
+                grid.innerHTML = '<p style="color: var(--text-color); text-align:center; grid-column: 1/-1; padding: 40px;">No flashcards found yet.</p>';
+            } else {
+                renderCards(allFlashcards);
+            }
+        }
 
     } catch (error) {
-        console.error("Error:", error);
-        if (error.code === 'permission-denied') {
-            grid.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
-                    <i class="fa-solid fa-lock" style="font-size: 3rem; color: var(--text-color); margin-bottom: 20px;"></i>
-                    <h3>Members Only</h3>
-                    <p style="color: var(--text-secondary-color); margin-bottom: 20px;">Please sign in to view and download flashcards.</p>
-                </div>
-            `;
-        } else {
-            grid.innerHTML = '<p style="color:#ff6b6b; text-align:center; grid-column: 1/-1;">Failed to load data.</p>';
+        console.error("Error loading data:", error);
+
+        // التعامل مع رسائل الخطأ في الواجهة فقط إذا كانت الشبكة موجودة
+        if (grid) {
+            if (error.code === 'permission-denied') {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
+                        <i class="fa-solid fa-lock" style="font-size: 3rem; color: var(--text-color); margin-bottom: 20px;"></i>
+                        <h3>Members Only</h3>
+                        <p style="color: var(--text-secondary-color); margin-bottom: 20px;">Please sign in to view and download flashcards.</p>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = '<p style="color:#ff6b6b; text-align:center; grid-column: 1/-1;">Failed to load data. Please try again later.</p>';
+            }
         }
     }
 }
