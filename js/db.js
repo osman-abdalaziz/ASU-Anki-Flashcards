@@ -83,6 +83,7 @@ export async function loadFlashcards() {
         querySnapshot.forEach((doc) => {
             // 🔥🔥🔥 الفلتر السحري 🔥🔥🔥
             // إذا كان الكارت مخفياً (isHidden == true)، لا تضفه للمصفوفة
+            const data = doc.data(); // 🔥 هذا هو السطر المفقود الذي يجب إضافته أولاً
             if (data.isHidden === true) {
                 return; // تخطي هذا الكارت (Skip)
             }
