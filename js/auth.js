@@ -54,7 +54,7 @@ export async function handleEmailSignUp(name, email, password) {
             "success", // <--- هذا يخلي اللون أخضر ✅
             () => {
                 // هذا الكود لن يعمل إلا بعد الضغط على OK
-                window.location.href = "signin.html";
+                window.location.href = "signin";
             }
         );
 
@@ -94,22 +94,30 @@ export async function handleEmailSignIn(email, password) {
 
         if (!user.emailVerified) {
 
-            // 1. نظهر المودل للمستخدم ونخبره بالمشكلة
+            // رسالة ذكية تحتوي على رابط إعادة الإرسال
+            const messageHTML = `
+                Please check your inbox to activate your account.<br>
+                <span style="font-size: 0.85rem; color: var(--text-secondary-color);">
+                    Didn't receive it? 
+                    <a href="#" onclick="window.resendVerificationEmail(event)" 
+                       style="color: var(--main-color); text-decoration: underline; font-weight: 500;">
+                       Resend Link
+                    </a>
+                </span>
+            `;
+
             await showModal(
                 "Verification Required 🔒",
-                "Please check your inbox or (Spam) and verify your email to access the library.",
+                messageHTML,
                 "error",
                 async () => {
-                    // عند ضغط OK، نضمن أنه خرج تماماً
+                    // 🔥 عند إغلاق المودل، يتم طرد المستخدم
                     await signOut(auth);
+                    isLoggingIn = false; // إعادة تفعيل الحماية
                 }
             );
 
-            // 2. 🛑 مهم جداً: نسجل خروجه فوراً في الخلفية لكي لا يعتبره النظام "متصلاً"
-            await signOut(auth);
-
-            // 3. نوقف الدالة هنا ونرجع false لنمنع الانتقال للصفحة التالية
-            return false;
+            return false; // نوقف الدخول
         }
         console.log("Logged In Successfully");
 
@@ -124,6 +132,8 @@ export async function handleEmailSignIn(email, password) {
             showError("Too many failed login attempts. Please try again later.");
         } else if (error.code === 'auth/invalid-email') {
             showError("The email address is not valid.");
+        } else if (error.code === 'auth/missing-password') {
+            showError("The password is missing.");
         } else {
             showError("Failed to sign in: " + error.message);
         }
@@ -168,6 +178,10 @@ export function initAuth() {
         // 2. الحماية: إعادة التوجيه إذا كان مسجل الدخول ويحاول دخول صفحات التسجيل
         if (user) {
             if (!user.emailVerified) {
+                // 🔥 أضف هذا السطر: إذا كنا نسجل الدخول حالياً، لا تتدخل يا مراقب
+                if (isLoggingIn) return;
+
+                // الكود القديم للطرد الصامت
                 signOut(auth);
                 return;
             }
@@ -206,3 +220,32 @@ function redirectIfSuccess() {
         window.location.href = 'index';
     }
 }
+
+// =============================
+// 5. وظيفة إعادة إرسال التفعيل 📧
+// =============================
+window.resendVerificationEmail = async function (event) {
+    if (event) event.preventDefault(); // منع الرابط من تحديث الصفحة
+
+    const user = auth.currentUser;
+    if (user) {
+        try {
+            // تغيير نص الرابط ليعرف المستخدم أنه ضغط
+            const link = event.target;
+            const originalText = link.innerText;
+            link.innerText = "Sending...";
+            link.style.pointerEvents = "none"; // منع الضغط المتكرر
+
+            await sendEmailVerification(user);
+
+            link.innerText = "✅ Sent Successfully!";
+            link.style.color = "#2ecc71"; // لون أخضر
+
+        } catch (error) {
+            console.error("Resend Error:", error);
+            alert("Error: " + error.message); // تنبيه بسيط في حال الخطأ
+            event.target.innerText = "Try Again";
+            event.target.style.pointerEvents = "auto";
+        }
+    }
+};

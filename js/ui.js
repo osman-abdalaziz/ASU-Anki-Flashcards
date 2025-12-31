@@ -145,7 +145,7 @@ export function showModal(title, message, type = 'success', onClose = null) {
 
     // تعبئة النصوص
     titleEl.textContent = title;
-    msgEl.textContent = message;
+    msgEl.innerHTML = message;
 
     // تنظيف الكلاسات القديمة وتحديد اللون
     box.className = 'modal-box';
