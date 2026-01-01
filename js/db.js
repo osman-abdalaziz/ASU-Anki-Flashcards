@@ -42,15 +42,13 @@ export async function loadFlashcards(isLoadMore = false) {
     // هل نحن في وضع البحث؟
     const isSearchMode = searchTerm.length > 0;
 
-    // 🔥 تصحيح الـ IDs لتطابق ملف HTML 🔥
-    // (filterModule غير موجود في HTML حالياً، لذا سيبقى "all" إلا إذا أضفته)
+    // عناصر الفلترة
     const subjectFilter =
         document.getElementById("filterModule")?.value || "all";
-    const yearFilter = document.getElementById("yearSelect")?.value || "all"; // ✅ تم التصحيح
+    const yearFilter = document.getElementById("yearSelect")?.value || "all";
     const categoryFilter =
-        document.getElementById("categorySelect")?.value || "all"; // ✅ تم التصحيح
+        document.getElementById("categorySelect")?.value || "all";
 
-    // تصفير الشبكة إذا كان بحثاً جديداً أو فلترة جديدة
     // تصفير الشبكة وعرض الـ Spinner
     if (!isLoadMore) {
         if (grid)
@@ -81,10 +79,8 @@ export async function loadFlashcards(isLoadMore = false) {
 
         // 2. التفرع المنطقي: بحث شامل أم تصفح عادي؟
         if (isSearchMode) {
-            // في وضع البحث نجلب عدداً كبيراً لنبحث بداخله
             constraints.push(limit(100));
         } else {
-            // في التصفح العادي نستخدم Pagination
             if (isLoadMore && lastVisibleDoc) {
                 constraints.push(startAfter(lastVisibleDoc));
             }
@@ -127,6 +123,10 @@ export async function loadFlashcards(isLoadMore = false) {
                     <p>No results found.</p>
                 </div>`;
             if (loadMoreBtn) loadMoreBtn.style.display = "none";
+
+            // 🔥🔥 الإصلاح: تشغيل الإشعارات (للإشعارات العامة) حتى لو لم توجد كروت 🔥🔥
+            loadAllNotifications([]);
+
             return;
         }
 
@@ -151,10 +151,8 @@ export async function loadFlashcards(isLoadMore = false) {
         // 4. التحكم في زر Load More
         if (loadMoreBtn) {
             if (isSearchMode) {
-                // نخفي الزر في وضع البحث لأننا جلبنا النتائج دفعة واحدة
                 loadMoreBtn.style.display = "none";
             } else {
-                // نظهره في التصفح العادي إذا كان هناك بقية
                 loadMoreBtn.style.display =
                     querySnapshot.docs.length < BATCH_SIZE ? "none" : "block";
             }
