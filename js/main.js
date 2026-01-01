@@ -1,20 +1,36 @@
-import { initAuth, handleGoogleLogin, handleLogout, handleEmailSignUp, handleEmailSignIn, handlePasswordReset } from "./auth.js";
-import { toggleDropdown, showError, clearError, setButtonLoading, toggleNotifications } from "./ui.js";
-import { loadFlashcards, filterFlashcards, saveDownloadHistory, markAllUpdatesAsRead } from "./db.js"; // <--- استيراد جديد
+import {
+    initAuth,
+    handleGoogleLogin,
+    handleLogout,
+    handleEmailSignUp,
+    handleEmailSignIn,
+    handlePasswordReset,
+} from "./auth.js";
+import {
+    toggleDropdown,
+    showError,
+    clearError,
+    setButtonLoading,
+    toggleNotifications,
+    showModal,
+} from "./ui.js";
+import {
+    loadFlashcards,
+    filterFlashcards,
+    saveDownloadHistory,
+    markAllUpdatesAsRead,
+} from "./db.js"; // <--- استيراد جديد
 
 // تشغيل المراقب
 initAuth();
 
-
-document.addEventListener('DOMContentLoaded', () => {
-
-
+document.addEventListener("DOMContentLoaded", () => {
     // -------------------------------------------
     // 1. معالجة صفحة إنشاء الحساب (Sign Up)
     // -------------------------------------------
-    const signupForm = document.getElementById('signupForm');
+    const signupForm = document.getElementById("signupForm");
     if (signupForm) {
-        signupForm.addEventListener('submit', async (e) => {
+        signupForm.addEventListener("submit", async (e) => {
             e.preventDefault(); // منع تحديث الصفحة
             clearError();
 
@@ -23,12 +39,19 @@ document.addEventListener('DOMContentLoaded', () => {
             // جلب البيانات من الحقول
             const name = signupForm.querySelector('input[name="name"]').value;
             const email = signupForm.querySelector('input[name="email"]').value;
-            const password = signupForm.querySelector('input[name="password"]').value;
-            const confirmPassword = signupForm.querySelector('input[name="confirm-password"]').value;
+            const password = signupForm.querySelector(
+                'input[name="password"]'
+            ).value;
+            const confirmPassword = signupForm.querySelector(
+                'input[name="confirm-password"]'
+            ).value;
 
-            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const emailRegex =
+                /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!emailRegex.test(email)) {
-                showError("Please enter a valid email in English (e.g. name@domain.com).");
+                showError(
+                    "Please enter a valid email in English (e.g. name@domain.com)."
+                );
                 return;
             }
 
@@ -36,7 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // ويشترط أن يكون الاسم 3 حروف على الأقل
             const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]{3,30}$/;
             if (!nameRegex.test(name)) {
-                showError("Please enter a real name (letters only, at least 3 chars).");
+                showError(
+                    "Please enter a real name (letters only, at least 3 chars)."
+                );
                 return;
             }
 
@@ -49,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showError("The password must be at least 8 characters long.");
                 return;
             }
-            if (!document.getElementById('terms-conditions').checked) {
+            if (!document.getElementById("terms-conditions").checked) {
                 showError("You must agree to the Terms & Conditions.");
                 return;
             }
@@ -69,14 +94,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------
     // 2. معالجة صفحة تسجيل الدخول (Sign In)
     // -------------------------------------------
-    const signinForm = document.getElementById('signinForm');
+    const signinForm = document.getElementById("signinForm");
     if (signinForm) {
-        signinForm.addEventListener('submit', async (e) => {
+        signinForm.addEventListener("submit", async (e) => {
             e.preventDefault();
 
             const submitBtn = signinForm.querySelector('button[type="submit"]');
             const email = signinForm.querySelector('input[name="email"]').value;
-            const password = signinForm.querySelector('input[name="password"]').value;
+            const password = signinForm.querySelector(
+                'input[name="password"]'
+            ).value;
 
             setButtonLoading(submitBtn, true);
 
@@ -149,215 +176,226 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------
     // 3. أزرار جوجل والقوائم (الكود السابق)
     // -------------------------------------------
-    const googleBtns = document.querySelectorAll('.google-btn');
-    googleBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
+    const googleBtns = document.querySelectorAll(".google-btn");
+    googleBtns.forEach((btn) => {
+        btn.addEventListener("click", (e) => {
             e.preventDefault();
             handleGoogleLogin();
         });
     });
 
-    const avatar = document.getElementById('userName');
-    const arrow = document.querySelector('.dropdown-arrow i');
+    const avatar = document.getElementById("userName");
+    const arrow = document.querySelector(".dropdown-arrow i");
     if (avatar) {
-        avatar.addEventListener('click', (e) => {
+        avatar.addEventListener("click", (e) => {
             e.stopPropagation();
             toggleDropdown("userDropdown");
 
             if (arrow) {
-                arrow.classList.toggle('fa-angle-down');
-                arrow.classList.toggle('fa-angle-up');
+                arrow.classList.toggle("fa-angle-down");
+                arrow.classList.toggle("fa-angle-up");
             }
         });
     }
 
-    const dropBtnMobile = document.getElementById('mobileUserName');
-    const arrowMobile = document.querySelector('#mobileDropdownArrow i');
+    const dropBtnMobile = document.getElementById("mobileUserName");
+    const arrowMobile = document.querySelector("#mobileDropdownArrow i");
 
     if (dropBtnMobile) {
-        dropBtnMobile.addEventListener('click', (e) => {
+        dropBtnMobile.addEventListener("click", (e) => {
             e.stopPropagation();
             toggleDropdown("mobileUserDropdown");
             if (arrowMobile) {
-                arrowMobile.classList.toggle('fa-angle-down');
-                arrowMobile.classList.toggle('fa-angle-up');
+                arrowMobile.classList.toggle("fa-angle-down");
+                arrowMobile.classList.toggle("fa-angle-up");
             }
         });
     }
 
-    const decks = document.getElementById('decksDropbtn');
-    const decksArrow = document.querySelector('.decksDropar i');
+    const decks = document.getElementById("decksDropbtn");
+    const decksArrow = document.querySelector(".decksDropar i");
     if (decks) {
-        decks.addEventListener('click', (e) => {
+        decks.addEventListener("click", (e) => {
             e.stopPropagation();
             e.preventDefault();
             toggleDropdown("decksDrop");
 
             if (decksArrow) {
-                decksArrow.classList.toggle('fa-angle-up');
-                decksArrow.classList.toggle('fa-angle-down');
+                decksArrow.classList.toggle("fa-angle-up");
+                decksArrow.classList.toggle("fa-angle-down");
             }
         });
     }
-    const noti = document.getElementById('notiDropbtn');
-    const notiarrw = document.querySelector('.notiDropar i');
+    const noti = document.getElementById("notiDropbtn");
+    const notiarrw = document.querySelector(".notiDropar i");
     if (noti) {
-        noti.addEventListener('click', (e) => {
+        noti.addEventListener("click", (e) => {
             e.stopPropagation();
             e.preventDefault();
             toggleDropdown("notiDrop");
 
             if (notiarrw) {
-                notiarrw.classList.toggle('fa-angle-up');
-                notiarrw.classList.toggle('fa-angle-down');
+                notiarrw.classList.toggle("fa-angle-up");
+                notiarrw.classList.toggle("fa-angle-down");
             }
         });
     }
 
     // ربط زر الخروج
 
-    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutBtn = document.getElementById("logoutBtn");
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
+        logoutBtn.addEventListener("click", handleLogout);
     }
 
     // ربط زر الخروج الخاص بالموبايل
-    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+    const mobileLogoutBtn = document.getElementById("mobileLogoutBtn");
     if (mobileLogoutBtn) {
-        mobileLogoutBtn.addEventListener('click', handleLogout);
+        mobileLogoutBtn.addEventListener("click", handleLogout);
     }
 
-    document.addEventListener('click', () => {
-        const dropdown = document.getElementById('userDropdown');
-        if (dropdown) dropdown.classList.remove('active');
-        if (!dropdown.classList.contains('active')) {
-            arrow.classList.add('fa-angle-down');
-            arrow.classList.remove('fa-angle-up');
+    document.addEventListener("click", () => {
+        const dropdown = document.getElementById("userDropdown");
+        if (dropdown) dropdown.classList.remove("active");
+        if (!dropdown.classList.contains("active")) {
+            arrow.classList.add("fa-angle-down");
+            arrow.classList.remove("fa-angle-up");
         }
     });
 
-
     // --- 1. إشعارات الكمبيوتر ---
-    const notifBtn = document.getElementById('notifBtn');
+    const notifBtn = document.getElementById("notifBtn");
     if (notifBtn) {
-        notifBtn.addEventListener('click', (e) => {
+        notifBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             // التصحيح: أضفنا 'notifBadge' كمتغير ثاني
-            toggleNotifications('notifDropdown', 'notifBadge');
+            toggleNotifications("notifDropdown", "notifBadge");
 
             // إغلاق قائمة المستخدم إذا كانت مفتوحة
-            const userDropdown = document.getElementById('userDropdown');
-            if (userDropdown) userDropdown.classList.remove('active');
+            const userDropdown = document.getElementById("userDropdown");
+            if (userDropdown) userDropdown.classList.remove("active");
         });
     }
 
     // --- 2. إشعارات الموبايل ---
-    const mobileNotifBtn = document.getElementById('mobileNotifBtn');
+    const mobileNotifBtn = document.getElementById("mobileNotifBtn");
     if (mobileNotifBtn) {
-        mobileNotifBtn.addEventListener('click', (e) => {
+        mobileNotifBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             // التصحيح: أضفنا 'mobileNotifBadge' كمتغير ثاني
-            toggleNotifications('mobileNotifDropdown', 'mobileNotifBadge');
+            toggleNotifications("mobileNotifDropdown", "mobileNotifBadge");
         });
     }
 
     // --- Mobile custom menu handling ---
-    const mobileMenuOpen = document.getElementById('mobileMenuOpen');
-    const mobileMenu = document.querySelector('.mobile-menu');
-    const mobileMenuClose = document.getElementById('mobileMenuClose');
-    const themeToggleMobile = document.getElementById('themeToggleMobile');
+    const mobileMenuOpen = document.getElementById("mobileMenuOpen");
+    const mobileMenu = document.querySelector(".mobile-menu");
+    const mobileMenuClose = document.getElementById("mobileMenuClose");
+    const themeToggleMobile = document.getElementById("themeToggleMobile");
 
     function openMobileMenu() {
         if (!mobileMenu) return;
-        mobileMenu.classList.add('show');
+        mobileMenu.classList.add("show");
         // prevent background scroll
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflow = "hidden";
         // set focus for accessibility
-        const closeBtn = document.getElementById('mobileMenuClose');
+        const closeBtn = document.getElementById("mobileMenuClose");
         if (closeBtn) closeBtn.focus();
     }
     function closeMobileMenu() {
         if (!mobileMenu) return;
-        mobileMenu.classList.remove('show');
-        document.body.style.overflow = '';
+        mobileMenu.classList.remove("show");
+        document.body.style.overflow = "";
         // return focus to menu open button
         if (mobileMenuOpen) mobileMenuOpen.focus();
     }
 
     if (mobileMenuOpen) {
-        mobileMenuOpen.addEventListener('click', (e) => {
+        mobileMenuOpen.addEventListener("click", (e) => {
             e.stopPropagation();
             openMobileMenu();
         });
     }
-    if (mobileMenuClose) mobileMenuClose.addEventListener('click', () => closeMobileMenu());
+    if (mobileMenuClose)
+        mobileMenuClose.addEventListener("click", () => closeMobileMenu());
 
     // close menu when clicking outside
-    document.addEventListener('click', (e) => {
+    document.addEventListener("click", (e) => {
         if (!mobileMenu) return;
-        if (!mobileMenu.classList.contains('show')) return;
-        const targetInside = e.target.closest('.mobile-menu');
-        const clickedOpen = e.target.closest('#mobileMenuOpen');
+        if (!mobileMenu.classList.contains("show")) return;
+        const targetInside = e.target.closest(".mobile-menu");
+        const clickedOpen = e.target.closest("#mobileMenuOpen");
         if (!targetInside && !clickedOpen) closeMobileMenu();
     });
 
     // close on ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeMobileMenu();
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeMobileMenu();
     });
 
     // mobile theme toggle: call global toggleTheme to avoid triggering clicks outside the menu
     if (themeToggleMobile) {
-        themeToggleMobile.addEventListener('click', (e) => {
+        themeToggleMobile.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation(); // keep the click inside the menu so it doesn't close
-            if (window && typeof window.toggleTheme === 'function') {
+            if (window && typeof window.toggleTheme === "function") {
                 window.toggleTheme();
             } else {
                 // fallback to clicking main button if global function not available
-                const mainThemeBtn = document.getElementById('themeToggle');
+                const mainThemeBtn = document.getElementById("themeToggle");
                 if (mainThemeBtn) mainThemeBtn.click();
             }
         });
 
         // keyboard accessibility: Enter / Space
-        themeToggleMobile.addEventListener('keydown', (e) => {
-            if (e.key === ' ' || e.key === 'Enter') {
+        themeToggleMobile.addEventListener("keydown", (e) => {
+            if (e.key === " " || e.key === "Enter") {
                 e.preventDefault();
                 e.stopPropagation();
-                if (window && typeof window.toggleTheme === 'function') window.toggleTheme();
+                if (window && typeof window.toggleTheme === "function")
+                    window.toggleTheme();
             }
         });
     }
 
     // close mobile menu when clicking a nav link inside it
     if (mobileMenu) {
-        const links = mobileMenu.querySelectorAll('a');
-        links.forEach((lnk) => lnk.addEventListener('click', () => closeMobileMenu()));
+        const links = mobileMenu.querySelectorAll("a");
+        links.forEach((lnk) =>
+            lnk.addEventListener("click", () => closeMobileMenu())
+        );
     }
 
     // إغلاق القوائم عند الضغط في أي مكان
-    document.addEventListener('click', (e) => {
+    document.addEventListener("click", (e) => {
         // إغلاق قائمة المستخدم
-        const userDropdown = document.getElementById('userDropdown');
-        if (userDropdown) userDropdown.classList.remove('active');
+        const userDropdown = document.getElementById("userDropdown");
+        if (userDropdown) userDropdown.classList.remove("active");
 
         // إغلاق قائمة الإشعارات (إلا إذا ضغطنا داخلها)
-        const notifDropdown = document.getElementById('notifDropdown');
-        const notifBtn = document.getElementById('notifBtn');
+        const notifDropdown = document.getElementById("notifDropdown");
+        const notifBtn = document.getElementById("notifBtn");
 
         if (notifDropdown && notifBtn) {
-            if (!notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
-                notifDropdown.classList.remove('active');
+            if (
+                !notifDropdown.contains(e.target) &&
+                !notifBtn.contains(e.target)
+            ) {
+                notifDropdown.classList.remove("active");
             }
         }
 
         // إغلاق قائمة إشعارات الموبايل (إلا إذا ضغطنا داخلها)
-        const mobileNotifDropdown = document.getElementById('mobileNotifDropdown');
-        const mobileNotifBtn = document.getElementById('mobileNotifBtn');
+        const mobileNotifDropdown = document.getElementById(
+            "mobileNotifDropdown"
+        );
+        const mobileNotifBtn = document.getElementById("mobileNotifBtn");
         if (mobileNotifDropdown && mobileNotifBtn) {
-            if (!mobileNotifDropdown.contains(e.target) && !mobileNotifBtn.contains(e.target)) {
-                mobileNotifDropdown.classList.remove('active');
+            if (
+                !mobileNotifDropdown.contains(e.target) &&
+                !mobileNotifBtn.contains(e.target)
+            ) {
+                mobileNotifDropdown.classList.remove("active");
             }
         }
     });
@@ -365,38 +403,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // -------------------------------------------
     // 4. نظام البحث والفلترة (Search & Filters)
     // -------------------------------------------
-    const searchInput = document.getElementById('searchInput');
-    const categorySelect = document.getElementById('categorySelect');
-    const yearSelect = document.getElementById('yearSelect');
-    const resetBtn = document.getElementById('resetFiltersBtn');
+    const searchInput = document.getElementById("searchInput");
+    const categorySelect = document.getElementById("categorySelect");
+    const yearSelect = document.getElementById("yearSelect");
+    const resetBtn = document.getElementById("resetFiltersBtn");
 
     // دالة تجمع القيم الحالية وترسلها للفلترة
     function performFilter() {
         const text = searchInput.value;
         const cat = categorySelect.value; // 'all', 'theoretical', 'practical'
-        const yr = yearSelect.value;      // 'all', '1st Year', ...
+        const yr = yearSelect.value; // 'all', '1st Year', ...
 
         filterFlashcards(text, cat, yr);
     }
 
     // الاستماع للأحداث (Live Search)
     if (searchInput) {
-        searchInput.addEventListener('input', performFilter); // يعمل عند كل حرف يُكتب
+        searchInput.addEventListener("input", performFilter); // يعمل عند كل حرف يُكتب
     }
     if (categorySelect) {
-        categorySelect.addEventListener('change', performFilter);
+        categorySelect.addEventListener("change", performFilter);
     }
     if (yearSelect) {
-        yearSelect.addEventListener('change', performFilter);
+        yearSelect.addEventListener("change", performFilter);
     }
 
     // زر إعادة التعيين (Reset)
     if (resetBtn) {
-        resetBtn.addEventListener('click', () => {
+        resetBtn.addEventListener("click", () => {
             // 1. تصفير الحقول في الواجهة
-            searchInput.value = '';
-            categorySelect.value = 'all';
-            yearSelect.value = 'all';
+            searchInput.value = "";
+            categorySelect.value = "all";
+            yearSelect.value = "all";
 
             // 2. تطبيق الفلتر (سيعيد كل شيء لأن القيم أصبحت 'all')
             performFilter();
@@ -407,18 +445,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // تفعيل زر Mark All As Read (الحل الجذري)
     // -------------------------------------------
 
-    document.addEventListener('click', (e) => {
+    document.addEventListener("click", (e) => {
         // هل الشيء الذي ضغطت عليه (أو أبوه) يحمل كلاس mark-read؟
-        if (e.target.matches('.mark-read') || e.target.closest('.mark-read')) {
-
+        if (e.target.matches(".mark-read") || e.target.closest(".mark-read")) {
             console.log("🖱️ تم الضغط على زر Mark All!"); // للتأكد أن الزر يعمل
 
             // استدعاء الدالة
             markAllUpdatesAsRead();
 
             // (اختياري) تأثير بصري بسيط لتشعر بالاستجابة
-            const btn = e.target.closest('.mark-read');
-            if (btn) btn.style.color = '#007bff';
+            const btn = e.target.closest(".mark-read");
+            if (btn) btn.style.color = "#007bff";
         }
     });
 
@@ -428,13 +465,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // استيراد دالة الحفظ
 
-
     // 1. مراقبة أزرار التنزيل في الكروت الرئيسية
-    const grid = document.getElementById('flashcardsGrid');
+    const grid = document.getElementById("flashcardsGrid");
     if (grid) {
-        grid.addEventListener('click', (e) => {
+        grid.addEventListener("click", (e) => {
             // البحث عن الزر المضغوط
-            const btn = e.target.closest('.download-trigger');
+            const btn = e.target.closest(".download-trigger");
 
             if (btn) {
                 const deckId = btn.dataset.id;
@@ -453,11 +489,157 @@ document.addEventListener('DOMContentLoaded', () => {
         // نحفظ أنه يمتلك هذه النسخة الآن، فيختفي الإشعار
         saveDownloadHistory(deckId, version);
     };
+
+    // --- Rating System Logic ---
+
+    // تعريف المتغيرات
+    const starsInput = document.querySelectorAll(".star-rating-input i");
+    const ratingValueInput = document.getElementById("selectedRating");
+    const commentInput = document.getElementById("reviewComment");
+    const submitBtn = document.getElementById("submitReviewBtn");
+    const ratingModal = document.getElementById("ratingModal");
+
+    // دالة مساعدة لتلوين النجوم
+    function fillStars(value) {
+        starsInput.forEach((star) => {
+            const starVal = star.getAttribute("data-value");
+            if (starVal <= value) {
+                star.classList.add("active");
+                star.classList.replace("fa-regular", "fa-solid");
+            } else {
+                star.classList.remove("active");
+                star.classList.replace("fa-solid", "fa-regular"); // تأكد من إرجاعها فارغة
+            }
+        });
+    }
+
+    // 1. فتح المودل (مطور)
+    let currentRateDeckId = null;
+
+    window.openRatingModal = async (deckId, deckTitle) => {
+        currentRateDeckId = deckId;
+
+        // أ) تحديث العنوان وإظهار المودل فوراً
+        document.querySelector(
+            "#ratingModal h3"
+        ).textContent = `Rate: ${deckTitle}`;
+        ratingModal.style.display = "flex";
+        ratingModal.style.opacity = "1";
+
+        // ب) تصفير الحقول أولاً (مهم جداً عشان ما يظهر تقييم قديم)
+        ratingValueInput.value = 0;
+        commentInput.value = "";
+        fillStars(0);
+        if (submitBtn) submitBtn.innerText = "Loading..."; // مؤشر بسيط
+
+        // ج) جلب التقييم السابق من قاعدة البيانات
+        const { getUserReview } = await import("./db.js");
+        const userReview = await getUserReview(deckId);
+
+        // د) إذا وجدنا تقييم، نملأ البيانات
+        if (userReview) {
+            ratingValueInput.value = userReview.rating;
+            commentInput.value = userReview.comment || "";
+            fillStars(userReview.rating); // 🔥 هنا يحدث السحر: تلوين النجوم فوراً
+            if (submitBtn) submitBtn.innerText = "Update Review";
+        } else {
+            if (submitBtn) submitBtn.innerText = "Submit Review";
+        }
+    };
+
+    // 2. إغلاق المودل
+    const closeRatingBtn = document.getElementById("closeRatingModal");
+    if (closeRatingBtn) {
+        closeRatingBtn.addEventListener("click", () => {
+            ratingModal.style.display = "none";
+        });
+    }
+
+    // 3. تفاعل النجوم (Hover & Click)
+    const starsContainer = document.querySelector(".star-rating-input");
+
+    starsInput.forEach((star) => {
+        // عند المرور: لون مؤقتاً
+        star.addEventListener("mouseover", function () {
+            const val = this.getAttribute("data-value");
+            fillStars(val);
+        });
+
+        // عند الضغط: ثبت القيمة
+        star.addEventListener("click", function () {
+            const val = this.getAttribute("data-value");
+            ratingValueInput.value = val;
+            fillStars(val);
+        });
+    });
+
+    // عند الخروج: ارجع للقيمة المثبتة (سواء كانت 0 أو القيمة المحفوظة)
+    if (starsContainer) {
+        starsContainer.addEventListener("mouseleave", () => {
+            const savedVal = ratingValueInput.value || 0;
+            fillStars(savedVal);
+        });
+    }
+
+    // 4. إرسال التقييم
+    if (submitBtn) {
+        submitBtn.addEventListener("click", async () => {
+            const rating = parseInt(ratingValueInput.value);
+            const comment = commentInput.value;
+            const btn = submitBtn;
+
+            if (rating === 0) {
+                showModal(
+                    "Rating Required ⭐",
+                    "Please select a star rating before submitting.",
+                    "error"
+                );
+                return;
+            }
+
+            const { submitDeckReview, loadFlashcards } = await import(
+                "./db.js"
+            );
+
+            // UI Loading
+            const originalText = btn.innerText;
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+
+            const success = await submitDeckReview(
+                currentRateDeckId,
+                rating,
+                comment
+            );
+
+            if (success) {
+                ratingModal.style.display = "none";
+                // alert("Thanks for your feedback! ⭐"); // اختياري
+
+                // رسالة نجاح مخصصة حسب الحالة (جديد أو تعديل)
+                const isUpdate = originalText.includes("Update");
+                const msg = isUpdate
+                    ? "Review Updated Successfully! 🔄"
+                    : "Thanks for your feedback! ⭐";
+                showModal("Success!", msg, "success");
+
+                loadFlashcards();
+            } else {
+                showModal(
+                    "Error",
+                    "Error submitting review. Please try again.",
+                    "error"
+                );
+            }
+
+            btn.innerText = originalText; // أو Reset
+            btn.disabled = false;
+        });
+    }
 });
 
 window.markGeneralAsRead = function (notifId) {
-    import('./db.js').then(module => {
+    import("./db.js").then((module) => {
         module.markGeneralAsRead(notifId);
     });
 };
-

@@ -265,6 +265,34 @@
             <button id="modalOkBtn">OK</button>
         </div>
     </div>
+    <div id="ratingModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header" style="margin-bottom: 20px;">
+                <h3>Rate this Deck</h3>
+                <button class="close-modal" id="closeRatingModal"
+                    style="position: absolute; right: 20px; top: 20px; font-size: 24px;">&times;</button>
+            </div>
+
+            <div class="star-rating-input" style="margin-bottom: 20px; font-size: 2rem; color: #ddd; cursor: pointer;">
+                <i class="fa-solid fa-star" data-value="1"></i>
+                <i class="fa-solid fa-star" data-value="2"></i>
+                <i class="fa-solid fa-star" data-value="3"></i>
+                <i class="fa-solid fa-star" data-value="4"></i>
+                <i class="fa-solid fa-star" data-value="5"></i>
+            </div>
+            <input type="hidden" id="selectedRating" value="0">
+
+            <label class="field" style="text-align: left;">
+                <span class="field-label">Review (Optional)</span>
+                <div class="input-wrap">
+                    <textarea id="reviewComment" rows="3" placeholder="Is this deck helpful? Any missing topics?"
+                        style="width: 100%; padding: 10px; border-radius: 10px; background: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); resize: none;"></textarea>
+                </div>
+            </label>
+
+            <button id="submitReviewBtn" class="main-btn" style="width: 100%; margin-top: 15px;">Submit Review</button>
+        </div>
+    </div>
     <script src="js/theme.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>

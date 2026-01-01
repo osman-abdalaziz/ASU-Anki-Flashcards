@@ -1,13 +1,26 @@
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { db } from "./config.js";
+import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    doc,
+    updateDoc,
+    addDoc,
+    increment,
+    serverTimestamp,
+    limit,
+    where,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { auth, db } from "./config.js";
 
 // متغير لتخزين الكروت
 let allFlashcards = [];
 
 // مفاتيح التخزين في متصفح الطالب
-const DOWNLOADS_KEY = 'asu_anki_downloads';
+const DOWNLOADS_KEY = "asu_anki_downloads";
 
-const READ_NOTIFS_KEY = 'asu_anki_read_general';
+const READ_NOTIFS_KEY = "asu_anki_read_general";
 
 // ==========================================
 // 1. دالة جلب الكروت (الأساسية)
@@ -63,7 +76,7 @@ const READ_NOTIFS_KEY = 'asu_anki_read_general';
 // في ملف js/db.js
 
 export async function loadFlashcards() {
-    const grid = document.getElementById('flashcardsGrid');
+    const grid = document.getElementById("flashcardsGrid");
 
     // 1. إظهار "جاري التحميل" فقط إذا كانت الشبكة موجودة في الصفحة
     if (grid) {
@@ -98,18 +111,18 @@ export async function loadFlashcards() {
         // 3. الرسم على الشاشة (فقط إذا كانت الشبكة موجودة)
         if (grid) {
             if (allFlashcards.length === 0) {
-                grid.innerHTML = '<p style="color: var(--text-color); text-align:center; grid-column: 1/-1; padding: 40px;">No flashcards found yet.</p>';
+                grid.innerHTML =
+                    '<p style="color: var(--text-color); text-align:center; grid-column: 1/-1; padding: 40px;">No flashcards found yet.</p>';
             } else {
                 renderCards(allFlashcards);
             }
         }
-
     } catch (error) {
         console.error("Error loading data:", error);
 
         // التعامل مع رسائل الخطأ في الواجهة فقط إذا كانت الشبكة موجودة
         if (grid) {
-            if (error.code === 'permission-denied') {
+            if (error.code === "permission-denied") {
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 40px;">
                         <i class="fa-solid fa-lock" style="font-size: 3rem; color: var(--text-color); margin-bottom: 20px;"></i>
@@ -118,7 +131,8 @@ export async function loadFlashcards() {
                     </div>
                 `;
             } else {
-                grid.innerHTML = '<p style="color:#ff6b6b; text-align:center; grid-column: 1/-1;">Failed to load data. Please try again later.</p>';
+                grid.innerHTML =
+                    '<p style="color:#ff6b6b; text-align:center; grid-column: 1/-1;">Failed to load data. Please try again later.</p>';
             }
         }
     }
@@ -131,16 +145,19 @@ export async function loadAllNotifications(allDecks) {
     // حفظ بيانات الكروت لاستخدامها لاحقاً في زر Mark All
     window.currentDecksData = allDecks;
 
-    const listDesktop = document.querySelector('#notifDropdown .notif-list');
-    const listMobile = document.querySelector('#mobileNotifDropdown .notif-list');
-    const badgeDesktop = document.getElementById('notifBadge');
-    const badgeMobile = document.getElementById('mobileNotifBadge');
+    const listDesktop = document.querySelector("#notifDropdown .notif-list");
+    const listMobile = document.querySelector(
+        "#mobileNotifDropdown .notif-list"
+    );
+    const badgeDesktop = document.getElementById("notifBadge");
+    const badgeMobile = document.getElementById("mobileNotifBadge");
 
     // أ) حساب تحديثات الكروت
-    const downloadHistory = JSON.parse(localStorage.getItem(DOWNLOADS_KEY)) || {};
+    const downloadHistory =
+        JSON.parse(localStorage.getItem(DOWNLOADS_KEY)) || {};
     let cardUpdates = [];
 
-    allDecks.forEach(deck => {
+    allDecks.forEach((deck) => {
         const userVersion = downloadHistory[deck.id];
         const serverVersion = deck.version;
         // شرط التحديث: الطالب نزل نسخة قديمة + النسخة في السيرفر أحدث
@@ -152,13 +169,17 @@ export async function loadAllNotifications(allDecks) {
     // ب) جلب الإشعارات العامة
     let generalNotifs = [];
     let currentGeneralIds = []; // لحفظ الـ IDs لغرض Mark All
-    const readGeneralIds = JSON.parse(localStorage.getItem(READ_NOTIFS_KEY)) || [];
+    const readGeneralIds =
+        JSON.parse(localStorage.getItem(READ_NOTIFS_KEY)) || [];
 
     try {
-        const q = query(collection(db, "general_notifications"), orderBy("createdAt", "desc"));
+        const q = query(
+            collection(db, "general_notifications"),
+            orderBy("createdAt", "desc")
+        );
         const snapshot = await getDocs(q);
 
-        snapshot.forEach(doc => {
+        snapshot.forEach((doc) => {
             // الشرط: إذا لم يكن الإشعار موجوداً في قائمة "المقروء"
             if (!readGeneralIds.includes(doc.id)) {
                 generalNotifs.push({ id: doc.id, ...doc.data() });
@@ -168,7 +189,6 @@ export async function loadAllNotifications(allDecks) {
 
         // حفظ الـ IDs الحالية في Window لزر Mark All
         window.currentGeneralIds = currentGeneralIds;
-
     } catch (error) {
         console.error("Error fetching general notifications:", error);
     }
@@ -177,19 +197,20 @@ export async function loadAllNotifications(allDecks) {
     const totalCount = cardUpdates.length + generalNotifs.length;
 
     if (totalCount === 0) {
-        const emptyHTML = '<div class="notif-item"><p class="notif-text" style="color: var(--text-secondary-color); text-align:center;">No new notifications.</p></div>';
+        const emptyHTML =
+            '<div class="notif-item"><p class="notif-text" style="color: var(--text-secondary-color); text-align:center;">No new notifications.</p></div>';
         if (listDesktop) listDesktop.innerHTML = emptyHTML;
         if (listMobile) listMobile.innerHTML = emptyHTML;
-        if (badgeDesktop) badgeDesktop.style.display = 'none';
-        if (badgeMobile) badgeMobile.style.display = 'none';
+        if (badgeDesktop) badgeDesktop.style.display = "none";
+        if (badgeMobile) badgeMobile.style.display = "none";
         return;
     }
 
-    let htmlContent = '';
+    let htmlContent = "";
 
     // 1. رسم تحديثات الكروت
-    cardUpdates.forEach(deck => {
-        const dateStr = deck.lastUpdate || 'Recent';
+    cardUpdates.forEach((deck) => {
+        const dateStr = deck.lastUpdate || "Recent";
         htmlContent += `
             <div class="notif-item unread" style="align-items: flex-start;">
                 <div class="notif-icon bg-green">
@@ -197,19 +218,27 @@ export async function loadAllNotifications(allDecks) {
                 </div>
                 <div class="notif-content" style="width: 100%;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                        <p class="notif-text" style="margin: 0; color: var(--text-color)">Check The New Update: <b>${deck.title}</b></p>
+                        <p class="notif-text" style="margin: 0; color: var(--text-color)">Check The New Update: <b>${
+                            deck.title
+                        }</b></p>
                         <span style="font-size: 0.65rem; color:  var(--text-secondary-color); white-space: nowrap; margin-left: 8px;">${dateStr}</span>
                     </div>
                     
                     <p class="notif-text" style="margin: 2px 0 5px 0;">
-                        <span style="font-size: 0.75rem; color: var(--text-secondary-color);">${downloadHistory[deck.id]} ➝ ${deck.version}</span>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary-color);">${
+                            downloadHistory[deck.id]
+                        } ➝ ${deck.version}</span>
                     </p>
 
                     <div class="notif-actions">
                         <a href="${deck.downloadUrl}" target="_blank" 
-                           onclick="window.handleUpdateClick('${deck.id}', '${deck.version}')"
+                           onclick="window.handleUpdateClick('${deck.id}', '${
+            deck.version
+        }')"
                            class="notif-action-btn download">Download</a>
-                        <button onclick="window.handleUpdateClick('${deck.id}', '${deck.version}')"
+                        <button onclick="window.handleUpdateClick('${
+                            deck.id
+                        }', '${deck.version}')"
                            class="notif-action-btn ignore">Mark read</button>
                     </div>
                 </div>
@@ -218,21 +247,30 @@ export async function loadAllNotifications(allDecks) {
     });
 
     // 2. رسم الإشعارات العامة
-    generalNotifs.forEach(notif => {
-        let icon = 'fa-bell';
-        let bgClass = 'bg-blue';
+    generalNotifs.forEach((notif) => {
+        let icon = "fa-bell";
+        let bgClass = "bg-blue";
 
-        if (notif.type === 'success') { icon = 'fa-check'; bgClass = 'bg-green'; }
-        else if (notif.type === 'danger') { icon = 'fa-triangle-exclamation'; bgClass = 'bg-red'; }
-
-        // تحويل التاريخ
-        let dateStr = '';
-        if (notif.createdAt && notif.createdAt.seconds) {
-            const dateObj = new Date(notif.createdAt.seconds * 1000);
-            dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        if (notif.type === "success") {
+            icon = "fa-check";
+            bgClass = "bg-green";
+        } else if (notif.type === "danger") {
+            icon = "fa-triangle-exclamation";
+            bgClass = "bg-red";
         }
 
-        let linkBtnHTML = '';
+        // تحويل التاريخ
+        let dateStr = "";
+        if (notif.createdAt && notif.createdAt.seconds) {
+            const dateObj = new Date(notif.createdAt.seconds * 1000);
+            dateStr = dateObj.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+            });
+        }
+
+        let linkBtnHTML = "";
         if (notif.link && notif.link.trim() !== "") {
             linkBtnHTML = `
                 <a href="${notif.link}" target="_blank" 
@@ -269,8 +307,14 @@ export async function loadAllNotifications(allDecks) {
     if (listDesktop) listDesktop.innerHTML = htmlContent;
     if (listMobile) listMobile.innerHTML = htmlContent;
 
-    if (badgeDesktop) { badgeDesktop.style.display = 'flex'; badgeDesktop.innerText = totalCount; }
-    if (badgeMobile) { badgeMobile.style.display = 'flex'; badgeMobile.innerText = totalCount; }
+    if (badgeDesktop) {
+        badgeDesktop.style.display = "flex";
+        badgeDesktop.innerText = totalCount;
+    }
+    if (badgeMobile) {
+        badgeMobile.style.display = "flex";
+        badgeMobile.innerText = totalCount;
+    }
 }
 
 // ==========================================
@@ -301,7 +345,9 @@ export function markAllUpdatesAsRead() {
     // 1. تحديث الكروت (نجعل كل الكروت محدثة)
     let history = JSON.parse(localStorage.getItem(DOWNLOADS_KEY)) || {};
     const allDecks = window.currentDecksData || [];
-    allDecks.forEach(deck => { history[deck.id] = deck.version; });
+    allDecks.forEach((deck) => {
+        history[deck.id] = deck.version;
+    });
     localStorage.setItem(DOWNLOADS_KEY, JSON.stringify(history));
 
     // 2. تحديث الإشعارات العامة (نضيف المعروض حالياً لقائمة المقروء)
@@ -321,22 +367,23 @@ export function markAllUpdatesAsRead() {
 // ==========================================
 export function filterFlashcards(searchText, category, year) {
     const term = searchText.toLowerCase().trim();
-    const filtered = allFlashcards.filter(card => {
+    const filtered = allFlashcards.filter((card) => {
         const matchesSearch =
             card.title.toLowerCase().includes(term) ||
             (card.module && card.module.toLowerCase().includes(term)) ||
             (card.creator && card.creator.toLowerCase().includes(term));
-        const matchesCategory = category === 'all' || card.category === category;
-        const matchesYear = year === 'all' || card.year === year;
+        const matchesCategory =
+            category === "all" || card.category === category;
+        const matchesYear = year === "all" || card.year === year;
         return matchesSearch && matchesCategory && matchesYear;
     });
     renderCards(filtered);
 }
 
 function renderCards(cardsList) {
-    const grid = document.getElementById('flashcardsGrid');
+    const grid = document.getElementById("flashcardsGrid");
     if (!grid) return;
-    grid.innerHTML = '';
+    grid.innerHTML = "";
 
     if (cardsList.length === 0) {
         grid.innerHTML = `
@@ -348,31 +395,155 @@ function renderCards(cardsList) {
         return;
     }
 
-    cardsList.forEach(data => {
+    cardsList.forEach((data) => {
+        // حساب النجوم (إذا لم يوجد تقييم نضع 0)
+        const rating =
+            data.totalStars && data.totalReviews
+                ? data.totalStars / data.totalReviews
+                : 0;
+        const reviewsCount = data.totalReviews || 0;
+        const starsHTML = getStarsHTML(rating);
+
         grid.innerHTML += `
-        <div class="card">
-            <div class="thumbnail">
-                <img src="${data.imageUrl || 'images/default_banner.png'}" alt="${data.title}">
-            </div>
-            <h3>${data.title}</h3>
-            <p class="description">${data.description}</p>
-            <ul>
-                <li>Subject: ${data.module}</li>
-                <li>Study Year: ${data.year}</li>
-                <li>Category: ${data.category || 'Theoretical'}</li>
-                <li>Creator: ${(data.creator || 'Unknown')}</li>
-            </ul>
-            <p class="meta">
-                <span class="date">Last Update: ${data.lastUpdate || 'Unknown'}</span>
-                <span class="version">Version ● ${data.version || 'v1.0'}</span>
-            </p>
-            <a href="${data.downloadUrl}" target="_blank" 
-               class="main-btn download-trigger" 
-               data-id="${data.id}" 
-               data-version="${data.version || 'v1.0'}">
-                Download <i class="fa-solid fa-download fa-fw"></i>
-            </a>
+<div class="card">
+    <div class="thumbnail">
+        <img src="${data.imageUrl || "images/default_banner.png"}" alt="${
+            data.title
+        }">
+    </div>
+    
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3>${data.title}</h3>
+        <div class="rating-display" style="cursor: pointer;" onclick="window.openRatingModal('${
+            data.id
+        }', '${data.title}')" title="Click to Rate">
+            ${starsHTML} <span style="font-size: 0.75rem; margin-left: 4px;">(${reviewsCount})</span>
         </div>
-        `;
+    </div>
+
+    <p class="description">${data.description}</p>
+    <ul>
+        <li>Subject: ${data.module}</li>
+        <li>Study Year: ${data.year}</li>
+        <li>Category: ${data.category || "Theoretical"}</li>
+        <li>Creator: ${data.creator || "Unknown"}</li>
+    </ul>
+    <p class="meta">
+        <span class="date">Last Update: ${data.lastUpdate || "Unknown"}</span>
+        <span class="version">Version: ${data.version || "v1.0"}</span>
+    </p>
+    <a href="${data.downloadUrl}" target="_blank" 
+       class="main-btn download-trigger" 
+       data-id="${data.id}" 
+       data-version="${data.version || "v1.0"}">
+        Download <i class="fa-solid fa-download fa-fw"></i>
+    </a>
+</div>
+`;
     });
+}
+
+// 1. دالة رسم النجوم (مساعدة)
+function getStarsHTML(rating) {
+    let stars = "";
+    for (let i = 1; i <= 5; i++) {
+        if (i <= Math.round(rating)) {
+            stars += '<i class="fa-solid fa-star"></i>'; // نجمة ممتلئة
+        } else {
+            stars += '<i class="fa-regular fa-star" style="color: #666;"></i>'; // نجمة فارغة
+        }
+    }
+    return stars;
+}
+
+// في ملف js/db.js
+
+export async function submitDeckReview(deckId, ratingValue, comment) {
+    const user = auth.currentUser;
+    if (!user) {
+        alert("Please sign in to rate decks.");
+        return false;
+    }
+
+    try {
+        const deckRef = doc(db, "decks", deckId);
+        const reviewsRef = collection(db, "decks", deckId, "reviews");
+
+        // 1. التحقق: هل قام المستخدم بتقييم هذا الكارت من قبل؟
+        const q = query(reviewsRef, where("userId", "==", user.uid), limit(1));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+            // ===========================================
+            // حالة أ: المستخدم قيم سابقاً (تعديل التقييم)
+            // ===========================================
+            const oldReviewDoc = snapshot.docs[0];
+            const oldRating = oldReviewDoc.data().rating;
+            const diff = ratingValue - oldRating; // الفرق بين التقييم الجديد والقديم
+
+            // تحديث وثيقة التقييم
+            await updateDoc(doc(reviewsRef, oldReviewDoc.id), {
+                rating: ratingValue,
+                comment: comment,
+                updatedAt: serverTimestamp(),
+            });
+
+            // تحديث إحصائيات الكارت (نعدل المجموع فقط، العدد يبقى كما هو)
+            // إذا كان الفرق صفراً (نفس التقييم)، لن يتغير المجموع
+            if (diff !== 0) {
+                await updateDoc(deckRef, {
+                    totalStars: increment(diff),
+                });
+            }
+
+            console.log("Review updated successfully");
+        } else {
+            // ===========================================
+            // حالة ب: تقييم جديد لأول مرة
+            // ===========================================
+            await addDoc(reviewsRef, {
+                userId: user.uid,
+                userName: user.displayName,
+                rating: ratingValue,
+                comment: comment,
+                createdAt: serverTimestamp(),
+            });
+
+            // تحديث الكارت (زيادة العدد + زيادة المجموع)
+            await updateDoc(deckRef, {
+                totalReviews: increment(1),
+                totalStars: increment(ratingValue),
+            });
+
+            console.log("New review added successfully");
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error submitting review:", error);
+        return false;
+    }
+}
+
+// في نهاية ملف js/db.js
+
+// دالة لجلب تقييم المستخدم الحالي لكارت معين (للعرض في المودل)
+export async function getUserReview(deckId) {
+    const user = auth.currentUser;
+    if (!user) return null; // لو مش مسجل، مفيش تقييم سابق
+
+    try {
+        const reviewsRef = collection(db, "decks", deckId, "reviews");
+        const q = query(reviewsRef, where("userId", "==", user.uid), limit(1));
+        const snapshot = await getDocs(q);
+
+        if (!snapshot.empty) {
+            // نرجع بيانات التقييم (عدد النجوم + التعليق)
+            return snapshot.docs[0].data();
+        }
+        return null; // لا يوجد تقييم سابق
+    } catch (error) {
+        console.error("Error fetching user review:", error);
+        return null;
+    }
 }

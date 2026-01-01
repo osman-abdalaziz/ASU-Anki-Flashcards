@@ -2049,3 +2049,45 @@ footer p a {
 .action-btn.unhide-btn:hover {
     background-color: #218c74;
 }
+
+/* في ملف css/styles.css (استبدل كود النجوم في النهاية بهذا) */
+
+/* 1. تنسيق النجوم في الكارت (للعرض فقط - ثابتة) */
+.card .rating-display {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 8px 0;
+    font-size: 14px;
+    color: var(--text-secondary-color);
+}
+.card .rating-display i {
+    color: #ffb142; /* لون ذهبي */
+    font-size: 13px;
+}
+
+/* 2. تنسيق النجوم داخل المودل (للتفاعل) */
+.star-rating-input {
+    display: flex;
+    justify-content: center;
+    flex-direction: row; /* ✅ اتجاه طبيعي من اليسار لليمين */
+    gap: 10px;
+}
+
+.star-rating-input i {
+    color: #ddd; /* اللون الافتراضي (رمادي) */
+    transition: color 0.2s, transform 0.2s;
+    cursor: pointer;
+    font-size: 2rem;
+}
+
+/* هذا الكلاس يضيفه الجافاسكريبت للنجمة المختارة وما قبلها */
+.star-rating-input i.active {
+    color: #ffb142; /* ذهبي */
+    transform: scale(1.1); /* تكبير بسيط عند التحديد */
+}
+
+/* ❌ تنبيه هام: تأكد أنك حذفت الكود القديم الذي يحتوي على:
+   .star-rating-input i:hover ~ i 
+   لأنه هو سبب المشكلة! 
+*/
