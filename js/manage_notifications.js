@@ -22,6 +22,12 @@ async function loadNotifs() {
     );
     tableBody.innerHTML = "";
 
+    if (querySnapshot.empty) {
+        tableBody.innerHTML =
+            '<tr><td colspan="6" style="text-align:center;">No notifications found yet.</td></tr>';
+        return;
+    }
+
     querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
         tableBody.innerHTML += `

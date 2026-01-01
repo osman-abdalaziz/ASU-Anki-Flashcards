@@ -29,6 +29,11 @@ async function loadDecks() {
     try {
         const querySnapshot = await getDocs(collection(db, "decks"));
         tableBody.innerHTML = "";
+        if (querySnapshot.empty) {
+            tableBody.innerHTML =
+                '<tr><td colspan="6" style="text-align:center;">No Decks found yet.</td></tr>';
+            return;
+        }
         querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
             const yearVal = data.year ? data.year.toLowerCase() : "";
