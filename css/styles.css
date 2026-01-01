@@ -950,10 +950,11 @@ main h1 span {
 .filters select:focus,
 .reset-btn:focus,
 .input-wrap input:focus,
-.filters select:focus {
+.filters select:focus,
+textarea:focus {
     outline: none;
-    border-color: var(--main-color);
-    box-shadow: 0 0 0 4px var(--input-focus-ring);
+    border-color: var(--main-color) !important;
+    box-shadow: 0 0 0 4px var(--input-focus-ring) !important;
 }
 
 .filters button.main-btn {
