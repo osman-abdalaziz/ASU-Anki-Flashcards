@@ -240,7 +240,7 @@ function renderCards(cardsList, shouldAppend = false) {
 }
 
 // ==========================================
-// 4. نظام الإشعارات (Notifications) - المصححة
+// 4. نظام الإشعارات (Notifications) - مع الترحيب الذكي
 // ==========================================
 export async function loadAllNotifications(allDecks) {
     window.currentDecksData = allDecks;
@@ -252,7 +252,7 @@ export async function loadAllNotifications(allDecks) {
     const badgeDesktop = document.getElementById("notifBadge");
     const badgeMobile = document.getElementById("mobileNotifBadge");
 
-    // 1. حساب تحديثات الكروت
+    // 1. حساب تحديثات الكروت (Updates)
     const downloadHistory =
         JSON.parse(localStorage.getItem(DOWNLOADS_KEY)) || {};
     let cardUpdates = [];
@@ -265,7 +265,7 @@ export async function loadAllNotifications(allDecks) {
         }
     });
 
-    // 2. جلب الإشعارات العامة
+    // 2. جلب الإشعارات العامة من السيرفر (General Notifications)
     let generalNotifs = [];
     let currentGeneralIds = [];
     const readGeneralIds =
@@ -289,7 +289,35 @@ export async function loadAllNotifications(allDecks) {
         console.error("Error fetching general notifications:", error);
     }
 
-    // 3. الرسم
+    // 🔥🔥🔥 3. إضافة رسالة الترحيب (Local Welcome Message) 🔥🔥🔥
+    // هذا الكود يعمل محلياً في متصفح الطالب ولا يستهلك قاعدة البيانات
+    const welcomeId = "welcome_msg_v1"; // 👈 غير هذا الرقم (v2) لو أردت إرسال ترحيب جديد مستقبلاً
+
+    // يظهر فقط إذا كان المستخدم مسجل دخول + لم يقرأ الرسالة من قبل
+    if (auth.currentUser && !readGeneralIds.includes(welcomeId)) {
+        // نأخذ الاسم الأول فقط ليكون ودوداً أكثر
+        const firstName = auth.currentUser.displayName
+            ? auth.currentUser.displayName.split(" ")[0]
+            : "Doctor";
+
+        const welcomeMsg = {
+            id: welcomeId,
+            title: `Welcome, ${firstName}! 👋`,
+            message:
+                "We are glad to have you with us. Explore the decks and start studying smart!",
+            type: "success", // لون أخضر ومميز
+            createdAt: { seconds: Date.now() / 1000 }, // يظهر بتاريخ اللحظة
+        };
+
+        // نضعها في مقدمة القائمة
+        generalNotifs.unshift(welcomeMsg);
+
+        // نضيفها لقائمة الـ IDs الحالية ليعمل زر Mark All معها
+        if (window.currentGeneralIds) window.currentGeneralIds.push(welcomeId);
+    }
+    // -----------------------------------------------------
+
+    // 4. الرسم وتحديث العداد
     const totalCount = cardUpdates.length + generalNotifs.length;
 
     if (badgeDesktop) {
@@ -301,6 +329,7 @@ export async function loadAllNotifications(allDecks) {
         badgeMobile.innerText = totalCount;
     }
 
+    // إذا لم توجد إشعارات
     if (totalCount === 0) {
         const emptyHTML =
             '<div class="notif-item"><p class="notif-text" style="text-align:center; color:#777;">No new notifications.</p></div>';
@@ -311,9 +340,9 @@ export async function loadAllNotifications(allDecks) {
 
     let htmlContent = "";
 
-    // أ) رسم كروت التحديث (مع التاريخ)
+    // أ) رسم كروت التحديث
     cardUpdates.forEach((deck) => {
-        const dateStr = deck.lastUpdate || "Recent"; // 🔥 استرجاع التاريخ
+        const dateStr = deck.lastUpdate || "Recent";
 
         htmlContent += `
             <div class="notif-item unread" style="align-items: flex-start;">
@@ -344,7 +373,7 @@ export async function loadAllNotifications(allDecks) {
             </div>`;
     });
 
-    // ب) رسم الإشعارات العامة (مع التاريخ)
+    // ب) رسم الإشعارات العامة (شاملة الترحيب)
     generalNotifs.forEach((notif) => {
         let icon =
             notif.type === "danger"
@@ -359,7 +388,6 @@ export async function loadAllNotifications(allDecks) {
                 ? "bg-green"
                 : "bg-blue";
 
-        // 🔥 حساب التاريخ
         let dateStr = "";
         if (notif.createdAt && notif.createdAt.seconds) {
             const dateObj = new Date(notif.createdAt.seconds * 1000);
@@ -368,6 +396,8 @@ export async function loadAllNotifications(allDecks) {
                 day: "numeric",
                 year: "numeric",
             });
+        } else {
+            dateStr = "Now";
         }
 
         htmlContent += `
