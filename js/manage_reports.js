@@ -5,91 +5,140 @@ import {
     getDocs,
     doc,
     deleteDoc,
-    updateDoc,
+    query,
+    orderBy,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// 1. حماية الصفحة
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
 onAuthStateChanged(auth, (user) => {
-    if (!user || user.email !== ADMIN_EMAIL) window.location.href = "../index";
+    if (!user || user.email !== ADMIN_EMAIL) {
+        window.location.href = "../index.html";
+    } else {
+        const avatar = document.getElementById("mobileUserAvatar");
+        if (avatar) avatar.src = user.photoURL || "../images/user.png";
+    }
 });
 
-const tableBody = document.getElementById("notifTableBody");
+const tableBody = document.getElementById("reportsTableBody");
 
-async function loadNotifs() {
-    tableBody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
-    const querySnapshot = await getDocs(
-        collection(db, "general_notifications")
-    );
-    tableBody.innerHTML = "";
+// 2. دالة تحميل البلاغات
+async function loadReports() {
+    tableBody.innerHTML =
+        '<tr><td colspan="6" style="text-align:center;">Loading reports...</td></tr>';
 
-    querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        tableBody.innerHTML += `
-            <tr>
-                <td>${data.title}</td>
-                <td>${data.message.substring(0, 50)}...</td>
-                <td>${data.type}</td>
-                <td>
-                    <button class="action-btn edit" onclick="window.openEditNotif('${
-                        docSnap.id
-                    }', '${data.title}', '${data.message}')">
-                        Edit <i class="fa-solid fa-pen fa-fw"></i>
-                    </button>
-                    <button class="action-btn delete" onclick="window.deleteNotif('${
-                        docSnap.id
-                    }')">
-                        Delete <i class="fa-solid fa-trash fa-fw"></i>
-                    </button>
-                </td>
-            </tr>`;
-    });
+    try {
+        // جلب البلاغات مرتبة بالأحدث
+        const q = query(
+            collection(db, "reports"),
+            orderBy("createdAt", "desc")
+        );
+        const querySnapshot = await getDocs(q);
+
+        tableBody.innerHTML = "";
+
+        if (querySnapshot.empty) {
+            tableBody.innerHTML =
+                '<tr><td colspan="6" style="text-align:center; padding: 20px;">No issues reported! 🎉</td></tr>';
+            return;
+        }
+
+        querySnapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+
+            // تنسيق التاريخ
+            let dateStr = "N/A";
+            if (data.createdAt && data.createdAt.seconds) {
+                const dateObj = new Date(data.createdAt.seconds * 1000);
+                dateStr = dateObj.toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                });
+            }
+
+            // تحديد لون السبب (Reason Color)
+            let reasonColor = "#ff6b6b"; // أحمر (Broken Link)
+            if (data.reason === "Outdated Content") reasonColor = "#feca57"; // أصفر
+            if (data.reason === "Other") reasonColor = "#54a0ff"; // أزرق
+
+            const row = `
+                <tr> 
+                    <td style="font-weight:500; color: var(--main-color);">
+                        ${data.deckTitle || "Unknown Deck"}
+                        <br><span style="font-size:10px; color:#777;">ID: ${
+                            data.deckId
+                        }</span>
+                    </td>
+                    <td>
+                        <span style="background:${reasonColor}; color:#fff; padding:3px 8px; border-radius:4px; font-size:12px;">
+                            ${data.reason}
+                        </span>
+                    </td>
+                    <td style="max-width: 300px; font-size: 0.9rem;">
+                        ${
+                            data.details ||
+                            "<em style='color:#777'>No details provided</em>"
+                        }
+                    </td>
+                    <td>
+                        ${data.reporterEmail || "Anonymous"}
+                    </td>
+                    <td>${dateStr}</td>
+                    <td>
+                        <button class="action-btn unhide-btn" onclick="window.resolveReport('${
+                            docSnap.id
+                        }')" title="Mark as Resolved (Delete)">
+                            Resolve <i class="fa-solid fa-check"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    } catch (error) {
+        console.error("Error loading reports:", error);
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error: ${error.message}</td></tr>`;
+    }
 }
 
-window.deleteNotif = async (id) => {
+// 3. حذف البلاغ (حل المشكلة)
+window.resolveReport = async (reportId) => {
     const isConfirmed = await window.showConfirm(
-        "Delete Notification?",
-        "Are you sure you want to delete this notification?",
+        "Resolve Report?",
+        "Did you fix the issue? This will remove the report permanently.",
         "warning"
     );
 
-    if (isConfirmed) {
-        await deleteDoc(doc(db, "general_notifications", id));
-        window.showModal("Deleted!", "Notification removed.", "success");
-        loadNotifs();
+    if (!isConfirmed) return;
+
+    try {
+        await deleteDoc(doc(db, "reports", reportId));
+        showModal("Resolved!", "Report has been removed.", "success");
+        loadReports(); // إعادة تحميل
+    } catch (error) {
+        console.error(error);
+        showModal("Error", error.message, "error");
     }
 };
 
-window.openEditNotif = (id, title, message) => {
-    document.getElementById("editNotifId").value = id;
-    document.getElementById("editTitle").value = title;
-    document.getElementById("editMessage").value = message;
-    document.getElementById("editNotifModal").classList.add("active");
-};
-
-window.closeEditModal = () => {
-    document.getElementById("editNotifModal").classList.remove("active");
-};
-
-document
-    .getElementById("editNotifForm")
-    .addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const id = document.getElementById("editNotifId").value;
-        await updateDoc(doc(db, "general_notifications", id), {
-            title: document.getElementById("editTitle").value,
-            message: document.getElementById("editMessage").value,
+// 4. البحث في الجدول
+const searchInput = document.getElementById("searchReportsInput");
+if (searchInput) {
+    searchInput.addEventListener("keyup", () => {
+        const val = searchInput.value.toLowerCase();
+        const rows = document.querySelectorAll("#reportsTableBody tr");
+        rows.forEach((row) => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(val) ? "" : "none";
         });
-        showModal(
-            "Updated!",
-            "The Notification Is Updated Successfully",
-            "success"
-        );
-        closeEditModal();
-        loadNotifs();
     });
+}
 
-document.addEventListener("DOMContentLoaded", loadNotifs);
+// تشغيل عند التحميل
+document.addEventListener("DOMContentLoaded", loadReports);
 
+// دالة المودل
 function showModal(title, message, type = "success") {
     const overlay = document.getElementById("customModal");
     const box = overlay.querySelector(".modal-box");
@@ -98,12 +147,10 @@ function showModal(title, message, type = "success") {
     const iconEl = document.getElementById("modalIconClass");
     const btn = document.getElementById("modalOkBtn");
 
-    // تعبئة البيانات
     titleEl.textContent = title;
     msgEl.textContent = message;
 
-    // تنسيق حسب النوع (نجاح أو خطأ)
-    box.className = "modal-box"; // reset classes
+    box.className = "modal-box";
     if (type === "success") {
         box.classList.add("success");
         iconEl.className = "fa-solid fa-check";
@@ -111,33 +158,8 @@ function showModal(title, message, type = "success") {
         box.classList.add("error");
         iconEl.className = "fa-solid fa-xmark";
     }
-
-    // إظهار المودل
     overlay.classList.add("active");
-
-    // إغلاق المودل عند الضغط
     btn.onclick = () => overlay.classList.remove("active");
-}
-
-// ==========================================
-// 4. منطق البحث في الجدول 🔍
-// ==========================================
-const searchInput = document.getElementById("searchNotifInput");
-
-if (searchInput) {
-    searchInput.addEventListener("keyup", function () {
-        const filter = searchInput.value.toLowerCase();
-        const rows = document.querySelectorAll("#notifTableBody tr");
-
-        rows.forEach((row) => {
-            const text = row.textContent.toLowerCase();
-            if (text.includes(filter)) {
-                row.style.display = "";
-            } else {
-                row.style.display = "none";
-            }
-        });
-    });
 }
 
 // 🔥🔥🔥 الدالة السحرية الجديدة (Confirm Modal) 🔥🔥🔥

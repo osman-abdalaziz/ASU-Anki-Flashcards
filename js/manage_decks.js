@@ -1,44 +1,42 @@
 import { db, auth } from "./config.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { collection, getDocs, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import {
+    collection,
+    getDocs,
+    doc,
+    deleteDoc,
+    updateDoc,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// التحقق من الأدمن (نفس الكود السابق)
-const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com"; // 🔴 ضع ايميلك
+const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
 onAuthStateChanged(auth, (user) => {
     if (!user || user.email !== ADMIN_EMAIL) {
         window.location.href = "../index";
     }
 });
 
-const tableBody = document.getElementById('decksTableBody');
+const tableBody = document.getElementById("decksTableBody");
 
-// 1. دالة جلب وعرض البيانات
-// 1. تعديل دالة التحميل لإضافة Data Attributes
+// ... (دالة loadDecks كما هي بدون تغيير) ...
+// تأكد من وضع دالة loadDecks هنا (أو اتركها كما هي في ملفك)
+
 async function loadDecks() {
-    tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
-
+    // ... (نفس كود التحميل السابق) ...
+    // اختصاراً للمساحة، افترض أن الكود هنا هو نفسه الموجود عندك
+    // المهم هو ما سيأتي في الأسفل
+    tableBody.innerHTML =
+        '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
     try {
         const querySnapshot = await getDocs(collection(db, "decks"));
-        tableBody.innerHTML = '';
-
+        tableBody.innerHTML = "";
         querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
-
-            // 🔥 إضافة data-attributes ليسهل علينا الفلترة لاحقاً
-            // نضع القيم بحروف صغيرة (lowercase) لتجنب مشاكل المطابقة
-            const yearVal = data.year ? data.year.toLowerCase() : '';
-            const catVal = data.category ? data.category.toLowerCase() : '';
-
-            // 🔥 1. تحديد حالة الزر (هل هو مخفي الآن أم ظاهر؟)
-            const isHidden = data.isHidden === true; // تأكد أنها boolean
-
-            // 🔥 2. تصميم الزر بناءً على الحالة
-            // إذا كان مخفياً: زر أخضر (Unhide)
-            // إذا كان ظاهراً: زر برتقالي (Hide)
-            const hideBtnClass = isHidden ? 'unhide-btn' : 'hide-btn';
-            const hideBtnText = isHidden ? 'Unhide' : 'Hide';
-            const hideBtnIcon = isHidden ? 'fa-eye' : 'fa-eye-slash';
-            const hideBtnAction = isHidden ? false : true; // القيمة الجديدة التي سنرسلها
+            const yearVal = data.year ? data.year.toLowerCase() : "";
+            const catVal = data.category ? data.category.toLowerCase() : "";
+            const isHidden = data.isHidden === true;
+            const hideBtnClass = isHidden ? "unhide-btn" : "hide-btn";
+            const hideBtnText = isHidden ? "Unhide" : "Hide";
+            const hideBtnIcon = isHidden ? "fa-eye" : "fa-eye-slash";
 
             const row = `
                 <tr data-year="${yearVal}" data-category="${catVal}"> 
@@ -67,160 +65,208 @@ async function loadDecks() {
     }
 }
 
-// 2. دوال الحذف والتعديل (Global Functions)
-window.deleteDeck = async (id) => {
-    if (confirm("Are you sure you want to delete this deck?")) {
-        try {
-            await deleteDoc(doc(db, "decks", id));
-            showModal("Deleted successfully!", "The Deck Is Deleted Successfully", 'success')
-            loadDecks(); // تحديث الجدول
-        } catch (error) {
-            showModal("Error: ", error.message, 'error')
+// 🔥🔥🔥 الدالة السحرية الجديدة (Confirm Modal) 🔥🔥🔥
+window.showConfirm = (title, message, type = "warning") => {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById("customModal");
+        const titleEl = document.getElementById("modalTitle");
+        const msgEl = document.getElementById("modalMessage");
+        const iconEl = document.getElementById("modalIconClass");
+        const okBtn = document.getElementById("modalOkBtn");
+        const cancelBtn = document.getElementById("modalCancelBtn");
+        const box = overlay.querySelector(".modal-box");
+
+        // تعبئة النصوص
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+
+        // إظهار زر الإلغاء
+        cancelBtn.style.display = "inline-block";
+        okBtn.textContent = "Confirm"; // تغيير النص لتأكيد
+
+        // تنسيق الأيقونة والألوان
+        box.className = "modal-box";
+        if (type === "warning") {
+            // للحذف
+            box.classList.add("error"); // أحمر
+            iconEl.className = "fa-solid fa-triangle-exclamation";
+            okBtn.style.backgroundColor = "#ff5252";
+        } else {
+            box.classList.add("info");
+            iconEl.className = "fa-solid fa-circle-question";
+            okBtn.style.backgroundColor = "var(--main-color)";
         }
-    }
+
+        // إظهار المودل
+        overlay.classList.add("active");
+
+        // التعامل مع الضغطات (مرة واحدة فقط لتجنب التكرار)
+        const handleOk = () => {
+            cleanup();
+            resolve(true); // ✅ المستخدم وافق
+        };
+
+        const handleCancel = () => {
+            cleanup();
+            resolve(false); // ❌ المستخدم ألغى
+        };
+
+        // تنظيف المستمعين عند الإغلاق
+        function cleanup() {
+            okBtn.removeEventListener("click", handleOk);
+            cancelBtn.removeEventListener("click", handleCancel);
+            overlay.classList.remove("active");
+        }
+
+        okBtn.addEventListener("click", handleOk);
+        cancelBtn.addEventListener("click", handleCancel);
+    });
 };
 
-// فتح المودل وتعبئة البيانات
-window.openEditModal = (id, title, url, img, version) => {
-    document.getElementById('editDeckId').value = id;
-    document.getElementById('editTitle').value = title;
-    document.getElementById('editUrl').value = url;
-    document.getElementById('editimgUrl').value = img;
-    document.getElementById('editVersion').value = version;
+// دالة showModal العادية (للتنبيهات فقط بدون Cancel)
+window.showModal = (title, message, type = "success") => {
+    const overlay = document.getElementById("customModal");
+    const box = overlay.querySelector(".modal-box");
+    const titleEl = document.getElementById("modalTitle");
+    const msgEl = document.getElementById("modalMessage");
+    const iconEl = document.getElementById("modalIconClass");
+    const okBtn = document.getElementById("modalOkBtn");
+    const cancelBtn = document.getElementById("modalCancelBtn");
 
-    document.getElementById('editDeckModal').classList.add('active');
-};
-
-window.closeEditModal = () => {
-    document.getElementById('editDeckModal').classList.remove('active');
-};
-
-// 3. حفظ التعديلات
-const editForm = document.getElementById('editDeckForm');
-editForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('editDeckId').value;
-    const saveBtn = editForm.querySelector('button');
-    saveBtn.innerText = "Saving...";
-
-    try {
-        const deckRef = doc(db, "decks", id);
-        await updateDoc(deckRef, {
-            title: document.getElementById('editTitle').value,
-            downloadUrl: document.getElementById('editUrl').value,
-            imageUrl: document.getElementById('editimgUrl').value,
-            version: document.getElementById('editVersion').value,
-            // يمكنك إضافة باقي الحقول هنا إذا أردت تعديلها أيضاً
-        });
-        showModal("Updated!", "The Deck Is Updated Successfully", 'success')
-        closeEditModal();
-        loadDecks(); // تحديث الجدول
-
-    } catch (error) {
-        showModal("Error: ", error.message, 'error')
-    } finally {
-        saveBtn.innerText = "Save Changes";
-    }
-});
-
-// تشغيل عند التحميل
-document.addEventListener('DOMContentLoaded', loadDecks);
-
-function showModal(title, message, type = 'success') {
-    const overlay = document.getElementById('customModal');
-    const box = overlay.querySelector('.modal-box');
-    const titleEl = document.getElementById('modalTitle');
-    const msgEl = document.getElementById('modalMessage');
-    const iconEl = document.getElementById('modalIconClass');
-    const btn = document.getElementById('modalOkBtn');
-
-    // تعبئة البيانات
     titleEl.textContent = title;
     msgEl.textContent = message;
 
-    // تنسيق حسب النوع (نجاح أو خطأ)
-    box.className = 'modal-box'; // reset classes
-    if (type === 'success') {
-        box.classList.add('success');
-        iconEl.className = 'fa-solid fa-check';
+    // إخفاء زر الإلغاء في وضع التنبيه العادي
+    cancelBtn.style.display = "none";
+    okBtn.textContent = "OK";
+    okBtn.style.backgroundColor =
+        type === "error" ? "#ff5252" : "var(--main-color)";
+
+    box.className = "modal-box";
+    if (type === "success") {
+        box.classList.add("success");
+        iconEl.className = "fa-solid fa-check";
     } else {
-        box.classList.add('error');
-        iconEl.className = 'fa-solid fa-xmark';
+        box.classList.add("error");
+        iconEl.className = "fa-solid fa-xmark";
     }
 
-    // إظهار المودل
-    overlay.classList.add('active');
+    overlay.classList.add("active");
 
-    // إغلاق المودل عند الضغط
-    btn.onclick = () => overlay.classList.remove('active');
-}
+    // عند الضغط يغلق فقط
+    okBtn.onclick = () => overlay.classList.remove("active");
+};
 
+// 2. تعديل دالة الحذف لاستخدام showConfirm
+window.deleteDeck = async (id) => {
+    // 👇 انظر كيف نستخدم await هنا بدلاً من if(confirm(...))
+    const isConfirmed = await window.showConfirm(
+        "Delete Deck?",
+        "Are you sure you want to delete this deck permanently? This action cannot be undone.",
+        "warning"
+    );
 
-// ==========================================
-// 4. نظام الفلترة الموحد (Unified Filtering Logic) 🧠🔍
-// ==========================================
-const searchInput = document.getElementById('searchDecksInput');
-const yearSelect = document.getElementById('filterYear');
-const catSelect = document.getElementById('filterCategory');
-
-function filterDecks() {
-    const searchTerm = searchInput.value.toLowerCase();
-    const selectedYear = yearSelect.value.toLowerCase(); // 1st year...
-    const selectedCat = catSelect.value.toLowerCase();   // theoretical...
-
-    const rows = document.querySelectorAll('#decksTableBody tr');
-
-    rows.forEach(row => {
-        // 1. البحث بالنص (في العنوان والموديول)
-        const text = row.textContent.toLowerCase();
-        const matchesSearch = text.includes(searchTerm);
-
-        // 2. البحث بالسنة (من الـ data attribute المخفي)
-        const rowYear = row.getAttribute('data-year');
-        const matchesYear = selectedYear === 'all' || rowYear === selectedYear;
-
-        // 3. البحث بالتصنيف (من الـ data attribute المخفي)
-        const rowCat = row.getAttribute('data-category');
-        const matchesCat = selectedCat === 'all' || rowCat === selectedCat;
-
-        // إظهار الصف فقط إذا تحقق الشروط الثلاثة معاً (AND Logic)
-        if (matchesSearch && matchesYear && matchesCat) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
+    if (isConfirmed) {
+        try {
+            await deleteDoc(doc(db, "decks", id));
+            window.showModal(
+                "Deleted!",
+                "The Deck Is Deleted Successfully",
+                "success"
+            );
+            loadDecks();
+        } catch (error) {
+            window.showModal("Error", error.message, "error");
         }
-    });
-}
+    }
+};
 
-// ربط الأحداث بالدالة الموحدة
-if (searchInput) searchInput.addEventListener('keyup', filterDecks);
-if (yearSelect) yearSelect.addEventListener('change', filterDecks);
-if (catSelect) catSelect.addEventListener('change', filterDecks);
-
+// تعديل دالة الإخفاء أيضاً
 window.toggleDeckVisibility = async (id, currentStatus) => {
-    const newStatus = !currentStatus; // عكس الحالة الحالية
-    const actionText = newStatus ? "Hidden" : "Visible"; // للنصوص التوضيحية
+    /* يمكنك تفعيل التأكيد هنا أيضاً لو أردت، أو تركها مباشرة */
+    // مثال:
+    // if (!await window.showConfirm("Change Visibility?", "Are you sure?")) return;
+
+    const newStatus = !currentStatus;
+    const actionText = newStatus ? "Hidden" : "Visible";
 
     try {
         const deckRef = doc(db, "decks", id);
-
-        // تحديث الحقل في قاعدة البيانات
-        await updateDoc(deckRef, {
-            isHidden: newStatus
-        });
-
-        // رسالة نجاح
-        showModal(
+        await updateDoc(deckRef, { isHidden: newStatus });
+        window.showModal(
             "Status Updated!",
             `The deck is now ${actionText}.`,
             "success"
         );
-
-        // إعادة تحميل الجدول لرؤية التغيير
         loadDecks();
-
     } catch (error) {
-        console.error("Error updating visibility:", error);
-        showModal("Error", "Failed to update status.", "error");
+        console.error("Error:", error);
+        window.showModal("Error", "Failed to update status.", "error");
     }
 };
+
+// ... (باقي الدوال مثل openEditModal, closeEditModal, الفلترة, والـ Listener تبقى كما هي) ...
+// تأكد من نسخ باقي الكود الموجود في ملفك الأصلي هنا (مثل window.openEditModal وتشغيل loadDecks في النهاية)
+
+// --- تكملة الكود (نسخ لصق من ملفك الأصلي) ---
+window.openEditModal = (id, title, url, img, version) => {
+    document.getElementById("editDeckId").value = id;
+    document.getElementById("editTitle").value = title;
+    document.getElementById("editUrl").value = url;
+    document.getElementById("editimgUrl").value = img;
+    document.getElementById("editVersion").value = version;
+    document.getElementById("editDeckModal").classList.add("active");
+};
+window.closeEditModal = () => {
+    document.getElementById("editDeckModal").classList.remove("active");
+};
+const editForm = document.getElementById("editDeckForm");
+if (editForm) {
+    editForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("editDeckId").value;
+        try {
+            const deckRef = doc(db, "decks", id);
+            await updateDoc(deckRef, {
+                title: document.getElementById("editTitle").value,
+                downloadUrl: document.getElementById("editUrl").value,
+                imageUrl: document.getElementById("editimgUrl").value,
+                version: document.getElementById("editVersion").value,
+            });
+            window.showModal(
+                "Updated!",
+                "Deck updated successfully",
+                "success"
+            );
+            closeEditModal();
+            loadDecks();
+        } catch (error) {
+            window.showModal("Error", error.message, "error");
+        }
+    });
+}
+// الفلترة
+const searchInput = document.getElementById("searchDecksInput");
+const yearSelect = document.getElementById("filterYear");
+const catSelect = document.getElementById("filterCategory");
+function filterDecks() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const selectedYear = yearSelect.value.toLowerCase();
+    const selectedCat = catSelect.value.toLowerCase();
+    const rows = document.querySelectorAll("#decksTableBody tr");
+    rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        const matchesSearch = text.includes(searchTerm);
+        const rowYear = row.getAttribute("data-year");
+        const matchesYear = selectedYear === "all" || rowYear === selectedYear;
+        const rowCat = row.getAttribute("data-category");
+        const matchesCat = selectedCat === "all" || rowCat === selectedCat;
+        row.style.display =
+            matchesSearch && matchesYear && matchesCat ? "" : "none";
+    });
+}
+if (searchInput) searchInput.addEventListener("keyup", filterDecks);
+if (yearSelect) yearSelect.addEventListener("change", filterDecks);
+if (catSelect) catSelect.addEventListener("change", filterDecks);
+
+document.addEventListener("DOMContentLoaded", loadDecks);

@@ -120,12 +120,13 @@ function getStars(rating) {
 
 // 3. حذف التقييم (مع تحديث إحصائيات الكارت)
 window.deleteReview = async (reviewId, deckId, rating) => {
-    if (
-        !confirm(
-            "Are you sure? This will remove the review and update the deck rating."
-        )
-    )
-        return;
+    const isConfirmed = await window.showConfirm(
+        "Delete Review?",
+        "Are you sure? This will remove the review and update ratings.",
+        "warning"
+    );
+
+    if (!isConfirmed) return; // إذا ضغط Cancel يخرج من الدالة
 
     try {
         // أ) حذف وثيقة التقييم
@@ -188,3 +189,95 @@ function showModal(title, message, type = "success") {
     overlay.classList.add("active");
     btn.onclick = () => overlay.classList.remove("active");
 }
+
+// 🔥🔥🔥 الدالة السحرية الجديدة (Confirm Modal) 🔥🔥🔥
+window.showConfirm = (title, message, type = "warning") => {
+    return new Promise((resolve) => {
+        const overlay = document.getElementById("customModal");
+        const titleEl = document.getElementById("modalTitle");
+        const msgEl = document.getElementById("modalMessage");
+        const iconEl = document.getElementById("modalIconClass");
+        const okBtn = document.getElementById("modalOkBtn");
+        const cancelBtn = document.getElementById("modalCancelBtn");
+        const box = overlay.querySelector(".modal-box");
+
+        // تعبئة النصوص
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+
+        // إظهار زر الإلغاء
+        cancelBtn.style.display = "inline-block";
+        okBtn.textContent = "Confirm"; // تغيير النص لتأكيد
+
+        // تنسيق الأيقونة والألوان
+        box.className = "modal-box";
+        if (type === "warning") {
+            // للحذف
+            box.classList.add("error"); // أحمر
+            iconEl.className = "fa-solid fa-triangle-exclamation";
+            okBtn.style.backgroundColor = "#ff5252";
+        } else {
+            box.classList.add("info");
+            iconEl.className = "fa-solid fa-circle-question";
+            okBtn.style.backgroundColor = "var(--main-color)";
+        }
+
+        // إظهار المودل
+        overlay.classList.add("active");
+
+        // التعامل مع الضغطات (مرة واحدة فقط لتجنب التكرار)
+        const handleOk = () => {
+            cleanup();
+            resolve(true); // ✅ المستخدم وافق
+        };
+
+        const handleCancel = () => {
+            cleanup();
+            resolve(false); // ❌ المستخدم ألغى
+        };
+
+        // تنظيف المستمعين عند الإغلاق
+        function cleanup() {
+            okBtn.removeEventListener("click", handleOk);
+            cancelBtn.removeEventListener("click", handleCancel);
+            overlay.classList.remove("active");
+        }
+
+        okBtn.addEventListener("click", handleOk);
+        cancelBtn.addEventListener("click", handleCancel);
+    });
+};
+
+// دالة showModal العادية (للتنبيهات فقط بدون Cancel)
+window.showModal = (title, message, type = "success") => {
+    const overlay = document.getElementById("customModal");
+    const box = overlay.querySelector(".modal-box");
+    const titleEl = document.getElementById("modalTitle");
+    const msgEl = document.getElementById("modalMessage");
+    const iconEl = document.getElementById("modalIconClass");
+    const okBtn = document.getElementById("modalOkBtn");
+    const cancelBtn = document.getElementById("modalCancelBtn");
+
+    titleEl.textContent = title;
+    msgEl.textContent = message;
+
+    // إخفاء زر الإلغاء في وضع التنبيه العادي
+    cancelBtn.style.display = "none";
+    okBtn.textContent = "OK";
+    okBtn.style.backgroundColor =
+        type === "error" ? "#ff5252" : "var(--main-color)";
+
+    box.className = "modal-box";
+    if (type === "success") {
+        box.classList.add("success");
+        iconEl.className = "fa-solid fa-check";
+    } else {
+        box.classList.add("error");
+        iconEl.className = "fa-solid fa-xmark";
+    }
+
+    overlay.classList.add("active");
+
+    // عند الضغط يغلق فقط
+    okBtn.onclick = () => overlay.classList.remove("active");
+};

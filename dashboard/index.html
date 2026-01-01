@@ -16,13 +16,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="../css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com">
+    <link rel="preconnect" href="https://www.googleapis.com">
 </head>
 
 <body>
     <main class="dashboard-container">
         <aside>
             <div class="admin-logo">
-                <a href="../index.html"><img src="../images/logo.png" alt="" /></a>
+                <a href="../index.html"><img src="../images/logo.webp" alt="" /></a>
             </div>
             <ul class="admin-nav">
                 <li>
@@ -35,6 +39,7 @@
                     <a href="manage_decks.html" class=""><i class="fa-solid fa-box fa-fw"></i> Decks
                         Table</a>
                     <a href="reviews.html"><i class="fa-solid fa-star fa-fw"></i> Reviews & Ratings</a>
+                    <a href="reports.html"><i class="fa-solid fa-flag fa-fw"></i> Reports & Issues</a>
                 </div>
 
                 <li>
@@ -167,7 +172,7 @@
                     <p>
                         Made With <i class="fa-solid fa-heart fa-fw"></i> By
                         <a href="https://osmanabdalaziz-portfolio.netlify.app/" target="_blank"><img
-                                src="../images/mylogo_white.png" alt="" /></a>
+                                src="../images/mylogo_white.webp" alt="" /></a>
                     </p>
                 </div>
             </footer>
@@ -175,12 +180,15 @@
     </main>
     <div id="customModal" class="modal-overlay">
         <div class="modal-box">
-            <div class="modal-icon">
-                <i id="modalIconClass" class="fa-solid fa-check"></i>
+            <div class="modal-icon"><i id="modalIconClass" class="fa-solid fa-check"></i></div>
+            <h3 id="modalTitle">Title</h3>
+            <p id="modalMessage">Message goes here.</p>
+
+            <div class="modal-actions" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button id="modalCancelBtn" class="action-btn"
+                    style="background: transparent; border: 1px solid var(--text-color); color: var(--text-color); display: none;">Cancel</button>
+                <button id="modalOkBtn" class="main-btn" style="width: auto; min-width: 100px;">OK</button>
             </div>
-            <h3 id="modalTitle">Success!</h3>
-            <p id="modalMessage">Operation completed successfully.</p>
-            <button id="modalOkBtn">OK</button>
         </div>
     </div>
     <script type="module" src="../js/admin.js"></script>

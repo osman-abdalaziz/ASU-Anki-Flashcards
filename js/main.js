@@ -407,36 +407,41 @@ document.addEventListener("DOMContentLoaded", () => {
     const categorySelect = document.getElementById("categorySelect");
     const yearSelect = document.getElementById("yearSelect");
     const resetBtn = document.getElementById("resetFiltersBtn");
+    const moduleSelect = document.getElementById("filterModule"); // تأكد من الـ ID في HTML
 
-    // دالة تجمع القيم الحالية وترسلها للفلترة
+    // متغير للتأخير (Debounce)
+    let searchTimeout;
+
     function performFilter() {
-        const text = searchInput.value;
-        const cat = categorySelect.value; // 'all', 'theoretical', 'practical'
-        const yr = yearSelect.value; // 'all', '1st Year', ...
-
-        filterFlashcards(text, cat, yr);
+        // نطلب إعادة التحميل من البداية (false)، والدالة في db.js ستكتشف وجود نص بحث وتتصرف
+        import("./db.js").then(({ loadFlashcards }) => {
+            loadFlashcards(false);
+        });
     }
 
-    // الاستماع للأحداث (Live Search)
+    // 1. البحث مع تأخير (Debounce) لتقليل القراءات من السيرفر
     if (searchInput) {
-        searchInput.addEventListener("input", performFilter); // يعمل عند كل حرف يُكتب
-    }
-    if (categorySelect) {
-        categorySelect.addEventListener("change", performFilter);
-    }
-    if (yearSelect) {
-        yearSelect.addEventListener("change", performFilter);
+        searchInput.addEventListener("input", () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                performFilter();
+            }, 600); // ينتظر 0.6 ثانية بعد التوقف عن الكتابة قبل البحث
+        });
     }
 
-    // زر إعادة التعيين (Reset)
+    // 2. الفلاتر تعمل فوراً
+    if (categorySelect)
+        categorySelect.addEventListener("change", performFilter);
+    if (yearSelect) yearSelect.addEventListener("change", performFilter);
+    if (moduleSelect) moduleSelect.addEventListener("change", performFilter); // لو عندك فلتر للمواد
+
+    // 3. زر إعادة التعيين
     if (resetBtn) {
         resetBtn.addEventListener("click", () => {
-            // 1. تصفير الحقول في الواجهة
             searchInput.value = "";
             categorySelect.value = "all";
             yearSelect.value = "all";
-
-            // 2. تطبيق الفلتر (سيعيد كل شيء لأن القيم أصبحت 'all')
+            if (moduleSelect) moduleSelect.value = "all";
             performFilter();
         });
     }
@@ -636,6 +641,78 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.disabled = false;
         });
     }
+    // --- Report System Logic ---
+    const reportModal = document.getElementById("reportModal");
+    const closeReportBtn = document.getElementById("closeReportModal");
+    const reportForm = document.getElementById("reportForm");
+
+    // 1. فتح المودال
+    window.openReportModal = (deckId, deckTitle) => {
+        document.getElementById("reportDeckId").value = deckId;
+        document.getElementById("reportDeckTitle").value = deckTitle;
+        // تصفير الحقول
+        document.getElementById("reportReason").value = "Broken Link";
+        document.getElementById("reportDetails").value = "";
+
+        if (reportModal) {
+            reportModal.style.display = "flex";
+            setTimeout(() => (reportModal.style.opacity = "1"), 10);
+        }
+    };
+
+    // 2. إغلاق المودال
+    if (closeReportBtn) {
+        closeReportBtn.addEventListener("click", () => {
+            if (reportModal) {
+                reportModal.style.opacity = "0";
+                setTimeout(() => (reportModal.style.display = "none"), 300);
+            }
+        });
+    }
+
+    // 3. إرسال البلاغ
+    if (reportForm) {
+        reportForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const btn = reportForm.querySelector('button[type="submit"]');
+            const originalText = btn.innerText;
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+
+            const deckId = document.getElementById("reportDeckId").value;
+            const deckTitle = document.getElementById("reportDeckTitle").value;
+            const reason = document.getElementById("reportReason").value;
+            const details = document.getElementById("reportDetails").value;
+
+            // استيراد الدالة ديناميكياً
+            const { submitReport } = await import("./db.js");
+            const success = await submitReport(
+                deckId,
+                deckTitle,
+                reason,
+                details
+            );
+
+            if (success) {
+                reportModal.style.display = "none";
+                showModal(
+                    "Report Sent",
+                    "Thanks for letting us know! We will check it soon.",
+                    "success"
+                );
+            } else {
+                showModal(
+                    "Error",
+                    "Could not send report. Try again.",
+                    "error"
+                );
+            }
+
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+    }
 });
 
 window.markGeneralAsRead = function (notifId) {
@@ -643,3 +720,11 @@ window.markGeneralAsRead = function (notifId) {
         module.markGeneralAsRead(notifId);
     });
 };
+
+const loadMoreBtn = document.getElementById("loadMoreBtn");
+if (loadMoreBtn) {
+    loadMoreBtn.addEventListener("click", () => {
+        // نرسل true لأننا نريد تحميل المزيد
+        loadFlashcards(true);
+    });
+}

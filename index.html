@@ -8,7 +8,7 @@
     <meta property="og:title" content="ASU Anki Flashcards" />
     <meta property="og:description"
         content="The ultimate platform for ASU medical students. Browse, download, and track Anki decks for all academic years and modules in one place." />
-    <meta property="og:image" content="https://i.ibb.co/kgNrJm8N/preveiw.png" />
+    <meta property="og:image" content="https://i.ibb.co/kgNrJm8N/preveiw.webp" />
 
     <meta property="og:url" content="https://asu-anki.netlify.app/" />
     <meta property="og:type" content="website" />
@@ -25,16 +25,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firestore.googleapis.com">
+    <link rel="preconnect" href="https://www.googleapis.com">
 </head>
 
 <body>
     <span itemprop="image" itemscope itemtype="image/png">
-        <link itemprop="url" href="https://i.ibb.co/kgNrJm8N/preveiw.png" />
+        <link itemprop="url" href="https://i.ibb.co/kgNrJm8N/preveiw.webp" />
     </span>
     <nav>
         <div class="container">
             <div class="left-component">
-                <img src="images/logo.png" alt="ASU | Anki flashcards" />
+                <img src="images/logo.webp" alt="ASU | Anki flashcards" />
                 <div class="links">
                     <ul>
                         <li>
@@ -144,7 +148,7 @@
                 </div>
 
                 <div class="mobile-links">
-                    <div class="logo"><img src="images/logo.png" alt=""></div>
+                    <div class="logo"><img src="images/logo.webp" alt=""></div>
                     <ul>
                         <li class="active">
                             <a href="index.html">Browse Flashcards</a>
@@ -241,6 +245,18 @@
                 <!-- Flashcards will be dynamically inserted here -->
 
             </div>
+            <section class="flashcards-section">
+                <div class="container">
+                    <div id="flashcardsGrid" class="grid-container">
+                    </div>
+
+                    <div style="text-align: center; margin-top: 30px;" class="load-btn">
+                        <button id="loadMoreBtn" style="display: none;">
+                            Load More <i class="fa-solid fa-angles-down fa-fw"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -250,7 +266,7 @@
             <p>
                 Made With <i class="fa-solid fa-heart fa-fw"></i> By
                 <a href="https://osmanabdalaziz-portfolio.netlify.app/" target="_blank"><img
-                        src="images/mylogo_white.png" alt="" /></a>
+                        src="images/mylogo_white.webp" alt="" /></a>
             </p>
         </div>
     </footer>
@@ -291,6 +307,44 @@
             </label>
 
             <button id="submitReviewBtn" class="main-btn" style="width: 100%; margin-top: 15px;">Submit Review</button>
+        </div>
+    </div>
+    <div id="reportModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header"
+                style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; color: #ff6b6b;">Report Issue 🚩</h3>
+                <button class="close-modal" id="closeReportModal"
+                    style="background:none; border:none; font-size: 24px; cursor: pointer; color: var(--text-color);">&times;</button>
+            </div>
+
+            <p style="text-align: left; margin-bottom: 10px; font-size: 0.9rem;">What is the issue with this deck?</p>
+
+            <form id="reportForm">
+                <input type="hidden" id="reportDeckId">
+                <input type="hidden" id="reportDeckTitle">
+
+                <div class="filters" style="margin: 0 0 15px 0; display: block;">
+                    <select id="reportReason"
+                        style="width: 100%; padding: 10px; border-radius: 8px; background: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border);">
+                        <option value="Broken Link">Broken Link (Download doesn't work)</option>
+                        <option value="Outdated Content">Outdated Content</option>
+                        <option value="Wrong Information">Wrong Information</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <label class="field" style="text-align: left;">
+                    <span class="field-label">Details (Optional)</span>
+                    <div class="input-wrap">
+                        <textarea id="reportDetails" rows="3" placeholder="Please describe the issue..."
+                            style="width: 100%; padding: 10px; border-radius: 10px; background: var(--input-bg); color: var(--input-text); border: 1px solid var(--input-border); resize: none;"></textarea>
+                    </div>
+                </label>
+
+                <button type="submit" class="main-btn"
+                    style="width: 100%; margin-top: 10px; background-color: #ff6b6b;">Submit Report</button>
+            </form>
         </div>
     </div>
     <script src="js/theme.js"></script>

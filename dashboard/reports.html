@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin | Reviews Management</title>
+    <title>Admin | Reports Management</title>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
@@ -31,11 +31,9 @@
                 <div id="decksDrop" class="decksDrop active">
                     <a href="index.html"><i class="fa-solid fa-plus fa-fw"></i> Add New Deck</a>
                     <a href="manage_decks.html"><i class="fa-solid fa-box fa-fw"></i> Decks Table</a>
-                    <a href="reviews.html" class="active"><i class="fa-solid fa-star fa-fw "></i> Reviews & Ratings</a>
-                    <a href="reports.html"><i class="fa-solid fa-flag fa-fw"></i> Reports & Issues</a>
+                    <a href="reviews.html"><i class="fa-solid fa-star fa-fw"></i> Reviews & Ratings</a>
+                    <a href="reports.html" class="active"><i class="fa-solid fa-flag fa-fw"></i> Reports & Issues</a>
                 </div>
-
-
 
                 <li>
                     <a id="notiDropbtn" href="#" class="notiDropar"><i class="fa-solid fa-angle-down fa-fw"></i>
@@ -52,8 +50,8 @@
         <section class="dashboard-main">
             <nav>
                 <div class="search">
-                    <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
-                    <input type="text" id="searchInput" placeholder="Search reviews..." />
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Search reports..." />
                 </div>
                 <div class="nav-actions">
                     <div class="userProfile-header">
@@ -67,12 +65,11 @@
 
             <div class="dashboard-content">
                 <div class="container">
-                    <h1 class="dashboard-title">Reviews <span>Management</span></h1>
+                    <h1 class="dashboard-title">Reports <span>Management</span></h1>
 
                     <div class="search" style="max-width: 100% !important; margin-bottom: 20px;">
                         <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input type="text" id="searchReviewsInput"
-                            placeholder="Search by deck name, user, or comment...">
+                        <input type="text" id="searchReportsInput" placeholder="Search by deck, reason, or details...">
                     </div>
 
                     <div class="table-container">
@@ -80,14 +77,14 @@
                             <thead>
                                 <tr>
                                     <th>Deck Title</th>
-                                    <th>User Name</th>
-                                    <th>Rating</th>
-                                    <th>Comment</th>
+                                    <th>Issue Reason</th>
+                                    <th>Details</th>
+                                    <th>Reporter</th>
                                     <th>Date</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="reviewsTableBody">
+                            <tbody id="reportsTableBody">
                             </tbody>
                         </table>
                     </div>
@@ -116,8 +113,8 @@
         </div>
     </div>
 
+    <script type="module" src="../js/manage_reports.js"></script>
     <script type="module" src="../js/main.js"></script>
-    <script type="module" src="../js/manage_reviews.js"></script>
 </body>
 
 </html>
