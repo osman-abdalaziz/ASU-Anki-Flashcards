@@ -212,10 +212,8 @@ function renderCards(cardsList, shouldAppend = false) {
                     <div style="cursor: pointer; padding: 5px;" onclick="window.openReportModal('${
                         data.id
                     }', '${title}')">
-                         <i class="fa-solid fa-flag" 
-                            style="font-size: 14px; color: #b33939; transition: 0.2s;" 
-                            onmouseover="this.style.color='#ff5252'" 
-                            onmouseout="this.style.color='#b33939'"></i>
+                         <i class="fa-solid fa-flag report-btn" 
+                            style="font-size: 14px; "></i>
                     </div>
                 </div>
 

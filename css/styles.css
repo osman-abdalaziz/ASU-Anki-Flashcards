@@ -2082,16 +2082,24 @@ footer p a {
 }
 
 .star-rating-input i {
-    color: #ddd; /* اللون الافتراضي (رمادي) */
-    transition: color 0.2s, transform 0.2s;
+    color: #ddd;
     cursor: pointer;
     font-size: 2rem;
+    transition: 0.3s ease;
+    -webkit-transition: 0.3s ease;
+    -moz-transition: 0.3s ease;
+    -ms-transition: 0.3s ease;
+    -o-transition: 0.3s ease;
 }
 
 /* هذا الكلاس يضيفه الجافاسكريبت للنجمة المختارة وما قبلها */
 .star-rating-input i.active {
-    color: #ffb142; /* ذهبي */
-    transform: scale(1.1); /* تكبير بسيط عند التحديد */
+    color: #ffb142;
+    transform: scale(1.075);
+    -webkit-transform: scale(1.075);
+    -moz-transform: scale(1.075);
+    -ms-transform: scale(1.075);
+    -o-transform: scale(1.075);
 }
 
 /* ❌ تنبيه هام: تأكد أنك حذفت الكود القديم الذي يحتوي على:
@@ -2124,15 +2132,15 @@ footer p a {
 }
 
 .load-btn button {
-    padding: 8px 30px;
+    padding: 6px 30px;
     background-color: transparent;
     border: 2px solid var(--text-color);
     color: var(--text-color);
-    border-radius: 100px;
-    -webkit-border-radius: 100px;
-    -moz-border-radius: 100px;
-    -ms-border-radius: 100px;
-    -o-border-radius: 100px;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
     font-size: 14px;
     transition: 0.3s ease;
     -webkit-transition: 0.3s ease;
@@ -2145,4 +2153,24 @@ footer p a {
 .load-btn button:hover {
     background-color: var(--text-color);
     color: var(--sec-background-color);
+}
+
+.report-btn {
+    color: #b33939;
+    transition: 0.3s ease;
+    -webkit-transition: 0.3s ease;
+    -moz-transition: 0.3s ease;
+    -ms-transition: 0.3s ease;
+    -o-transition: 0.3s ease;
+}
+
+.report-btn:hover {
+    color: #ff5252;
+}
+
+html[data-theme="light"] .report-btn {
+    color: #ff5252 !important;
+}
+html[data-theme="light"] .report-btn:hover {
+    color: #b33939 !important;
 }
