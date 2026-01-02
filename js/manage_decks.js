@@ -6,6 +6,7 @@ import {
     doc,
     deleteDoc,
     updateDoc,
+    serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
@@ -36,6 +37,10 @@ async function loadDecks() {
         }
         querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
+
+            // 🔥 شرط جديد: لو الملف محذوف (Soft Delete)، لا تظهره في الجدول
+            if (data.isDeleted === true) return;
+
             const yearVal = data.year ? data.year.toLowerCase() : "";
             const catVal = data.category ? data.category.toLowerCase() : "";
             const isHidden = data.isHidden === true;
@@ -164,22 +169,29 @@ window.showModal = (title, message, type = "success") => {
 
 // 2. تعديل دالة الحذف لاستخدام showConfirm
 window.deleteDeck = async (id) => {
-    // 👇 انظر كيف نستخدم await هنا بدلاً من if(confirm(...))
     const isConfirmed = await window.showConfirm(
         "Delete Deck?",
-        "Are you sure you want to delete this deck permanently? This action cannot be undone.",
+        "Are you sure you want to delete this deck? Users will lose access to it immediately.",
         "warning"
     );
 
     if (isConfirmed) {
         try {
-            await deleteDoc(doc(db, "decks", id));
+            // ❌ القديم: كان يحذف الملف نهائياً فلا يراه السيرفر
+            // await deleteDoc(doc(db, "decks", id));
+
+            // ✅ الجديد (Soft Delete): نضع علامة ونحدث التاريخ ليراه الطلاب
+            await updateDoc(doc(db, "decks", id), {
+                isDeleted: true,
+                updatedAt: serverTimestamp(), // هذا الجرس اللي هيصحي جهاز الطالب
+            });
+
             window.showModal(
                 "Deleted!",
-                "The Deck Is Deleted Successfully",
+                "The Deck has been removed successfully.",
                 "success"
             );
-            loadDecks();
+            loadDecks(); // إعادة تحميل الجدول لإخفاء الكارت
         } catch (error) {
             window.showModal("Error", error.message, "error");
         }
@@ -188,8 +200,7 @@ window.deleteDeck = async (id) => {
 
 // تعديل دالة الإخفاء أيضاً
 window.toggleDeckVisibility = async (id, currentStatus) => {
-    /* يمكنك تفعيل التأكيد هنا أيضاً لو أردت، أو تركها مباشرة */
-    // مثال:
+    // تأكيد اختياري (يمكنك تفعيله لو أردت)
     // if (!await window.showConfirm("Change Visibility?", "Are you sure?")) return;
 
     const newStatus = !currentStatus;
@@ -197,7 +208,13 @@ window.toggleDeckVisibility = async (id, currentStatus) => {
 
     try {
         const deckRef = doc(db, "decks", id);
-        await updateDoc(deckRef, { isHidden: newStatus });
+
+        // 🔥 التعديل هنا: نحدث التاريخ أيضاً ليراه الطلاب 🔥
+        await updateDoc(deckRef, {
+            isHidden: newStatus,
+            updatedAt: serverTimestamp(),
+        });
+
         window.showModal(
             "Status Updated!",
             `The deck is now ${actionText}.`,
@@ -237,6 +254,7 @@ if (editForm) {
                 downloadUrl: document.getElementById("editUrl").value,
                 imageUrl: document.getElementById("editimgUrl").value,
                 version: document.getElementById("editVersion").value,
+                updatedAt: serverTimestamp(), // 🔥🔥🔥 هذا هو السطر السحري الجديد
             });
             window.showModal(
                 "Updated!",

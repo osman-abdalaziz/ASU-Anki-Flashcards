@@ -5,6 +5,7 @@ import {
     collection,
     doc,
     setDoc,
+    serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // 🔴 هام: ضع إيميلك هنا (نفس الإيميل الموجود في قواعد الأمان)
@@ -80,7 +81,7 @@ function setupDeckForm() {
             }
 
             // --- 2. تجهيز البيانات ---
-            const title = getVal("title"); // حفظ العنوان لاستخدامه في الـ ID
+            const title = getVal("title"); // حفظ العنوان
 
             const deckData = {
                 title: title,
@@ -93,7 +94,8 @@ function setupDeckForm() {
                 category: getVal("category"),
                 version: getVal("version") || "v1.0",
                 lastUpdate: formattedDate, // التاريخ المنسق
-                createdAt: new Date(), // للتريب الداخلي
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(), // ليظهر في التحديثات
                 isHidden: false,
             };
 
@@ -102,14 +104,19 @@ function setupDeckForm() {
                 throw new Error("Title and Download URL are required!");
             }
 
-            // --- 3. توليد الـ ID تلقائياً (Auto-generate ID) ---
-            // تحويل العنوان إلى صيغة ID (مثلاً: "CNS Module" -> "cns-module")
-            const generatedId = title.toLowerCase().trim().replace(/\s+/g, "-");
+            // --- 3. توليد الـ ID المميز (Generated ID) ---
+            // أ) تنظيف العنوان (مسافات -> شرطة)
+            const cleanTitle = title.toLowerCase().trim().replace(/\s+/g, "-");
+
+            // ب) توليد كود عشوائي قصير (6 حروف وأرقام) لمنع التشابه
+            const randomCode = Math.random().toString(36).substring(2, 8);
+
+            // ج) الـ ID النهائي: title-randomCode
+            const generatedId = `${cleanTitle}-${randomCode}`;
 
             console.log("Saving Doc with ID:", generatedId);
 
             // --- 4. الحفظ في فايربيس ---
-            // نستخدم setDoc بدلاً من addDoc لنحدد الـ ID بأنفسنا
             await setDoc(doc(db, "decks", generatedId), deckData);
 
             // رسالة النجاح

@@ -11,156 +11,268 @@ import {
     serverTimestamp,
     limit,
     where,
-    startAfter, // ✅ تم إضافة الاستيراد الناقص
+    Timestamp,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { auth, db } from "./config.js";
 
-// مفاتيح التخزين في متصفح الطالب
+// ==========================================
+// مفاتيح التخزين (Caching Keys)
+// ==========================================
 const DOWNLOADS_KEY = "asu_anki_downloads";
 const READ_NOTIFS_KEY = "asu_anki_read_general";
+const CACHED_DECKS_KEY = "asu_anki_cached_decks_v1"; // 📦 مخزن الكروت
+const CACHED_NOTIFS_KEY = "asu_anki_cached_notifs_v1"; // 📦 مخزن الإشعارات
+const LAST_SYNC_KEY = "asu_anki_last_sync_timestamp"; // 🕒 وقت آخر مزامنة ناجحة
 
 // ==========================================
 // 1. المتغيرات العامة (Global Variables)
 // ==========================================
-let allFlashcards = []; // لتخزين كل البيانات المحملة (لأجل الفلترة والإشعارات)
-let lastVisibleDoc = null; // لتخزين أخر كارت وصلنا له (لأجل Load More)
-const BATCH_SIZE = 8; // عدد الكروت في كل دفعة
+let allFlashcards = [];
+let currentDisplayCount = 0;
+const BATCH_SIZE = 8;
 
 // ==========================================
-// 2. دالة تحميل الكروت (Load Flashcards)
+// 2. دالة تحميل الكروت (System Core)
 // ==========================================
 export async function loadFlashcards(isLoadMore = false) {
     const grid = document.getElementById("flashcardsGrid");
     const loadMoreBtn = document.getElementById("loadMoreBtn");
 
-    // جلب قيم البحث
+    // عناصر البحث والفلترة
     const searchInput = document.getElementById("searchInput");
     const searchTerm = searchInput
         ? searchInput.value.trim().toLowerCase()
         : "";
-
-    // هل نحن في وضع البحث؟
-    const isSearchMode = searchTerm.length > 0;
-
-    // عناصر الفلترة
     const subjectFilter =
         document.getElementById("filterModule")?.value || "all";
     const yearFilter = document.getElementById("yearSelect")?.value || "all";
     const categoryFilter =
         document.getElementById("categorySelect")?.value || "all";
 
-    // تصفير الشبكة وعرض الـ Spinner
+    // أ) التحميل الأولي (ليس Load More)
     if (!isLoadMore) {
-        if (grid)
-            grid.innerHTML = `
-            <div style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px;">
-                <div class="spinner" style="width: 50px; height: 50px; border-width: 5px; border-color: rgba(128,128,128,0.2); border-top-color: var(--main-color);"></div>
-                <p style="margin-top: 15px; color: var(--text-secondary-color); font-size: 0.9rem;">Loading Decks...</p>
-            </div>
-        `;
-        lastVisibleDoc = null;
-        allFlashcards = [];
-        if (loadMoreBtn) loadMoreBtn.style.display = "none";
+        currentDisplayCount = 0;
+
+        // عرض الـ Spinner فقط لو المصفوفة فاضية
+        if (allFlashcards.length === 0) {
+            // محاولة التحميل من الكاش أولاً
+            const cachedData = localStorage.getItem(CACHED_DECKS_KEY);
+            if (cachedData) {
+                try {
+                    allFlashcards = JSON.parse(cachedData);
+                } catch (e) {
+                    console.error("Cache Parse Error", e);
+                    allFlashcards = [];
+                }
+            }
+
+            // لو لسه فاضية (أول مرة خالص)، اعرض لودينج
+            if (allFlashcards.length === 0 && grid) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px;">
+                        <div class="spinner" style="width: 50px; height: 50px; border-width: 5px; border-color: rgba(128,128,128,0.2); border-top-color: var(--main-color);"></div>
+                        <p style="margin-top: 15px; color: var(--text-secondary-color); font-size: 0.9rem;">Checking for updates...</p>
+                    </div>`;
+            }
+        }
+
+        // 🔥 تشغيل المزامنة الذكية (Smart Delta Sync) 🔥
+        syncDecksWithServer().then(() => {
+            // تحديث الواجهة فقط إذا كنا في الوضع الافتراضي
+            if (searchTerm === "" && subjectFilter === "all") {
+                applyClientSideFilters(false);
+            }
+        });
     }
 
+    applyClientSideFilters(isLoadMore);
+}
+
+// دالة الفلترة والرسم (محلية)
+function applyClientSideFilters(isLoadMore) {
+    const grid = document.getElementById("flashcardsGrid");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+    const searchInput = document.getElementById("searchInput");
+    const searchTerm = searchInput
+        ? searchInput.value.trim().toLowerCase()
+        : "";
+    const subjectFilter =
+        document.getElementById("filterModule")?.value || "all";
+    const yearFilter = document.getElementById("yearSelect")?.value || "all";
+    const categoryFilter =
+        document.getElementById("categorySelect")?.value || "all";
+
+    // 1. التصفية
+    let filteredCards = allFlashcards.filter((card) => {
+        // 🔥 شرط الإخفاء: لو الكارت مخفي، لا تعرضه أبداً 🔥
+        if (card.isHidden === true) return false;
+
+        const matchesSearch =
+            !searchTerm ||
+            (card.title && card.title.toLowerCase().includes(searchTerm)) ||
+            (card.module && card.module.toLowerCase().includes(searchTerm)) ||
+            (card.creator && card.creator.toLowerCase().includes(searchTerm));
+
+        const matchesYear = yearFilter === "all" || card.year === yearFilter;
+        const matchesSubject =
+            subjectFilter === "all" || card.module === subjectFilter;
+        const matchesCategory =
+            categoryFilter === "all" || card.category === categoryFilter;
+
+        return (
+            matchesSearch && matchesYear && matchesSubject && matchesCategory
+        );
+    });
+
+    // 2. الترتيب (الأحدث creation أو الأحدث update)
+    filteredCards.sort((a, b) => {
+        // نستخدم updated timestamp لو موجود، أو created
+        const dateA = a.updatedAt?.seconds || a.createdAt?.seconds || 0;
+        const dateB = b.updatedAt?.seconds || b.createdAt?.seconds || 0;
+        return dateB - dateA;
+    });
+
+    // 3. التقسيم
+    if (!isLoadMore) {
+        currentDisplayCount = BATCH_SIZE;
+        if (grid) grid.innerHTML = "";
+    } else {
+        currentDisplayCount += BATCH_SIZE;
+    }
+
+    const cardsToShow = filteredCards.slice(0, currentDisplayCount);
+
+    // 4. معالجة "لا يوجد نتائج"
+    if (cardsToShow.length === 0 && !isLoadMore) {
+        if (grid)
+            grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary-color);">
+                <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; margin-bottom: 15px; display:block;"></i>
+                <p>No results found.</p>
+            </div>`;
+        if (loadMoreBtn) loadMoreBtn.style.display = "none";
+        loadAllNotifications(allFlashcards);
+        return;
+    }
+
+    // 5. الرسم
+    renderCards(cardsToShow, isLoadMore);
+
+    // تحديث الإشعارات
+    loadAllNotifications(allFlashcards);
+
+    // 6. زر Load More
+    if (loadMoreBtn) {
+        loadMoreBtn.style.display =
+            cardsToShow.length < filteredCards.length ? "flex" : "none";
+    }
+}
+
+// 🔥🔥 دالة المزامنة الزمنية (Time-Based Delta Sync) 🔥🔥
+async function syncDecksWithServer() {
     try {
-        let q = collection(db, "decks");
-        let constraints = [];
+        let q;
+        const lastSyncTime = localStorage.getItem(LAST_SYNC_KEY);
+        let fetchAll = false;
 
-        // 1. تطبيق الفلاتر على الاستعلام (Server-Side Filtering)
-        if (yearFilter !== "all")
-            constraints.push(where("year", "==", yearFilter));
-        if (subjectFilter !== "all")
-            constraints.push(where("module", "==", subjectFilter));
-        if (categoryFilter !== "all")
-            constraints.push(where("category", "==", categoryFilter));
+        // الحالة 1: أول مرة يفتح الموقع (أو مسح الكاش)
+        if (!lastSyncTime || allFlashcards.length === 0) {
+            console.log("Fetching ALL decks (First Run)...");
+            q = query(
+                collection(db, "decks"),
+                orderBy("createdAt", "desc"),
+                limit(500)
+            );
+            fetchAll = true;
+        }
+        // الحالة 2: تحديثات فقط (Delta)
+        else {
+            const lastDate = new Date(lastSyncTime);
+            console.log("Checking for updates since:", lastSyncTime);
 
-        constraints.push(orderBy("createdAt", "desc"));
-
-        // 2. التفرع المنطقي: بحث شامل أم تصفح عادي؟
-        if (isSearchMode) {
-            constraints.push(limit(100));
-        } else {
-            if (isLoadMore && lastVisibleDoc) {
-                constraints.push(startAfter(lastVisibleDoc));
-            }
-            constraints.push(limit(BATCH_SIZE));
+            // نطلب الدكات التي تم تعديلها (updatedAt) بعد آخر مزامنة
+            // ملاحظة: هذا يتطلب أن يكون الـ Deck يحتوي على حقل updatedAt
+            q = query(
+                collection(db, "decks"),
+                where("updatedAt", ">", lastDate)
+            );
         }
 
-        // تنفيذ الاستعلام
-        const finalQuery = query(q, ...constraints);
-        const querySnapshot = await getDocs(finalQuery);
+        const snapshot = await getDocs(q);
 
-        // تنظيف اللودر
-        if (!isLoadMore && grid) grid.innerHTML = "";
-
-        // معالجة البيانات
-        let newCards = [];
-        querySnapshot.forEach((doc) => {
-            newCards.push({ id: doc.id, ...doc.data() });
-        });
-
-        // 3. فلترة البحث النصي (Client-Side)
-        if (isSearchMode) {
-            newCards = newCards.filter((card) => {
-                return (
-                    (card.title &&
-                        card.title.toLowerCase().includes(searchTerm)) ||
-                    (card.module &&
-                        card.module.toLowerCase().includes(searchTerm)) ||
-                    (card.creator &&
-                        card.creator.toLowerCase().includes(searchTerm))
-                );
-            });
-        }
-
-        // حالة عدم وجود نتائج
-        if (newCards.length === 0 && !isLoadMore) {
-            if (grid)
-                grid.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-secondary-color);">
-                    <i class="fa-solid fa-magnifying-glass" style="font-size: 2rem; margin-bottom: 15px; display:block;"></i>
-                    <p>No results found.</p>
-                </div>`;
-            if (loadMoreBtn) loadMoreBtn.style.display = "none";
-
-            // 🔥🔥 الإصلاح: تشغيل الإشعارات (للإشعارات العامة) حتى لو لم توجد كروت 🔥🔥
-            loadAllNotifications([]);
-
+        // لو مفيش تحديثات (Snapshot Empty)، وفرنا القراءات! (1 Read cost)
+        if (snapshot.empty && !fetchAll) {
+            console.log("No new updates found. Cache is valid. ✅");
             return;
         }
 
-        // حفظ أخر مستند (فقط في التصفح العادي لاستكمال التحميل)
-        if (!isSearchMode && querySnapshot.docs.length > 0) {
-            lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
-        }
+        let hasChanges = false;
 
-        // تحديث المصفوفة العامة
-        if (isLoadMore) {
-            allFlashcards = [...allFlashcards, ...newCards];
+        // لو كنا بنجيب الكل، بنصفر المصفوفة ونعبيها
+        if (fetchAll) {
+            allFlashcards = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                // لو بنجيب الكل، نتجاهل المحذوف تماماً
+                if (data.isDeleted !== true) {
+                    allFlashcards.push({ id: doc.id, ...data });
+                }
+            });
+            hasChanges = true;
         } else {
-            allFlashcards = newCards;
+            // 🔥 هنا السحر (Delta Sync) 🔥
+            snapshot.forEach((doc) => {
+                const serverDeck = { id: doc.id, ...doc.data() };
+                const localIndex = allFlashcards.findIndex(
+                    (d) => d.id === serverDeck.id
+                );
+
+                // 1. هل وصلتنا إشارة بأن الملف "محذوف"؟
+                if (serverDeck.isDeleted === true) {
+                    if (localIndex !== -1) {
+                        // الملف موجود عندنا؟ امسحه فوراً من الذاكرة!
+                        allFlashcards.splice(localIndex, 1);
+                        hasChanges = true;
+                        console.log(
+                            "♻️ Deck removed from cache:",
+                            serverDeck.title
+                        );
+                    }
+                    // لا تكمل باقي الكود لهذا الملف
+                    return;
+                }
+
+                // 2. لو مش محذوف، كمل عادي (إضافة جديد أو تحديث)
+                if (localIndex === -1) {
+                    allFlashcards.unshift(serverDeck);
+                    console.log("New Deck Found:", serverDeck.title);
+                } else {
+                    allFlashcards[localIndex] = serverDeck;
+                    console.log("Deck Updated:", serverDeck.title);
+                }
+                hasChanges = true;
+            });
         }
 
-        // رسم الكروت
-        renderCards(newCards, isLoadMore);
+        if (hasChanges) {
+            // حفظ الكاش الجديد
+            localStorage.setItem(
+                CACHED_DECKS_KEY,
+                JSON.stringify(allFlashcards)
+            );
 
-        // تشغيل الإشعارات
-        loadAllNotifications(allFlashcards);
+            // حفظ وقت اللحظة الحالية كآخر وقت مزامنة
+            // (نستخدم ISO string لسهولة المقارنة)
+            const now = new Date();
+            localStorage.setItem(LAST_SYNC_KEY, now.toISOString());
 
-        // 4. التحكم في زر Load More
-        if (loadMoreBtn) {
-            if (isSearchMode) {
-                loadMoreBtn.style.display = "none";
-            } else {
-                loadMoreBtn.style.display =
-                    querySnapshot.docs.length < BATCH_SIZE ? "none" : "flex";
-            }
+            console.log(`Synced ${snapshot.size} decks. ✅`);
         }
     } catch (error) {
-        console.error("Error loading decks:", error);
-        if (grid)
-            grid.innerHTML = `<p style="color:red; text-align:center;">Error: ${error.message}</p>`;
+        console.error("Sync Error:", error);
+        // في حالة الخطأ (مثل نقص الـ Index)، لا نعطل الموقع
+        // يمكن إضافة رابط للإندكس في الكونسول لو ظهرت المشكلة
     }
 }
 
@@ -171,28 +283,18 @@ function renderCards(cardsList, shouldAppend = false) {
     const grid = document.getElementById("flashcardsGrid");
     if (!grid) return;
 
-    if (!shouldAppend) {
-        grid.innerHTML = "";
-    }
-
-    if (cardsList.length === 0 && !shouldAppend) {
-        grid.innerHTML = `<p style="text-align:center;">No matches found.</p>`;
-        return;
-    }
+    grid.innerHTML = "";
 
     cardsList.forEach((data) => {
-        // حساب النجوم
         const rating =
             data.totalStars && data.totalReviews
                 ? data.totalStars / data.totalReviews
                 : 0;
         const reviewsCount = data.totalReviews || 0;
         const starsHTML = getStarsHTML(rating);
-
         const title = data.title || "Untitled Deck";
         const desc = data.description || "No description available.";
 
-        // HTML الكارت
         grid.innerHTML += `
             <div class="card">
                 <div class="thumbnail">
@@ -210,8 +312,7 @@ function renderCards(cardsList, shouldAppend = false) {
                     <div style="cursor: pointer; padding: 5px;" onclick="window.openReportModal('${
                         data.id
                     }', '${title}')">
-                         <i class="fa-solid fa-flag report-btn" 
-                            style="font-size: 14px; "></i>
+                         <i class="fa-solid fa-flag report-btn" style="font-size: 14px;"></i>
                     </div>
                 </div>
 
@@ -244,7 +345,7 @@ function renderCards(cardsList, shouldAppend = false) {
 }
 
 // ==========================================
-// 4. نظام الإشعارات (Notifications) - مع الترحيب الذكي
+// 4. نظام الإشعارات (Notifications)
 // ==========================================
 export async function loadAllNotifications(allDecks) {
     window.currentDecksData = allDecks;
@@ -256,7 +357,6 @@ export async function loadAllNotifications(allDecks) {
     const badgeDesktop = document.getElementById("notifBadge");
     const badgeMobile = document.getElementById("mobileNotifBadge");
 
-    // 1. حساب تحديثات الكروت (Updates)
     const downloadHistory =
         JSON.parse(localStorage.getItem(DOWNLOADS_KEY)) || {};
     let cardUpdates = [];
@@ -269,60 +369,65 @@ export async function loadAllNotifications(allDecks) {
         }
     });
 
-    // 2. جلب الإشعارات العامة من السيرفر (General Notifications)
     let generalNotifs = [];
-    let currentGeneralIds = [];
     const readGeneralIds =
         JSON.parse(localStorage.getItem(READ_NOTIFS_KEY)) || [];
+
+    const cachedNotifs = localStorage.getItem(CACHED_NOTIFS_KEY);
+    if (cachedNotifs) {
+        generalNotifs = JSON.parse(cachedNotifs);
+    }
 
     try {
         const q = query(
             collection(db, "general_notifications"),
-            orderBy("createdAt", "desc")
+            orderBy("createdAt", "desc"),
+            limit(5)
         );
         const snapshot = await getDocs(q);
+        let notifsChanged = false;
 
         snapshot.forEach((doc) => {
-            if (!readGeneralIds.includes(doc.id)) {
-                generalNotifs.push({ id: doc.id, ...doc.data() });
-                currentGeneralIds.push(doc.id);
+            const notifData = { id: doc.id, ...doc.data() };
+            if (!generalNotifs.some((n) => n.id === notifData.id)) {
+                generalNotifs.unshift(notifData);
+                notifsChanged = true;
             }
         });
-        window.currentGeneralIds = currentGeneralIds;
+
+        if (notifsChanged) {
+            localStorage.setItem(
+                CACHED_NOTIFS_KEY,
+                JSON.stringify(generalNotifs)
+            );
+        }
     } catch (error) {
         console.error("Error fetching general notifications:", error);
     }
 
-    // 🔥🔥🔥 3. إضافة رسالة الترحيب (Local Welcome Message) 🔥🔥🔥
-    // هذا الكود يعمل محلياً في متصفح الطالب ولا يستهلك قاعدة البيانات
-    const welcomeId = "welcome_msg_v1"; // 👈 غير هذا الرقم (v2) لو أردت إرسال ترحيب جديد مستقبلاً
+    let displayGeneralNotifs = generalNotifs.filter(
+        (n) => !readGeneralIds.includes(n.id)
+    );
+    window.currentGeneralIds = displayGeneralNotifs.map((n) => n.id);
 
-    // يظهر فقط إذا كان المستخدم مسجل دخول + لم يقرأ الرسالة من قبل
+    const welcomeId = "welcome_msg_v1";
     if (auth.currentUser && !readGeneralIds.includes(welcomeId)) {
-        // نأخذ الاسم الأول فقط ليكون ودوداً أكثر
         const firstName = auth.currentUser.displayName
             ? auth.currentUser.displayName.split(" ")[0]
             : "Doctor";
-
         const welcomeMsg = {
             id: welcomeId,
             title: `Welcome, ${firstName}! 👋`,
             message:
                 "We are glad to have you with us. Explore the decks and start studying smart!",
-            type: "success", // لون أخضر ومميز
-            createdAt: { seconds: Date.now() / 1000 }, // يظهر بتاريخ اللحظة
+            type: "success",
+            createdAt: { seconds: Date.now() / 1000 },
         };
-
-        // نضعها في مقدمة القائمة
-        generalNotifs.unshift(welcomeMsg);
-
-        // نضيفها لقائمة الـ IDs الحالية ليعمل زر Mark All معها
+        displayGeneralNotifs.unshift(welcomeMsg);
         if (window.currentGeneralIds) window.currentGeneralIds.push(welcomeId);
     }
-    // -----------------------------------------------------
 
-    // 4. الرسم وتحديث العداد
-    const totalCount = cardUpdates.length + generalNotifs.length;
+    const totalCount = cardUpdates.length + displayGeneralNotifs.length;
 
     if (badgeDesktop) {
         badgeDesktop.style.display = totalCount > 0 ? "flex" : "none";
@@ -333,7 +438,6 @@ export async function loadAllNotifications(allDecks) {
         badgeMobile.innerText = totalCount;
     }
 
-    // إذا لم توجد إشعارات
     if (totalCount === 0) {
         const emptyHTML =
             '<div class="notif-item"><p class="notif-text" style="text-align:center; color:#777;">No new notifications.</p></div>';
@@ -344,10 +448,8 @@ export async function loadAllNotifications(allDecks) {
 
     let htmlContent = "";
 
-    // أ) رسم كروت التحديث
     cardUpdates.forEach((deck) => {
         const dateStr = deck.lastUpdate || "Recent";
-
         htmlContent += `
             <div class="notif-item unread" style="align-items: flex-start;">
                 <div class="notif-icon bg-green"><i class="fa-solid fa-rotate"></i></div>
@@ -377,8 +479,7 @@ export async function loadAllNotifications(allDecks) {
             </div>`;
     });
 
-    // ب) رسم الإشعارات العامة (شاملة الترحيب)
-    generalNotifs.forEach((notif) => {
+    displayGeneralNotifs.forEach((notif) => {
         let icon =
             notif.type === "danger"
                 ? "fa-triangle-exclamation"
@@ -391,14 +492,12 @@ export async function loadAllNotifications(allDecks) {
                 : notif.type === "success"
                 ? "bg-green"
                 : "bg-blue";
-
         let dateStr = "";
         if (notif.createdAt && notif.createdAt.seconds) {
             const dateObj = new Date(notif.createdAt.seconds * 1000);
             dateStr = dateObj.toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
-                year: "numeric",
             });
         } else {
             dateStr = "Now";
@@ -429,26 +528,14 @@ export async function loadAllNotifications(allDecks) {
 // ==========================================
 
 export function filterFlashcards(searchText, category, year) {
-    const term = searchText.toLowerCase().trim();
-    const filtered = allFlashcards.filter((card) => {
-        const matchesSearch =
-            card.title.toLowerCase().includes(term) ||
-            (card.module && card.module.toLowerCase().includes(term)) ||
-            (card.creator && card.creator.toLowerCase().includes(term));
-        const matchesCategory =
-            category === "all" || card.category === category;
-        const matchesYear = year === "all" || card.year === year;
-        return matchesSearch && matchesCategory && matchesYear;
-    });
-    // عند الفلترة، نعيد رسم الكروت المفلترة فقط
-    renderCards(filtered, false);
+    loadFlashcards(false);
 }
 
 export function saveDownloadHistory(deckId, version) {
     let history = JSON.parse(localStorage.getItem(DOWNLOADS_KEY)) || {};
     history[deckId] = version;
     localStorage.setItem(DOWNLOADS_KEY, JSON.stringify(history));
-    loadAllNotifications(allFlashcards); // تحديث فوري للإشعارات
+    loadAllNotifications(allFlashcards);
 }
 
 export function markGeneralAsRead(notifId) {
@@ -476,7 +563,6 @@ export function markAllUpdatesAsRead() {
     loadAllNotifications(allDecks);
 }
 
-// دالة مساعدة للنجوم
 function getStarsHTML(rating) {
     let stars = "";
     for (let i = 1; i <= 5; i++) {
@@ -488,7 +574,7 @@ function getStarsHTML(rating) {
     return stars;
 }
 
-// دالة إرسال التقييم
+// 🔥🔥🔥 تم تحديث هذه الدالة لتحديث updatedAt في الدك 🔥🔥🔥
 export async function submitDeckReview(deckId, ratingValue, comment) {
     const user = auth.currentUser;
     if (!user) {
@@ -501,16 +587,26 @@ export async function submitDeckReview(deckId, ratingValue, comment) {
         const q = query(reviewsRef, where("userId", "==", user.uid), limit(1));
         const snapshot = await getDocs(q);
 
+        // 🟢 الجديد هنا: نقوم بتحديث updatedAt للدك نفسه عند أي تقييم
+        // هذا سيجعل الدك يظهر كـ "محدث" في عملية المزامنة
+        const updatePayload = {
+            updatedAt: serverTimestamp(),
+            // إذا كان لديك حقول أخرى تريد تحديثها
+        };
+
         if (!snapshot.empty) {
             const oldReviewDoc = snapshot.docs[0];
             const diff = ratingValue - oldReviewDoc.data().rating;
+
             await updateDoc(doc(reviewsRef, oldReviewDoc.id), {
                 rating: ratingValue,
                 comment: comment,
                 updatedAt: serverTimestamp(),
             });
-            if (diff !== 0)
-                await updateDoc(deckRef, { totalStars: increment(diff) });
+
+            if (diff !== 0) {
+                updatePayload.totalStars = increment(diff);
+            }
         } else {
             await addDoc(reviewsRef, {
                 userId: user.uid,
@@ -519,11 +615,14 @@ export async function submitDeckReview(deckId, ratingValue, comment) {
                 comment: comment,
                 createdAt: serverTimestamp(),
             });
-            await updateDoc(deckRef, {
-                totalReviews: increment(1),
-                totalStars: increment(ratingValue),
-            });
+
+            updatePayload.totalReviews = increment(1);
+            updatePayload.totalStars = increment(ratingValue);
         }
+
+        // تنفيذ التحديث على وثيقة الدك (تغيير النجوم + تغيير التاريخ)
+        await updateDoc(deckRef, updatePayload);
+
         return true;
     } catch (error) {
         console.error(error);
@@ -531,7 +630,6 @@ export async function submitDeckReview(deckId, ratingValue, comment) {
     }
 }
 
-// دالة جلب التقييم السابق
 export async function getUserReview(deckId) {
     const user = auth.currentUser;
     if (!user) return null;
@@ -548,7 +646,6 @@ export async function getUserReview(deckId) {
     }
 }
 
-// دالة الإبلاغ
 export async function submitReport(deckId, deckTitle, reason, details) {
     try {
         await addDoc(collection(db, "reports"), {

@@ -1868,6 +1868,7 @@ footer p a {
    =========================== */
 .table-container {
     margin-top: 10px;
+    margin-bottom: 20px;
     overflow-x: auto;
     background: var(--card-color);
     border-radius: 10px;
