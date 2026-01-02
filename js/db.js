@@ -233,7 +233,9 @@ function renderCards(cardsList, shouldAppend = false) {
                 <a href="${data.downloadUrl}" download target="_self"
                    class="main-btn download-trigger" 
                    data-id="${data.id}" 
-                   data-version="${data.version || "v1.0"}">
+                   data-version="${
+                       data.version || "v1.0"
+                   }" onclick="animateDownload(this)">
                     Download <i class="fa-solid fa-download fa-fw"></i>
                 </a>
             </div>

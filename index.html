@@ -349,6 +349,43 @@
     </div>
     <script src="js/theme.js"></script>
     <script type="module" src="js/main.js"></script>
+    <script>function animateDownload(btn) {
+            // 1. منع الضغط المتكرر (Double Click Prevention)
+            if (btn.getAttribute("data-clicked") === "true") return;
+
+            // 2. حفظ النص الأصلي والعرض (عشان الزر ما يصغرش ويكبر فجأة)
+            const originalText = btn.innerHTML;
+            const originalWidth = btn.offsetWidth;
+
+            // تثبيت عرض الزر
+            btn.style.width = `${originalWidth}px`;
+            btn.style.textAlign = "center";
+            btn.style.display = "flex"; // لضمان ثبات العرض
+
+            // علامة "تم الضغط"
+            btn.setAttribute("data-clicked", "true");
+
+            // 3. تغيير النص لـ Spinner
+            // (استخدمنا نفس أيقونات FontAwesome الموجودة في موقعك)
+            btn.innerHTML =
+                'Loading... <i class="fa-solid fa-spinner fa-spin fa-fw"></i> ';
+
+            // 4. محاكاة وقت استجابة السيرفر (3 ثواني)
+            setTimeout(() => {
+                // تغيير الشكل للون الأخضر وعلامة الصح
+                btn.innerHTML = 'Started! <i class="fa-solid fa-check fa-fw"></i> ';
+
+                // 5. إرجاع الزر لأصله بعد ثانيتين (اختياري)
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.width = ""; // إزالة تثبيت العرض
+                    btn.style.backgroundColor = ""; // إزالة اللون الأخضر
+                    btn.style.color = "";
+                    btn.style.borderColor = "";
+                    btn.setAttribute("data-clicked", "false"); // السماح بالضغط مرة أخرى
+                }, 2500);
+            }, 3000); // هذا الرقم (3000) هو مدة الـ Spinner بالمللي ثانية
+        }</script>
 </body>
 
 </html>
