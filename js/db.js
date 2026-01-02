@@ -223,10 +223,12 @@ function renderCards(cardsList, shouldAppend = false) {
                     <li>Creator: ${data.creator || "Unknown"}</li>
                 </ul>
                 <p class="meta">
-                    <span class="date">Update: ${
+                    <span class="date">Last Update: ${
                         data.lastUpdate || "Unknown"
                     }</span>
-                    <span class="version">Ver: ${data.version || "v1.0"}</span>
+                    <span class="version">Version: ${
+                        data.version || "v1.0"
+                    }</span>
                 </p>
                 <a href="${data.downloadUrl}" download target="_self"
                    class="main-btn download-trigger" 
