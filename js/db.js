@@ -215,7 +215,7 @@ function renderCards(cardsList, shouldAppend = false) {
                     </div>
                 </div>
 
-                <h3 style="margin-top: 0px; margin-bottom: 15px; line-height: 1.4;">${title}</h3>
+                <h3 style="margin-top: 0px; margin-bottom: 10px; line-height: 1.4;">${title}</h3>
                 <p class="description">${desc}</p>
                 <ul>
                     <li>Study Year: ${data.year || "All"}</li>
