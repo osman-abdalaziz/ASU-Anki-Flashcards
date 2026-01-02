@@ -228,7 +228,7 @@ function renderCards(cardsList, shouldAppend = false) {
                     }</span>
                     <span class="version">Ver: ${data.version || "v1.0"}</span>
                 </p>
-                <a href="${data.downloadUrl}" target="_blank" 
+                <a href="${data.downloadUrl}" download target="_self"
                    class="main-btn download-trigger" 
                    data-id="${data.id}" 
                    data-version="${data.version || "v1.0"}">
