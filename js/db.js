@@ -154,7 +154,7 @@ export async function loadFlashcards(isLoadMore = false) {
                 loadMoreBtn.style.display = "none";
             } else {
                 loadMoreBtn.style.display =
-                    querySnapshot.docs.length < BATCH_SIZE ? "none" : "block";
+                    querySnapshot.docs.length < BATCH_SIZE ? "none" : "flex";
             }
         }
     } catch (error) {

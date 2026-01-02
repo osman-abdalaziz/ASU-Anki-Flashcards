@@ -251,8 +251,10 @@
                     </div>
 
                     <div style="text-align: center; margin-top: 30px;" class="load-btn">
-                        <button id="loadMoreBtn" style="display: none;" onclick="animateLoadMore(this)">
-                            Load More <i class="fa-solid fa-angles-down fa-fw"></i>
+                        <button id="loadMoreBtn"
+                            style="display: none; justify-content: center; align-items: center; gap: 5px;"
+                            onclick="animateLoadMore(this)">
+                            Load More <i class="fa-solid fa-cloud-arrow-down fa-fw"></i>
                         </button>
                     </div>
                 </div>
@@ -398,7 +400,7 @@
             // تثبيت العرض عشان الزر ما "يرقصش" لما الكلام يتغير
             btn.style.width = `${originalWidth}px`;
             btn.setAttribute('disabled', 'true'); // تعطيل الزر مؤقتاً
-            btn.innerHTML = 'Loading... <i class="spinner" style="width: 17px; height: 17px"></i>';
+            btn.innerHTML = 'Loading...';
 
             // 2. محاكاة وقت التحميل (تأخير جمالي بسيط)
             // (لو عندك دالة بتجيب الداتا فعلاً، نادِ عليها هنا وحط await قبلها)

@@ -13,6 +13,8 @@
     --ver-tag-color: rgba(255, 255, 255, 0.06);
     --noti-border-color: rgba(255, 255, 255, 0.1);
     --mobile-menu-bg: #0f1112dc;
+    --spinner-color:#0f1720;
+    --spinner-color-bg: #0f17204d;
 
     /* Input colors (defaults; overridden in light theme) */
     --input-bg: var(--sec-background-color);
@@ -51,6 +53,11 @@ html[data-theme="light"] {
     --ver-tag-color: rgba(0, 0, 0, 0.06);
     --noti-border-color: rgba(0, 0, 0, 0.1);
     --mobile-menu-bg: #dedededd;
+    --spinner-color:#fff;
+    --spinner-color-bg: rgba(255, 255, 255, 0.3)
+
+    
+
 
     /* Light theme input overrides */
     --input-bg: #ffffff;
