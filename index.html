@@ -251,7 +251,7 @@
                     </div>
 
                     <div style="text-align: center; margin-top: 30px;" class="load-btn">
-                        <button id="loadMoreBtn" style="display: none;">
+                        <button id="loadMoreBtn" style="display: none;" onclick="animateLoadMore(this)">
                             Load More <i class="fa-solid fa-angles-down fa-fw"></i>
                         </button>
                     </div>
@@ -385,7 +385,36 @@
                     btn.setAttribute("data-clicked", "false"); // السماح بالضغط مرة أخرى
                 }, 2500);
             }, 3000); // هذا الرقم (3000) هو مدة الـ Spinner بالمللي ثانية
-        }</script>
+        }
+
+        // دالة التعامل مع زر Load More
+        window.animateLoadMore = async function (btn) {
+            // 1. منع التكرار وحفظ الشكل القديم
+            if (btn.getAttribute('disabled')) return;
+
+            const originalText = btn.innerHTML;
+            const originalWidth = btn.offsetWidth;
+
+            // تثبيت العرض عشان الزر ما "يرقصش" لما الكلام يتغير
+            btn.style.width = `${originalWidth}px`;
+            btn.setAttribute('disabled', 'true'); // تعطيل الزر مؤقتاً
+            btn.innerHTML = 'Loading... <i class="spinner" style="width: 17px; height: 17px"></i>';
+
+            // 2. محاكاة وقت التحميل (تأخير جمالي بسيط)
+            // (لو عندك دالة بتجيب الداتا فعلاً، نادِ عليها هنا وحط await قبلها)
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // === 3. هنا ضع الكود اللي بيزود الكروت (لو موجود) ===
+            // مثال: window.renderNextBatch();
+            // ===============================================
+
+            // 4. إرجاع الزر لطبيعته
+            btn.innerHTML = originalText;
+            btn.style.width = '';
+            btn.removeAttribute('disabled');
+        }
+
+    </script>
 </body>
 
 </html>
