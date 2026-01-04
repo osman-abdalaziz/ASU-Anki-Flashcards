@@ -2204,3 +2204,7 @@ html[data-theme="light"] .report-btn:hover {
         -o-transform: rotate(360deg);
     }
 }
+
+.submit-deck{
+    margin-bottom: 20px;
+}
