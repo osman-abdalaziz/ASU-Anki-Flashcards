@@ -12,7 +12,7 @@ import {
     increment,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// 1. حماية الصفحة
+// 1. حماية الصفحة + تشغيل التحميل بعد التأكد من الهوية
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
 onAuthStateChanged(auth, (user) => {
     if (!user || user.email !== ADMIN_EMAIL) {
@@ -21,6 +21,9 @@ onAuthStateChanged(auth, (user) => {
         // تعبئة صورة الأدمن
         const avatar = document.getElementById("mobileUserAvatar");
         if (avatar) avatar.src = user.photoURL || "../images/user.png";
+
+        // 🔥🔥 التعديل هنا: تشغيل التحميل بعد التأكد من الدخول فقط 🔥🔥
+        loadReviews();
     }
 });
 
@@ -29,18 +32,20 @@ let decksMap = {}; // لتخزين أسماء الكروت: { id: "Deck Title" }
 
 // 2. دالة التحميل الرئيسية
 async function loadReviews() {
+    // التأكد من وجود العنصر قبل الكتابة فيه
+    if (!tableBody) return;
+
     tableBody.innerHTML =
         '<tr><td colspan="6" style="text-align:center;">Loading reviews...</td></tr>';
 
     try {
-        // أ) جلب أسماء الكروت أولاً (لتفادي ظهور ID بدلاً من الاسم)
+        // أ) جلب أسماء الكروت أولاً
         const decksSnapshot = await getDocs(collection(db, "decks"));
         decksSnapshot.forEach((doc) => {
             decksMap[doc.id] = doc.data().title;
         });
 
-        // ب) جلب التقييمات من كل الكروت (Collection Group Query)
-        // ملاحظة: قد يطلب منك الفايربيس إنشاء Index في الكونسول عند تشغيل هذا السطر لأول مرة
+        // ب) جلب التقييمات من كل الكروت
         const reviewsQuery = query(
             collectionGroup(db, "reviews"),
             orderBy("createdAt", "desc")
@@ -58,9 +63,15 @@ async function loadReviews() {
         querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
 
-            // استخراج معرف الكارت الأب (Parent Deck ID)
-            const deckId = docSnap.ref.parent.parent.id;
-            const deckTitle = decksMap[deckId] || "Unknown Deck";
+            // استخراج معرف الكارت الأب
+            let deckTitle = "Unknown Deck";
+            try {
+                // محاولة الوصول للأب (قد يفشل لو المسار مختلف)
+                const deckId = docSnap.ref.parent.parent.id;
+                deckTitle = decksMap[deckId] || deckId;
+            } catch (e) {
+                console.warn("Could not determine parent deck");
+            }
 
             // تنسيق التاريخ
             let dateStr = "N/A";
@@ -68,13 +79,18 @@ async function loadReviews() {
                 const dateObj = new Date(data.createdAt.seconds * 1000);
                 dateStr = dateObj.toLocaleDateString("en-US", {
                     year: "numeric",
-                    month: "short", // اسم الشهر مختصر (Jan, Feb...)
+                    month: "short",
                     day: "numeric",
                 });
             }
 
             // تحويل الرقم لنجوم
             const stars = getStars(data.rating);
+
+            // استخراج deckId للحذف
+            const deckId = docSnap.ref.parent.parent
+                ? docSnap.ref.parent.parent.id
+                : null;
 
             const row = `
                 <tr> 
@@ -98,10 +114,9 @@ async function loadReviews() {
         });
     } catch (error) {
         console.error("Error loading reviews:", error);
-        // التعامل مع خطأ نقص الـ Index
         if (error.message.includes("indexes")) {
             tableBody.innerHTML =
-                '<tr><td colspan="6" style="color:red; text-align:center;">Missing Index! Check Console for link to create it.</td></tr>';
+                '<tr><td colspan="6" style="color:red; text-align:center;">Missing Index! Check Console for link.</td></tr>';
         } else {
             tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error: ${error.message}</td></tr>`;
         }
@@ -118,39 +133,44 @@ function getStars(rating) {
     return html;
 }
 
-// 3. حذف التقييم (مع تحديث إحصائيات الكارت)
+// 3. حذف التقييم
 window.deleteReview = async (reviewId, deckId, rating) => {
+    if (!deckId) {
+        showModal("Error", "Cannot identify Deck ID", "error");
+        return;
+    }
+
     const isConfirmed = await window.showConfirm(
         "Delete Review?",
         "Are you sure? This will remove the review and update ratings.",
         "warning"
     );
 
-    if (!isConfirmed) return; // إذا ضغط Cancel يخرج من الدالة
+    if (!isConfirmed) return;
 
     try {
-        // أ) حذف وثيقة التقييم
-        // نحتاج للمسار الكامل، وبما أننا لا نملك المسار المباشر هنا بسهولة،
-        // سنعتمد على أننا نعرف deckId و reviewId
+        // حذف الوثيقة
         const reviewRef = doc(db, "decks", deckId, "reviews", reviewId);
         await deleteDoc(reviewRef);
 
-        // ب) تحديث الكارت (طرح التقييم والعدد)
+        // تحديث الكارت
         const deckRef = doc(db, "decks", deckId);
         await updateDoc(deckRef, {
             totalReviews: increment(-1),
             totalStars: increment(-rating),
+            // نحدث التاريخ أيضاً لكي يشعر الطلاب بالتغيير في التقييم
+            // updatedAt: serverTimestamp() // يمكن إضافتها إذا استوردت serverTimestamp
         });
 
         showModal("Deleted!", "Review removed successfully.", "success");
-        loadReviews(); // إعادة تحميل الجدول
+        loadReviews();
     } catch (error) {
         console.error(error);
         showModal("Error", error.message, "error");
     }
 };
 
-// 4. البحث في الجدول
+// 4. البحث
 const searchInput = document.getElementById("searchReviewsInput");
 if (searchInput) {
     searchInput.addEventListener("keyup", () => {
@@ -163,10 +183,9 @@ if (searchInput) {
     });
 }
 
-// تشغيل
-document.addEventListener("DOMContentLoaded", loadReviews);
+// 🔥 حذفنا سطر document.addEventListener("DOMContentLoaded", loadReviews); لأننا وضعناه داخل الـ Auth
 
-// دالة المودل (للتكرار)
+// دوال المودل (كما هي)
 function showModal(title, message, type = "success") {
     const overlay = document.getElementById("customModal");
     const box = overlay.querySelector(".modal-box");
@@ -190,7 +209,6 @@ function showModal(title, message, type = "success") {
     btn.onclick = () => overlay.classList.remove("active");
 }
 
-// 🔥🔥🔥 الدالة السحرية الجديدة (Confirm Modal) 🔥🔥🔥
 window.showConfirm = (title, message, type = "warning") => {
     return new Promise((resolve) => {
         const overlay = document.getElementById("customModal");
@@ -201,19 +219,15 @@ window.showConfirm = (title, message, type = "warning") => {
         const cancelBtn = document.getElementById("modalCancelBtn");
         const box = overlay.querySelector(".modal-box");
 
-        // تعبئة النصوص
         titleEl.textContent = title;
         msgEl.textContent = message;
 
-        // إظهار زر الإلغاء
         cancelBtn.style.display = "inline-block";
-        okBtn.textContent = "Confirm"; // تغيير النص لتأكيد
+        okBtn.textContent = "Confirm";
 
-        // تنسيق الأيقونة والألوان
         box.className = "modal-box";
         if (type === "warning") {
-            // للحذف
-            box.classList.add("error"); // أحمر
+            box.classList.add("error");
             iconEl.className = "fa-solid fa-triangle-exclamation";
             okBtn.style.backgroundColor = "#ff5252";
         } else {
@@ -222,62 +236,24 @@ window.showConfirm = (title, message, type = "warning") => {
             okBtn.style.backgroundColor = "var(--main-color)";
         }
 
-        // إظهار المودل
         overlay.classList.add("active");
 
-        // التعامل مع الضغطات (مرة واحدة فقط لتجنب التكرار)
         const handleOk = () => {
             cleanup();
-            resolve(true); // ✅ المستخدم وافق
+            resolve(true);
         };
-
         const handleCancel = () => {
             cleanup();
-            resolve(false); // ❌ المستخدم ألغى
+            resolve(false);
         };
 
-        // تنظيف المستمعين عند الإغلاق
         function cleanup() {
             okBtn.removeEventListener("click", handleOk);
             cancelBtn.removeEventListener("click", handleCancel);
             overlay.classList.remove("active");
         }
-
         okBtn.addEventListener("click", handleOk);
         cancelBtn.addEventListener("click", handleCancel);
     });
 };
-
-// دالة showModal العادية (للتنبيهات فقط بدون Cancel)
-window.showModal = (title, message, type = "success") => {
-    const overlay = document.getElementById("customModal");
-    const box = overlay.querySelector(".modal-box");
-    const titleEl = document.getElementById("modalTitle");
-    const msgEl = document.getElementById("modalMessage");
-    const iconEl = document.getElementById("modalIconClass");
-    const okBtn = document.getElementById("modalOkBtn");
-    const cancelBtn = document.getElementById("modalCancelBtn");
-
-    titleEl.textContent = title;
-    msgEl.textContent = message;
-
-    // إخفاء زر الإلغاء في وضع التنبيه العادي
-    cancelBtn.style.display = "none";
-    okBtn.textContent = "OK";
-    okBtn.style.backgroundColor =
-        type === "error" ? "#ff5252" : "var(--main-color)";
-
-    box.className = "modal-box";
-    if (type === "success") {
-        box.classList.add("success");
-        iconEl.className = "fa-solid fa-check";
-    } else {
-        box.classList.add("error");
-        iconEl.className = "fa-solid fa-xmark";
-    }
-
-    overlay.classList.add("active");
-
-    // عند الضغط يغلق فقط
-    okBtn.onclick = () => overlay.classList.remove("active");
-};
+window.showModal = showModal;

@@ -10,6 +10,7 @@ import {
     query,
     orderBy,
     increment,
+    serverTimestamp, // 👈 1. تم إضافة استيراد التوقيت
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // 1. حماية الصفحة + تشغيل التحميل بعد التأكد من الهوية
@@ -18,34 +19,27 @@ onAuthStateChanged(auth, (user) => {
     if (!user || user.email !== ADMIN_EMAIL) {
         window.location.href = "../index.html";
     } else {
-        // تعبئة صورة الأدمن
         const avatar = document.getElementById("mobileUserAvatar");
         if (avatar) avatar.src = user.photoURL || "../images/user.png";
-
-        // 🔥🔥 التعديل هنا: تشغيل التحميل بعد التأكد من الدخول فقط 🔥🔥
         loadReviews();
     }
 });
 
 const tableBody = document.getElementById("reviewsTableBody");
-let decksMap = {}; // لتخزين أسماء الكروت: { id: "Deck Title" }
+let decksMap = {};
 
 // 2. دالة التحميل الرئيسية
 async function loadReviews() {
-    // التأكد من وجود العنصر قبل الكتابة فيه
     if (!tableBody) return;
-
     tableBody.innerHTML =
         '<tr><td colspan="6" style="text-align:center;">Loading reviews...</td></tr>';
 
     try {
-        // أ) جلب أسماء الكروت أولاً
         const decksSnapshot = await getDocs(collection(db, "decks"));
         decksSnapshot.forEach((doc) => {
             decksMap[doc.id] = doc.data().title;
         });
 
-        // ب) جلب التقييمات من كل الكروت
         const reviewsQuery = query(
             collectionGroup(db, "reviews"),
             orderBy("createdAt", "desc")
@@ -62,18 +56,14 @@ async function loadReviews() {
 
         querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
-
-            // استخراج معرف الكارت الأب
             let deckTitle = "Unknown Deck";
             try {
-                // محاولة الوصول للأب (قد يفشل لو المسار مختلف)
                 const deckId = docSnap.ref.parent.parent.id;
                 deckTitle = decksMap[deckId] || deckId;
             } catch (e) {
                 console.warn("Could not determine parent deck");
             }
 
-            // تنسيق التاريخ
             let dateStr = "N/A";
             if (data.createdAt && data.createdAt.seconds) {
                 const dateObj = new Date(data.createdAt.seconds * 1000);
@@ -84,10 +74,7 @@ async function loadReviews() {
                 });
             }
 
-            // تحويل الرقم لنجوم
             const stars = getStars(data.rating);
-
-            // استخراج deckId للحذف
             const deckId = docSnap.ref.parent.parent
                 ? docSnap.ref.parent.parent.id
                 : null;
@@ -114,16 +101,11 @@ async function loadReviews() {
         });
     } catch (error) {
         console.error("Error loading reviews:", error);
-        if (error.message.includes("indexes")) {
-            tableBody.innerHTML =
-                '<tr><td colspan="6" style="color:red; text-align:center;">Missing Index! Check Console for link.</td></tr>';
-        } else {
-            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error: ${error.message}</td></tr>`;
-        }
+        // ملاحظة: إذا ظهر خطأ Permissions هنا، تأكد من تحديث قواعد الأمان كما شرحت لك سابقاً
+        tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error: ${error.message}</td></tr>`;
     }
 }
 
-// دالة مساعدة لرسم النجوم
 function getStars(rating) {
     let html = "";
     for (let i = 1; i <= 5; i++) {
@@ -133,7 +115,7 @@ function getStars(rating) {
     return html;
 }
 
-// 3. حذف التقييم
+// 3. حذف التقييم (مع تحديث التاريخ)
 window.deleteReview = async (reviewId, deckId, rating) => {
     if (!deckId) {
         showModal("Error", "Cannot identify Deck ID", "error");
@@ -149,17 +131,16 @@ window.deleteReview = async (reviewId, deckId, rating) => {
     if (!isConfirmed) return;
 
     try {
-        // حذف الوثيقة
+        // حذف وثيقة التقييم
         const reviewRef = doc(db, "decks", deckId, "reviews", reviewId);
         await deleteDoc(reviewRef);
 
-        // تحديث الكارت
+        // تحديث الكارت (النجوم + التاريخ)
         const deckRef = doc(db, "decks", deckId);
         await updateDoc(deckRef, {
             totalReviews: increment(-1),
             totalStars: increment(-rating),
-            // نحدث التاريخ أيضاً لكي يشعر الطلاب بالتغيير في التقييم
-            // updatedAt: serverTimestamp() // يمكن إضافتها إذا استوردت serverTimestamp
+            updatedAt: serverTimestamp(), // 🔥 2. تفعيل التحديث هنا ليراه الطلاب
         });
 
         showModal("Deleted!", "Review removed successfully.", "success");
@@ -170,7 +151,8 @@ window.deleteReview = async (reviewId, deckId, rating) => {
     }
 };
 
-// 4. البحث
+// ... باقي الكود (البحث والمودل) كما هو ...
+// (اختصاراً للمساحة، الجزء السفلي هو نفسه الموجود عندك سابقاً)
 const searchInput = document.getElementById("searchReviewsInput");
 if (searchInput) {
     searchInput.addEventListener("keyup", () => {
@@ -183,9 +165,6 @@ if (searchInput) {
     });
 }
 
-// 🔥 حذفنا سطر document.addEventListener("DOMContentLoaded", loadReviews); لأننا وضعناه داخل الـ Auth
-
-// دوال المودل (كما هي)
 function showModal(title, message, type = "success") {
     const overlay = document.getElementById("customModal");
     const box = overlay.querySelector(".modal-box");
@@ -193,10 +172,8 @@ function showModal(title, message, type = "success") {
     const msgEl = document.getElementById("modalMessage");
     const iconEl = document.getElementById("modalIconClass");
     const btn = document.getElementById("modalOkBtn");
-
     titleEl.textContent = title;
     msgEl.textContent = message;
-
     box.className = "modal-box";
     if (type === "success") {
         box.classList.add("success");
@@ -218,13 +195,10 @@ window.showConfirm = (title, message, type = "warning") => {
         const okBtn = document.getElementById("modalOkBtn");
         const cancelBtn = document.getElementById("modalCancelBtn");
         const box = overlay.querySelector(".modal-box");
-
         titleEl.textContent = title;
         msgEl.textContent = message;
-
         cancelBtn.style.display = "inline-block";
         okBtn.textContent = "Confirm";
-
         box.className = "modal-box";
         if (type === "warning") {
             box.classList.add("error");
@@ -235,9 +209,7 @@ window.showConfirm = (title, message, type = "warning") => {
             iconEl.className = "fa-solid fa-circle-question";
             okBtn.style.backgroundColor = "var(--main-color)";
         }
-
         overlay.classList.add("active");
-
         const handleOk = () => {
             cleanup();
             resolve(true);
@@ -246,7 +218,6 @@ window.showConfirm = (title, message, type = "warning") => {
             cleanup();
             resolve(false);
         };
-
         function cleanup() {
             okBtn.removeEventListener("click", handleOk);
             cancelBtn.removeEventListener("click", handleCancel);
