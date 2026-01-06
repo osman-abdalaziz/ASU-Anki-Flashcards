@@ -5,16 +5,19 @@ import {
     getCountFromServer,
     doc,
     getDoc,
+    query,
+    where, // 🔥 استيراد شرط البحث
+    orderBy, // للترتيب
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let visitsChart = null;
-let allDecksData = []; // 🔥 مصفوفة لتخزين كل البيانات محلياً للفلترة السريعة
+let allDecksData = []; // لتخزين البيانات التي تم جلبها فقط (المحملة)
 
 async function initAnalytics() {
     try {
-        console.log("🔄 Loading Analytics...");
+        console.log("🔄 Loading Smart Analytics...");
 
-        // 1. جلب عدد المستخدمين
+        // 1. جلب عدد المستخدمين (Aggregation - رخيص)
         try {
             const usersCol = collection(db, "users");
             const usersSnap = await getCountFromServer(usersCol);
@@ -22,22 +25,37 @@ async function initAnalytics() {
                 usersSnap.data().count;
         } catch (e) {
             console.error("Error fetching users count:", e);
-            document.getElementById("usersCount").innerText = "0";
+            document.getElementById("usersCount").innerText = "-";
         }
 
-        // 2. جلب الـ Decks وتخزينها
-        const decksCol = collection(db, "decks");
-        const decksSnap = await getDocs(decksCol);
+        // 2. جلب عدد الملفات الكلي (Aggregation - رخيص)
+        // نستخدم هذا بدلاً من جلب كل الملفات لعدها يدوياً
+        try {
+            const decksCol = collection(db, "decks");
+            // لو عايز تستثني المحذوف بدقة، ممكن تضيف كويري، لكن الـ count رخيص عموماً
+            const decksCountSnap = await getCountFromServer(decksCol);
+            document.getElementById("decksCount").innerText =
+                decksCountSnap.data().count;
+        } catch (e) {
+            console.error("Error fetching decks count:", e);
+        }
 
-        let activeDecks = 0;
+        // 3. 🔥 جلب الملفات التي عليها تحميلات فقط 🔥
+        // هذا هو التوفير الحقيقي: لن نجلب الـ 0 تحميل
+        const decksCol = collection(db, "decks");
+        const q = query(decksCol, where("downloads", ">", 0)); // الشرط السحري
+
+        const decksSnap = await getDocs(q);
+
         let totalDownloads = 0;
         allDecksData = []; // تصفير المصفوفة
 
         decksSnap.forEach((doc) => {
             const data = doc.data();
-            if (data.isDeleted === true) return; // تجاهل المحذوف
 
-            activeDecks++;
+            // تحقق إضافي: لو الملف محذوف حتى لو عليه تحميلات، لا تعرضه
+            if (data.isDeleted === true) return;
+
             const dl = data.downloads || 0;
             totalDownloads += dl;
 
@@ -46,29 +64,29 @@ async function initAnalytics() {
                 title: data.title || "Untitled",
                 module: data.module || "-",
                 year: data.year || "-",
-                category: data.category || "Theoretical", // تأكد من الاسم في الداتابيز
+                category: data.category || "Theoretical",
                 downloads: dl,
             });
         });
 
-        // تحديث البطاقات العلوية
-        document.getElementById("decksCount").innerText = activeDecks;
+        // تحديث إجمالي التحميلات
         document.getElementById("downloadsCount").innerText = totalDownloads;
 
-        // 3. رسم الجدول الأولي (بدون فلترة)
+        // 4. رسم الجدول الأولي
         applyFilters();
 
-        // 4. رسم الجراف
+        // 5. رسم الجراف
         await loadVisitsData();
 
-        // 5. تفعيل مستمعي الأحداث للفلاتر (Event Listeners)
+        // 6. تفعيل الفلاتر
         setupEventListeners();
     } catch (error) {
         console.error("Critical Error loading analytics:", error);
     }
 }
 
-// دالة تفعيل الفلاتر
+// --- باقي الدوال كما هي تماماً ---
+
 function setupEventListeners() {
     const searchInput = document.getElementById("analyticsSearch");
     const yearSelect = document.getElementById("analyticsYear");
@@ -79,7 +97,6 @@ function setupEventListeners() {
     if (catSelect) catSelect.addEventListener("change", applyFilters);
 }
 
-// دالة تطبيق الفلترة
 function applyFilters() {
     const searchVal = document
         .getElementById("analyticsSearch")
@@ -87,14 +104,11 @@ function applyFilters() {
     const yearVal = document.getElementById("analyticsYear").value;
     const catVal = document.getElementById("analyticsCategory").value;
 
-    // الفلترة
     let filteredDecks = allDecksData.filter((deck) => {
         const matchSearch =
             deck.title.toLowerCase().includes(searchVal) ||
             deck.module.toLowerCase().includes(searchVal);
         const matchYear = yearVal === "all" || deck.year === yearVal;
-
-        // مقارنة مرنة للتصنيف (Case Insensitive)
         const matchCat =
             catVal === "all" ||
             (deck.category &&
@@ -103,7 +117,6 @@ function applyFilters() {
         return matchSearch && matchYear && matchCat;
     });
 
-    // إعادة الرسم
     renderTopDecksTable(filteredDecks);
 }
 
@@ -116,12 +129,15 @@ function renderTopDecksTable(decks) {
     // ترتيب تنازلي حسب التحميلات
     decks.sort((a, b) => b.downloads - a.downloads);
 
-    // عرض أول 50 نتيجة فقط لتسريع الصفحة (أو يمكن إزالة الشرط لعرض الكل)
     const displayDecks = decks.slice(0, 50);
 
     if (displayDecks.length === 0) {
-        tbody.innerHTML =
-            '<tr><td colspan="4" style="text-align:center; padding: 20px;">No decks found matching filters.</td></tr>';
+        // رسالة مخصصة
+        const msg =
+            allDecksData.length === 0
+                ? "No downloads recorded yet."
+                : "No decks match filters.";
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">${msg}</td></tr>`;
         return;
     }
 
@@ -146,6 +162,8 @@ async function loadVisitsData() {
         const data = docSnap.data();
         const sortedDates = Object.keys(data).sort().slice(-7);
         const visitCounts = sortedDates.map((date) => data[date]);
+
+        // توقيت القاهرة
         const today = new Date().toLocaleDateString("en-CA", {
             timeZone: "Africa/Cairo",
         });
