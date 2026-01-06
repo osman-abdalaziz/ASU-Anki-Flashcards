@@ -2,22 +2,21 @@ import { db } from "./config.js";
 import {
     collection,
     getDocs,
-    getCountFromServer,
+    getCountFromServer, // 👈 دالة العد الرخيصة
     doc,
     getDoc,
     query,
-    where, // 🔥 استيراد شرط البحث
-    orderBy, // للترتيب
+    where,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let visitsChart = null;
-let allDecksData = []; // لتخزين البيانات التي تم جلبها فقط (المحملة)
+let allDecksData = [];
 
 async function initAnalytics() {
     try {
-        console.log("🔄 Loading Smart Analytics...");
+        console.log("🔄 Loading Precision Analytics...");
 
-        // 1. جلب عدد المستخدمين (Aggregation - رخيص)
+        // 1. جلب عدد المستخدمين
         try {
             const usersCol = collection(db, "users");
             const usersSnap = await getCountFromServer(usersCol);
@@ -28,22 +27,34 @@ async function initAnalytics() {
             document.getElementById("usersCount").innerText = "-";
         }
 
-        // 2. جلب عدد الملفات الكلي (Aggregation - رخيص)
-        // نستخدم هذا بدلاً من جلب كل الملفات لعدها يدوياً
+        // 🔥 2. حساب عدد الملفات النشطة (Active Decks) بدقة وتوفير 🔥
+        // المعادلة: الكل - المحذوف = النشط
         try {
             const decksCol = collection(db, "decks");
-            // لو عايز تستثني المحذوف بدقة، ممكن تضيف كويري، لكن الـ count رخيص عموماً
-            const decksCountSnap = await getCountFromServer(decksCol);
-            document.getElementById("decksCount").innerText =
-                decksCountSnap.data().count;
+
+            // أ) العدد الكلي (رخيص)
+            const totalSnap = await getCountFromServer(decksCol);
+            const totalCount = totalSnap.data().count;
+
+            // ب) عدد المحذوف فقط (رخيص)
+            const deletedQuery = query(
+                decksCol,
+                where("isDeleted", "==", true)
+            );
+            const deletedSnap = await getCountFromServer(deletedQuery);
+            const deletedCount = deletedSnap.data().count;
+
+            // ج) الناتج الصافي
+            const activeDecks = totalCount - deletedCount;
+            document.getElementById("decksCount").innerText = activeDecks;
         } catch (e) {
-            console.error("Error fetching decks count:", e);
+            console.error("Error calculating active decks:", e);
         }
 
-        // 3. 🔥 جلب الملفات التي عليها تحميلات فقط 🔥
-        // هذا هو التوفير الحقيقي: لن نجلب الـ 0 تحميل
+        // 🔥 3. جلب بيانات الجدول (للملفات المحملة فقط) 🔥
+        // نطلب فقط الملفات التي عليها تحميلات (لتوفير القراءات)
         const decksCol = collection(db, "decks");
-        const q = query(decksCol, where("downloads", ">", 0)); // الشرط السحري
+        const q = query(decksCol, where("downloads", ">", 0));
 
         const decksSnap = await getDocs(q);
 
@@ -53,13 +64,13 @@ async function initAnalytics() {
         decksSnap.forEach((doc) => {
             const data = doc.data();
 
-            // تحقق إضافي: لو الملف محذوف حتى لو عليه تحميلات، لا تعرضه
+            // 🛑 التحقق الأهم: لو الملف محذوف، تجاهله تماماً (حتى لو عليه تحميلات)
             if (data.isDeleted === true) return;
 
             const dl = data.downloads || 0;
             totalDownloads += dl;
 
-            // تخزين البيانات للجدول والفلترة
+            // تخزين البيانات
             allDecksData.push({
                 title: data.title || "Untitled",
                 module: data.module || "-",
@@ -69,7 +80,7 @@ async function initAnalytics() {
             });
         });
 
-        // تحديث إجمالي التحميلات
+        // تحديث رقم إجمالي التحميلات
         document.getElementById("downloadsCount").innerText = totalDownloads;
 
         // 4. رسم الجدول الأولي
@@ -85,7 +96,7 @@ async function initAnalytics() {
     }
 }
 
-// --- باقي الدوال كما هي تماماً ---
+// --- باقي الدوال (الفلترة والرسم) كما هي ---
 
 function setupEventListeners() {
     const searchInput = document.getElementById("analyticsSearch");
@@ -126,13 +137,13 @@ function renderTopDecksTable(decks) {
 
     tbody.innerHTML = "";
 
-    // ترتيب تنازلي حسب التحميلات
+    // ترتيب تنازلي
     decks.sort((a, b) => b.downloads - a.downloads);
 
+    // عرض أول 50
     const displayDecks = decks.slice(0, 50);
 
     if (displayDecks.length === 0) {
-        // رسالة مخصصة
         const msg =
             allDecksData.length === 0
                 ? "No downloads recorded yet."
@@ -163,7 +174,6 @@ async function loadVisitsData() {
         const sortedDates = Object.keys(data).sort().slice(-7);
         const visitCounts = sortedDates.map((date) => data[date]);
 
-        // توقيت القاهرة
         const today = new Date().toLocaleDateString("en-CA", {
             timeZone: "Africa/Cairo",
         });
