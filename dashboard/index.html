@@ -37,12 +37,12 @@
         .stat-value {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--text-color);
+            color: var(--text-secondary-color);
             margin: 5px 0;
         }
 
         .stat-label {
-            color: var(--text-secondary-color);
+            color: var(--text-color);
             font-size: 0.9rem;
         }
 
@@ -99,6 +99,11 @@
             border: 1px solid var(--input-border);
             background: var(--input-bg);
             color: var(--text-color);
+        }
+
+        .search-box input:focus {
+            border: 1px solid var(--main-color);
+            outline: 5px solid var(--input-focus-ring);
         }
 
         .search-box i {
@@ -169,7 +174,7 @@
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <h1 class="dashboard-title">Analytics <span>Overview</span></h1>
                         <button onclick="window.location.reload()" class="main-btn" style="width: auto;">
-                            <i class="fa-solid fa-rotate-right"></i> Refresh
+                            Refresh <i class="fa-solid fa-rotate-right fa-fw"></i>
                         </button>
                     </div>
 

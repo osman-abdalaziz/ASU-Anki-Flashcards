@@ -2,69 +2,24 @@ import {
     signInWithPopup,
     signOut,
     onAuthStateChanged,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    updateProfile,
-    sendPasswordResetEmail,
-    sendEmailVerification,
+    createUserWithEmailAndPassword, // دالة إنشاء الحساب
+    signInWithEmailAndPassword,     // دالة تسجيل الدخول
+    updateProfile,// دالة تحديث الاسم
+    sendPasswordResetEmail,  // دالة استعادة كلمة المرور
+    sendEmailVerification
+
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-
-// 🔥 1. إضافة استيراد دوال Firestore
-import {
-    doc,
-    setDoc,
-    getDoc,
-    serverTimestamp,
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-// 🔥 2. إضافة استيراد db
-import { auth, provider, db } from "./config.js";
+import { auth, provider } from "./config.js";
 import { updateNavbarUI, showError, showModal } from "./ui.js";
-import { loadFlashcards } from "./db.js";
+import { loadFlashcards } from "./db.js"; // <--- جديد
+
 
 // =============================
-// 🔥 دالة مساعدة جديدة لحفظ المستخدم (بدون التأثير على باقي الكود)
-// =============================
-async function saveUserToFirestore(user) {
-    try {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        // إذا لم يكن الملف موجوداً (مستخدم جديد)
-        if (!userSnap.exists()) {
-            await setDoc(userRef, {
-                uid: user.uid,
-                name: user.displayName || "User",
-                email: user.email,
-                role: "student", // الرتبة الافتراضية
-                createdAt: serverTimestamp(),
-                lastLogin: serverTimestamp(),
-            });
-            console.log("✅ User document created in Firestore");
-        } else {
-            // تحديث وقت آخر ظهور فقط
-            await setDoc(
-                userRef,
-                { lastLogin: serverTimestamp() },
-                { merge: true }
-            );
-        }
-    } catch (error) {
-        console.error("Error saving user to DB:", error);
-    }
-}
-
-// =============================
-// 1. الدخول عبر جوجل
+// 1. الدخول عبر جوجل (موجود سابقاً)
 // =============================
 export async function handleGoogleLogin() {
     try {
-        const result = await signInWithPopup(auth, provider); // تم تعديلها لاستلام النتيجة
-        const user = result.user;
-
-        // 🔥 حفظ المستخدم في الداتابيز
-        await saveUserToFirestore(user);
-
+        await signInWithPopup(auth, provider);
         redirectIfSuccess();
     } catch (error) {
         console.error("Google Login Error:", error);
@@ -78,32 +33,17 @@ export async function handleGoogleLogin() {
 export async function handleEmailSignUp(name, email, password) {
     try {
         // 1. إنشاء الحساب
-        const userCredential = await createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
         // 2. تحديث اسم المستخدم
         await updateProfile(user, {
-            displayName: name,
+            displayName: name
         });
-
-        // 🔥 حفظ بيانات المستخدم الجديد فوراً في Firestore 🔥
-        await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            name: name,
-            email: email,
-            role: "student",
-            createdAt: serverTimestamp(),
-            lastLogin: serverTimestamp(),
-        });
-
-        // 3. إرسال رابط التفعيل
+        // 🔥 3. إرسال رابط التفعيل 🔥
         await sendEmailVerification(user);
 
-        // 3. (خطوتك الأصلية) إجبار المتصفح على تحديث بيانات المستخدم
+        // 3. (الخطوة الجديدة) إجبار المتصفح على تحديث بيانات المستخدم فوراً لضمان حفظ الاسم
         await user.reload();
 
         await signOut(auth);
@@ -111,21 +51,28 @@ export async function handleEmailSignUp(name, email, password) {
         await showModal(
             "Account Created Successfully! 🎉",
             "We have sent a verification link to your email. Please check your inbox or (Spam), activate your account, and then sign in.",
-            "success",
+            "success", // <--- هذا يخلي اللون أخضر ✅
             () => {
+                // هذا الكود لن يعمل إلا بعد الضغط على OK
                 window.location.href = "signin";
             }
         );
 
+        // تسجيل الخروج فوراً ليقوم بالتفعيل أولاً
+
         console.log("Account Created:", user.email);
+
+        // 4. التوجيه
+        // redirectIfSuccess();
         return true;
+
     } catch (error) {
         console.error("SignUp Error:", error.code);
-        if (error.code === "auth/email-already-in-use") {
+        if (error.code === 'auth/email-already-in-use') {
             showError("This email is already registered.");
-        } else if (error.code === "auth/weak-password") {
+        } else if (error.code === 'auth/weak-password') {
             showError("The password must be at least 8 characters long.");
-        } else if (error.code === "auth/invalid-email") {
+        } else if (error.code === 'auth/invalid-email') {
             showError("The email address is not valid.");
         } else {
             showError("Error:" + error.message);
@@ -142,14 +89,12 @@ let isLoggingIn = false;
 export async function handleEmailSignIn(email, password) {
     try {
         isLoggingIn = true;
-        const userCredential = await signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        );
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
         if (!user.emailVerified) {
+
+            // رسالة ذكية تحتوي على رابط إعادة الإرسال
             const messageHTML = `
                 Please check your inbox or (Spam) to activate your account.<br>
                 <span style="font-size: 0.85rem; color: var(--text-secondary-color);">
@@ -166,36 +111,28 @@ export async function handleEmailSignIn(email, password) {
                 messageHTML,
                 "error",
                 async () => {
+                    // 🔥 عند إغلاق المودل، يتم طرد المستخدم
                     await signOut(auth);
-                    isLoggingIn = false;
+                    isLoggingIn = false; // إعادة تفعيل الحماية
                 }
             );
 
-            return false;
+            return false; // نوقف الدخول
         }
-
-        // 🔥 تحديث وقت الدخول في الداتابيز عند تسجيل الدخول الناجح
-        await saveUserToFirestore(user);
-
         console.log("Logged In Successfully");
+
         redirectIfSuccess();
         return true;
     } catch (error) {
         isLoggingIn = false;
         console.error("SignIn Error:", error.code);
-        if (
-            error.code === "auth/invalid-credential" ||
-            error.code === "auth/user-not-found" ||
-            error.code === "auth/wrong-password"
-        ) {
+        if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
             showError(" Invalid email or password.");
-        } else if (error.code === "auth/too-many-requests") {
-            showError(
-                "Too many failed login attempts. Please try again later."
-            );
-        } else if (error.code === "auth/invalid-email") {
+        } else if (error.code === 'auth/too-many-requests') {
+            showError("Too many failed login attempts. Please try again later.");
+        } else if (error.code === 'auth/invalid-email') {
             showError("The email address is not valid.");
-        } else if (error.code === "auth/missing-password") {
+        } else if (error.code === 'auth/missing-password') {
             showError("The password is missing.");
         } else {
             showError("Failed to sign in: " + error.message);
@@ -204,22 +141,16 @@ export async function handleEmailSignIn(email, password) {
     }
 }
 
-// دالة إرسال رابط استعادة كلمة المرور (كما هي)
+// دالة إرسال رابط استعادة كلمة المرور
 export async function handlePasswordReset(email) {
     try {
         await sendPasswordResetEmail(auth, email);
-        return {
-            success: true,
-            message: `Check your spam folder if you didn't receive the email! Link Sent Successfully`,
-        };
+        return { success: true, message: `Check your spam folder if you didn't receive the email! Link Sent Successfully` };
     } catch (error) {
         console.error("Reset Error:", error.code);
-        if (error.code === "auth/user-not-found") {
-            return {
-                success: false,
-                message: "No user found with this email.",
-            };
-        } else if (error.code === "auth/invalid-email") {
+        if (error.code === 'auth/user-not-found') {
+            return { success: false, message: "No user found with this email." };
+        } else if (error.code === 'auth/invalid-email') {
             return { success: false, message: "Invalid email format." };
         } else {
             return { success: false, message: "Error: " + error.message };
@@ -241,31 +172,33 @@ export async function handleLogout() {
 
 export function initAuth() {
     onAuthStateChanged(auth, (user) => {
+
         updateNavbarUI(user);
 
+        // 2. الحماية: إعادة التوجيه إذا كان مسجل الدخول ويحاول دخول صفحات التسجيل
         if (user) {
             if (!user.emailVerified) {
+                // 🔥 أضف هذا السطر: إذا كنا نسجل الدخول حالياً، لا تتدخل يا مراقب
                 if (isLoggingIn) return;
 
+                // الكود القديم للطرد الصامت
                 signOut(auth);
                 return;
             }
+            loadFlashcards(); // <--- جديد: تحميل الكروت بعد تسجيل الدخول
+            const path = window.location.pathname; // معرفة اسم الصفحة الحالية
 
-            // 🔥 إضافة أمان: التأكد من تسجيل المستخدم في الداتابيز (للمستخدمين القدامى)
-            saveUserToFirestore(user);
-
-            loadFlashcards();
-            const path = window.location.pathname;
-
-            if (path.includes("signin") || path.includes("signup")) {
-                if (!isLoggingIn) {
+            // هل نحن في صفحة signin.html أو signup.html؟
+            if (path.includes('signin') || path.includes('signup')) {
+                if (!isLoggingIn) { // 👈 شرط جديد: فقط إذا لم يكن يسجل الدخول حالياً
                     console.log("User already logged in, redirecting...");
-                    window.location.replace("index.html");
+                    window.location.replace('index.html');
                 }
             }
         } else {
-            // (كودك الأصلي للقفل)
-            const grid = document.getElementById("page-content");
+            // ❌ المستخدم زائر
+            // يمكنك هنا إفراغ الشبكة أو إظهار رسالة "يجب التسجيل"
+            const grid = document.getElementById('page-content');
             if (grid) {
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 60px; width: 100%; height: 100%; display:flex; justify-content:center; flex-direction:column; align-items:center;">
@@ -280,12 +213,11 @@ export function initAuth() {
     });
 }
 
+// دالة مساعدة للتوجيه بعد النجاح
 function redirectIfSuccess() {
-    if (
-        window.location.pathname.includes("signin") ||
-        window.location.pathname.includes("signup")
-    ) {
-        window.location.href = "index";
+    // إذا كان المستخدم في صفحة الدخول أو التسجيل، نرجعه للصفحة الرئيسية
+    if (window.location.pathname.includes('signin') || window.location.pathname.includes('signup')) {
+        window.location.href = 'index';
     }
 }
 
@@ -293,23 +225,25 @@ function redirectIfSuccess() {
 // 5. وظيفة إعادة إرسال التفعيل 📧
 // =============================
 window.resendVerificationEmail = async function (event) {
-    if (event) event.preventDefault();
+    if (event) event.preventDefault(); // منع الرابط من تحديث الصفحة
 
     const user = auth.currentUser;
     if (user) {
         try {
+            // تغيير نص الرابط ليعرف المستخدم أنه ضغط
             const link = event.target;
             const originalText = link.innerText;
             link.innerText = "Sending...";
-            link.style.pointerEvents = "none";
+            link.style.pointerEvents = "none"; // منع الضغط المتكرر
 
             await sendEmailVerification(user);
 
             link.innerText = "✅ Sent Successfully!";
-            link.style.color = "#2ecc71";
+            link.style.color = "#2ecc71"; // لون أخضر
+
         } catch (error) {
             console.error("Resend Error:", error);
-            alert("Error: " + error.message);
+            alert("Error: " + error.message); // تنبيه بسيط في حال الخطأ
             event.target.innerText = "Try Again";
             event.target.style.pointerEvents = "auto";
         }
