@@ -86,13 +86,13 @@ function renderChart(labels, data) {
                 {
                     label: "Daily Visitors",
                     data: data,
-                    borderColor: "#004d40", // Your primary color
+                    borderColor: "#0088d1", // Your primary color
                     backgroundColor: "rgba(255,255,255,0.05)",
                     borderWidth: 2,
                     tension: 0.3, // Smooth curve
                     fill: true,
                     pointBackgroundColor: "#fff",
-                    pointBorderColor: "#0f1112",
+                    pointBorderColor: "#0088d1",
                     pointRadius: 4,
                 },
             ],
@@ -106,7 +106,7 @@ function renderChart(labels, data) {
             scales: {
                 y: {
                     beginAtZero: true,
-                    grid: { color: "rgba(255,255,255,0.05)" },
+                    grid: { color: "rgba(255,255,255,0.075)" },
                 },
                 x: {
                     grid: { display: false },
