@@ -1714,7 +1714,7 @@ footer p a {
 .dashboard-container .search {
     max-width: 350px;
     margin: 0;
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
 }
 .dashboard-container #mobileUserAvatar {
     border: 2px solid var(--main-color);

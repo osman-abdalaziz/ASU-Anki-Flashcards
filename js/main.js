@@ -20,6 +20,15 @@ import {
     saveDownloadHistory,
     markAllUpdatesAsRead,
 } from "./db.js"; // <--- استيراد جديد
+// ✅ استبدل هذا الجزء في بداية main.js
+import {
+    doc,
+    getDoc,
+    setDoc,
+    updateDoc,
+    increment,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; // كان 10.8.0 وجعلناه 10.7.1 ليتطابق مع config.js
+import { db } from "./config.js";
 
 // تشغيل المراقب
 initAuth();
@@ -728,3 +737,41 @@ if (loadMoreBtn) {
         loadFlashcards(true);
     });
 }
+// ==========================================
+// 📊 Simple Daily Visitor Tracker
+// ==========================================
+
+async function trackDailyVisit() {
+    // 1. Check if user already visited in this session
+    const today = new Date().toISOString().split("T")[0]; // Format: 2024-01-01
+    const storageKey = `visited_${today}`;
+
+    if (sessionStorage.getItem(storageKey)) {
+        return; // User already counted today
+    }
+
+    // 2. Increment the counter in Firebase
+    try {
+        const statsRef = doc(db, "analytics", "daily_visits");
+        const docSnap = await getDoc(statsRef);
+
+        if (docSnap.exists()) {
+            await updateDoc(statsRef, {
+                [today]: increment(1),
+            });
+        } else {
+            await setDoc(statsRef, {
+                [today]: 1,
+            });
+        }
+
+        // 3. Mark session as visited
+        sessionStorage.setItem(storageKey, "true");
+        console.log(`✅ New visitor counted for: ${today}`);
+    } catch (error) {
+        console.error("Tracker Error:", error);
+    }
+}
+
+// Run automatically
+document.addEventListener("DOMContentLoaded", trackDailyVisit);
