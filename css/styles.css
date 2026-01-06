@@ -2208,3 +2208,7 @@ html[data-theme="light"] .report-btn:hover {
 .submit-deck{
     margin-bottom: 20px;
 }
+
+.dashboard-title{
+    margin-bottom: 10px;
+}
