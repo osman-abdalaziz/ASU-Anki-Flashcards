@@ -146,7 +146,9 @@ async function loadVisitsData() {
         const data = docSnap.data();
         const sortedDates = Object.keys(data).sort().slice(-7);
         const visitCounts = sortedDates.map((date) => data[date]);
-        const today = new Date().toISOString().split("T")[0];
+        const today = new Date().toLocaleDateString("en-CA", {
+            timeZone: "Africa/Cairo",
+        });
 
         document.getElementById("todayVisits").innerText = data[today] || 0;
         renderChart(sortedDates, visitCounts);

@@ -747,7 +747,9 @@ if (loadMoreBtn) {
 
 async function trackDailyVisit() {
     // 1. Check if user already visited in this session
-    const today = new Date().toISOString().split("T")[0]; // Format: 2024-01-01
+    const today = new Date().toLocaleDateString("en-CA", {
+        timeZone: "Africa/Cairo",
+    });
     const storageKey = `visited_${today}`;
 
     if (sessionStorage.getItem(storageKey)) {
