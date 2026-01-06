@@ -61,7 +61,6 @@
             border-radius: 10px;
             padding: 0;
             overflow-x: auto;
-            border: 1px solid var(--ver-tag-color);
         }
 
         .badge-download {
@@ -78,8 +77,6 @@
             background: var(--card-color);
             padding: 20px;
             border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid var(--ver-tag-color);
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
@@ -214,30 +211,32 @@
                             <h3 style="margin-bottom: 15px; font-weight: 500; margin-top: 0;">Decks Downloads Analysis
                             </h3>
 
-                            <div class="controls-wrapper">
-                                <div class="search-box">
-                                    <i class="fa-solid fa-magnifying-glass"></i>
-                                    <input type="text" id="analyticsSearch" placeholder="Search by title, module...">
-                                </div>
-                                <div class="filters"
-                                    style="display: flex; flex-direction: row; gap: 10px; margin-top: 0;">
-                                    <select id="analyticsYear" style="padding: 12px 40px 12px 20px;">
-                                        <option value="all">All Years</option>
-                                        <option value="1st Year">1st Year</option>
-                                        <option value="2nd Year">2nd Year</option>
-                                        <option value="3rd Year">3rd Year</option>
-                                        <option value="4th Year">4th Year</option>
-                                        <option value="5th Year">5th Year</option>
 
-                                    </select>
-                                    <select id="analyticsCategory" style="padding: 12px 40px 12px 20px;">
-                                        <option value="all">All Categories</option>
-                                        <option value="Theoretical">Theoretical</option>
-                                        <option value="Practical">Practical</option>
-                                    </select>
-                                </div>
-                            </div>
                             <div class="table-container">
+                                <div class="controls-wrapper">
+                                    <div class="search-box">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                        <input type="text" id="analyticsSearch"
+                                            placeholder="Search by title, module...">
+                                    </div>
+                                    <div class="filters"
+                                        style="display: flex; flex-direction: row; gap: 10px; margin-top: 0;">
+                                        <select id="analyticsYear" style="padding: 12px 40px 12px 20px;">
+                                            <option value="all">All Years</option>
+                                            <option value="1st Year">1st Year</option>
+                                            <option value="2nd Year">2nd Year</option>
+                                            <option value="3rd Year">3rd Year</option>
+                                            <option value="4th Year">4th Year</option>
+                                            <option value="5th Year">5th Year</option>
+
+                                        </select>
+                                        <select id="analyticsCategory" style="padding: 12px 40px 12px 20px;">
+                                            <option value="all">All Categories</option>
+                                            <option value="Theoretical">Theoretical</option>
+                                            <option value="Practical">Practical</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <table class="data-table">
                                     <thead>
                                         <tr>
