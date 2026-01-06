@@ -4,10 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin | Analytics Dashboard</title>
+    <title>Admin | Analytics</title>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -15,7 +13,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* تنسيقات خاصة بالإحصائيات */
         .analytics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -26,11 +23,9 @@
         .stat-card {
             background: var(--card-color, #fff);
             padding: 25px;
-            border-radius: 15px;
+            border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
+            border: 1px solid var(--ver-tag-color);
         }
 
         .stat-icon {
@@ -42,58 +37,81 @@
         .stat-value {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--text-secondary-color);
+            color: var(--text-color);
             margin: 5px 0;
         }
 
         .stat-label {
-            color: var(--text-color);
+            color: var(--text-secondary-color);
             font-size: 0.9rem;
         }
 
         .chart-container {
             background: var(--card-color, #fff);
             padding: 25px;
-            border-radius: 15px;
+            border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             height: 350px;
             margin-bottom: 30px;
+            border: 1px solid var(--ver-tag-color);
         }
 
-        /* تنسيقات الجدول الجديد */
-        .modules-table-container {
-            background: var(--card-color, #fff);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        .table-container {
+            background: var(--card-color);
+            border-radius: 10px;
+            padding: 0;
             overflow-x: auto;
-        }
-
-        .modules-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .modules-table th {
-            text-align: left;
-            padding: 12px;
-            border-bottom: 2px solid #eee;
-            color: var(--text-secondary-color);
-        }
-
-        .modules-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            color: var(--text-color);
+            border: 1px solid var(--ver-tag-color);
         }
 
         .badge-download {
-            background: #e0f2f1;
-            color: #00695c;
-            padding: 5px 12px;
-            border-radius: 20px;
+            background: rgba(0, 136, 209, 0.1);
+            color: var(--main-color);
+            padding: 4px 10px;
+            border-radius: 6px;
             font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* تنسيقات الفلاتر الجديدة (مطابقة للموقع) */
+        .controls-wrapper {
+            background: var(--card-color);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--ver-tag-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary-color);
+        }
+
+        strong {
             font-weight: 500;
+            color: var(--main-color);
         }
     </style>
 </head>
@@ -107,12 +125,12 @@
             <ul class="admin-nav">
                 <li><a href="index.html" class="active"><i class="fa-solid fa-chart-line fa-fw"></i> Dashboard</a></li>
                 <li><a id="decksDropbtn" href="#" class="decksDropar"><i class="fa-solid fa-angle-down fa-fw"></i> Decks
-                        Management</a></li>
+                        Manage</a></li>
                 <div id="decksDrop" class="decksDrop">
                     <a href="add_decks.html"><i class="fa-solid fa-plus fa-fw"></i> Add New Deck</a>
                     <a href="manage_decks.html"><i class="fa-solid fa-box fa-fw"></i> Decks Table</a>
-                    <a href="reviews.html"><i class="fa-solid fa-star fa-fw"></i> Reviews & Ratings</a>
-                    <a href="reports.html"><i class="fa-solid fa-flag fa-fw"></i> Reports & Issues</a>
+                    <a href="reviews.html"><i class="fa-solid fa-star fa-fw"></i> Reviews</a>
+                    <a href="reports.html"><i class="fa-solid fa-flag fa-fw"></i> Reports</a>
                 </div>
                 <li><a id="notiDropbtn" href="#" class="notiDropar"><i class="fa-solid fa-angle-down fa-fw"></i>
                         Notifications</a></li>
@@ -125,22 +143,32 @@
 
         <section class="dashboard-main">
             <nav>
-                <div class="search"><input type="text" placeholder="Search..." disabled style="opacity:0;"></div>
+                <div class="search">
+                    <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+                    <input type="text" id="searchInput" placeholder="Search..." />
+                </div>
+
                 <div class="nav-actions">
                     <div class="userProfile-header">
-                        <img id="mobileUserAvatar" src="../images/user.webp" alt="User" />
-                        <p id="mobileUserName">Admin</p>
+                        <div class="userimg">
+                            <img id="mobileUserAvatar" src="" alt="User" />
+                        </div>
+                        <p id="mobileUserName" style="
+                                                padding: 10px 15px;
+                                                font-weight: 400;
+                                                margin: 0;
+                                            ">
+                            User Name
+                        </p>
                     </div>
-                </div>
             </nav>
 
             <div class="dashboard-content">
                 <div class="container">
                     <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <h1 class="dashboard-title">Analytics <span>Overview</span></h1>
-                        <button onclick="window.location.reload()" class="main-btn"
-                            style="width: auto; padding: 10px 20px;">
+                        <button onclick="window.location.reload()" class="main-btn" style="width: auto;">
                             <i class="fa-solid fa-rotate-right"></i> Refresh
                         </button>
                     </div>
@@ -168,28 +196,57 @@
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
+                    <div style="display: flex; flex-direction: column;">
 
                         <div>
-                            <h2 style="margin-bottom: 15px; font-weight: 500;">Traffic Overview (Last 7 Days)</h2>
+                            <h3 style="margin-bottom: 15px; font-weight: 500;">Visits Overview (Last 7 Days)</h3>
                             <div class="chart-container">
                                 <canvas id="visitsChart"></canvas>
                             </div>
                         </div>
 
                         <div>
-                            <h2 style="margin-bottom: 15px; font-weight: 500;">Downloads by Module</h2>
-                            <div class="modules-table-container">
-                                <table class="modules-table">
+                            <h3 style="margin-bottom: 15px; font-weight: 500; margin-top: 0;">Decks Downloads Analysis
+                            </h3>
+
+                            <div class="controls-wrapper">
+                                <div class="search-box">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                    <input type="text" id="analyticsSearch" placeholder="Search by title, module...">
+                                </div>
+                                <div class="filters"
+                                    style="display: flex; flex-direction: row; gap: 10px; margin-top: 0;">
+                                    <select id="analyticsYear" style="padding: 12px 40px 12px 20px;">
+                                        <option value="all">All Years</option>
+                                        <option value="1st Year">1st Year</option>
+                                        <option value="2nd Year">2nd Year</option>
+                                        <option value="3rd Year">3rd Year</option>
+                                        <option value="4th Year">4th Year</option>
+                                        <option value="5th Year">5th Year</option>
+
+                                    </select>
+                                    <select id="analyticsCategory" style="padding: 12px 40px 12px 20px;">
+                                        <option value="all">All Categories</option>
+                                        <option value="Theoretical">Theoretical</option>
+                                        <option value="Practical">Practical</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="table-container">
+                                <table class="data-table">
                                     <thead>
                                         <tr>
-                                            <th>Module Name</th>
-                                            <th>Total Downloads</th>
+                                            <th>Deck Title</th>
+                                            <th>Module / Subject</th>
+                                            <th>Category</th>
+                                            <th>Year</th>
+                                            <th>Downloads</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="modulesTableBody">
+                                    <tbody id="topDecksTableBody">
                                         <tr>
-                                            <td colspan="2">Loading...</td>
+                                            <td colspan="4" style="text-align:center; padding: 20px;">Loading data...
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -199,7 +256,6 @@
                     </div>
                 </div>
             </div>
-
             <footer>
                 <div class="container">
                     <p>&copy; 2025 ASU Anki Flashcards.</p>

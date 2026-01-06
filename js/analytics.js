@@ -8,12 +8,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 let visitsChart = null;
+let allDecksData = []; // 🔥 مصفوفة لتخزين كل البيانات محلياً للفلترة السريعة
 
 async function initAnalytics() {
     try {
         console.log("🔄 Loading Analytics...");
 
-        // 1. جلب عدد المستخدمين (مع معالجة الأخطاء)
+        // 1. جلب عدد المستخدمين
         try {
             const usersCol = collection(db, "users");
             const usersSnap = await getCountFromServer(usersCol);
@@ -21,79 +22,123 @@ async function initAnalytics() {
                 usersSnap.data().count;
         } catch (e) {
             console.error("Error fetching users count:", e);
-            document.getElementById("usersCount").innerText = "N/A";
+            document.getElementById("usersCount").innerText = "0";
         }
 
-        // 2. جلب الملفات (مع استبعاد المحذوف + حساب الموديولات)
+        // 2. جلب الـ Decks وتخزينها
         const decksCol = collection(db, "decks");
         const decksSnap = await getDocs(decksCol);
 
         let activeDecks = 0;
         let totalDownloads = 0;
-        let moduleStats = {}; // لتخزين إحصائيات كل موديول
+        allDecksData = []; // تصفير المصفوفة
 
         decksSnap.forEach((doc) => {
             const data = doc.data();
-
-            // 🔥 التعديل: تجاهل الملفات المحذوفة 🔥
-            if (data.isDeleted === true) return;
+            if (data.isDeleted === true) return; // تجاهل المحذوف
 
             activeDecks++;
+            const dl = data.downloads || 0;
+            totalDownloads += dl;
 
-            // حساب التنزيلات (نتأكد من وجود الحقل)
-            const downloads = data.downloads || 0;
-            totalDownloads += downloads;
-
-            // تجميع البيانات للجدول (Module Stats)
-            const modName = data.module || "General / Other";
-            if (!moduleStats[modName]) {
-                moduleStats[modName] = 0;
-            }
-            moduleStats[modName] += downloads;
+            // تخزين البيانات للجدول والفلترة
+            allDecksData.push({
+                title: data.title || "Untitled",
+                module: data.module || "-",
+                year: data.year || "-",
+                category: data.category || "Theoretical", // تأكد من الاسم في الداتابيز
+                downloads: dl,
+            });
         });
 
-        // تحديث الأرقام في الشاشة
+        // تحديث البطاقات العلوية
         document.getElementById("decksCount").innerText = activeDecks;
         document.getElementById("downloadsCount").innerText = totalDownloads;
 
-        // رسم جدول الموديولات
-        renderModulesTable(moduleStats);
+        // 3. رسم الجدول الأولي (بدون فلترة)
+        applyFilters();
 
-        // 3. جلب ورسم زيارات الموقع
+        // 4. رسم الجراف
         await loadVisitsData();
+
+        // 5. تفعيل مستمعي الأحداث للفلاتر (Event Listeners)
+        setupEventListeners();
     } catch (error) {
         console.error("Critical Error loading analytics:", error);
     }
 }
 
-// دالة رسم الجدول الجديد
-function renderModulesTable(stats) {
-    const tbody = document.getElementById("modulesTableBody");
+// دالة تفعيل الفلاتر
+function setupEventListeners() {
+    const searchInput = document.getElementById("analyticsSearch");
+    const yearSelect = document.getElementById("analyticsYear");
+    const catSelect = document.getElementById("analyticsCategory");
+
+    if (searchInput) searchInput.addEventListener("input", applyFilters);
+    if (yearSelect) yearSelect.addEventListener("change", applyFilters);
+    if (catSelect) catSelect.addEventListener("change", applyFilters);
+}
+
+// دالة تطبيق الفلترة
+function applyFilters() {
+    const searchVal = document
+        .getElementById("analyticsSearch")
+        .value.toLowerCase();
+    const yearVal = document.getElementById("analyticsYear").value;
+    const catVal = document.getElementById("analyticsCategory").value;
+
+    // الفلترة
+    let filteredDecks = allDecksData.filter((deck) => {
+        const matchSearch =
+            deck.title.toLowerCase().includes(searchVal) ||
+            deck.module.toLowerCase().includes(searchVal);
+        const matchYear = yearVal === "all" || deck.year === yearVal;
+
+        // مقارنة مرنة للتصنيف (Case Insensitive)
+        const matchCat =
+            catVal === "all" ||
+            (deck.category &&
+                deck.category.toLowerCase() === catVal.toLowerCase());
+
+        return matchSearch && matchYear && matchCat;
+    });
+
+    // إعادة الرسم
+    renderTopDecksTable(filteredDecks);
+}
+
+function renderTopDecksTable(decks) {
+    const tbody = document.getElementById("topDecksTableBody");
     if (!tbody) return;
 
     tbody.innerHTML = "";
 
-    // تحويل الكائن لمصفوفة وترتيبها بالأكثر تنزيلاً
-    const sortedModules = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+    // ترتيب تنازلي حسب التحميلات
+    decks.sort((a, b) => b.downloads - a.downloads);
 
-    if (sortedModules.length === 0) {
+    // عرض أول 50 نتيجة فقط لتسريع الصفحة (أو يمكن إزالة الشرط لعرض الكل)
+    const displayDecks = decks.slice(0, 50);
+
+    if (displayDecks.length === 0) {
         tbody.innerHTML =
-            '<tr><td colspan="2" style="text-align:center;">No data available yet</td></tr>';
+            '<tr><td colspan="4" style="text-align:center; padding: 20px;">No decks found matching filters.</td></tr>';
         return;
     }
 
-    sortedModules.forEach(([name, count]) => {
+    displayDecks.forEach((deck) => {
         const row = `
             <tr>
-                <td>${name}</td>
-                <td><span class="badge-download">${count} Downloads</span></td>
+                <td><strong>${deck.title}</strong></td>
+                <td>${deck.module}</td>
+                <td>${deck.category}</td>
+                <td><span style="font-size:0.85rem; color:#888;">${deck.year}</span></td>
+                <td><span class="badge-download">${deck.downloads} <i class="fa-solid fa-download" style="font-size:0.7rem; margin-left:3px;"></i></span></td>
             </tr>
         `;
         tbody.innerHTML += row;
     });
 }
 
-// دالة رسم الجراف (كما هي)
 async function loadVisitsData() {
     const docRef = doc(db, "analytics", "daily_visits");
     const docSnap = await getDoc(docRef);
@@ -102,6 +147,7 @@ async function loadVisitsData() {
         const sortedDates = Object.keys(data).sort().slice(-7);
         const visitCounts = sortedDates.map((date) => data[date]);
         const today = new Date().toISOString().split("T")[0];
+
         document.getElementById("todayVisits").innerText = data[today] || 0;
         renderChart(sortedDates, visitCounts);
     } else {
@@ -114,21 +160,18 @@ function renderChart(labels, data) {
     const ctx = document.getElementById("visitsChart").getContext("2d");
     if (visitsChart) visitsChart.destroy();
 
-    // الألوان حسب الثيم (افتراضي)
-    const isDark = document.body.classList.contains("dark-mode");
-
     visitsChart = new Chart(ctx, {
         type: "line",
         data: {
             labels: labels,
             datasets: [
                 {
-                    label: "Daily Visitors",
+                    label: "Visits",
                     data: data,
-                    borderColor: "#0088d1", // Your primary color
-                    backgroundColor: "rgba(255,255,255,0.05)",
+                    borderColor: "#0088d1",
+                    backgroundColor: "rgba(0, 136, 209, 0.1)",
                     borderWidth: 2,
-                    tension: 0.3, // Smooth curve
+                    tension: 0.3,
                     fill: true,
                     pointBackgroundColor: "#fff",
                     pointBorderColor: "#0088d1",
@@ -139,17 +182,14 @@ function renderChart(labels, data) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }, // Hide legend for cleaner look
-            },
+            plugins: { legend: { display: false } },
             scales: {
                 y: {
                     beginAtZero: true,
-                    grid: { color: "rgba(255,255,255,0.075)" },
+                    grid: { color: "rgba(255,255,255,0.05)" },
+                    ticks: { color: "#888" },
                 },
-                x: {
-                    grid: { display: false },
-                },
+                x: { grid: { display: false }, ticks: { color: "#888" } },
             },
         },
     });
