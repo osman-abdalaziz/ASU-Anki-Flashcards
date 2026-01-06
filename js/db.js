@@ -663,3 +663,17 @@ export async function submitReport(deckId, deckTitle, reason, details) {
         return false;
     }
 }
+// ... (باقي الكود في الأعلى)
+
+// دالة جديدة لزيادة عدد التنزيلات في الداتابيز
+export async function incrementDeckDownloads(deckId) {
+    try {
+        const deckRef = doc(db, "decks", deckId);
+        await updateDoc(deckRef, {
+            downloads: increment(1), // هذا الحقل هو الذي سنعرضه في الإحصائيات
+        });
+        console.log(`Downloads incremented for deck: ${deckId}`);
+    } catch (error) {
+        console.error("Error incrementing downloads:", error);
+    }
+}

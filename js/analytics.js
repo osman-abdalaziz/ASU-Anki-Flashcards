@@ -1,4 +1,3 @@
-// ✅ Correct Import: Get db directly from config.js
 import { db } from "./config.js";
 import {
     collection,
@@ -14,58 +13,97 @@ async function initAnalytics() {
     try {
         console.log("🔄 Loading Analytics...");
 
-        // 1. Get User Count (from users collection)
-        const usersCol = collection(db, "users");
-        // Note: Using getCountFromServer is cost-effective
-        const usersSnap = await getCountFromServer(usersCol);
-        const userCount = usersSnap.data().count;
-        document.getElementById("usersCount").innerText = userCount;
+        // 1. جلب عدد المستخدمين (مع معالجة الأخطاء)
+        try {
+            const usersCol = collection(db, "users");
+            const usersSnap = await getCountFromServer(usersCol);
+            document.getElementById("usersCount").innerText =
+                usersSnap.data().count;
+        } catch (e) {
+            console.error("Error fetching users count:", e);
+            document.getElementById("usersCount").innerText = "N/A";
+        }
 
-        // 2. Get Downloads & Decks Count
+        // 2. جلب الملفات (مع استبعاد المحذوف + حساب الموديولات)
         const decksCol = collection(db, "decks");
         const decksSnap = await getDocs(decksCol);
 
+        let activeDecks = 0;
         let totalDownloads = 0;
-        let totalDecks = 0;
+        let moduleStats = {}; // لتخزين إحصائيات كل موديول
 
         decksSnap.forEach((doc) => {
-            totalDecks++;
             const data = doc.data();
-            // Sum up downloads (checking both common field names just in case)
-            totalDownloads += data.downloads || data.downloadCount || 0;
+
+            // 🔥 التعديل: تجاهل الملفات المحذوفة 🔥
+            if (data.isDeleted === true) return;
+
+            activeDecks++;
+
+            // حساب التنزيلات (نتأكد من وجود الحقل)
+            const downloads = data.downloads || 0;
+            totalDownloads += downloads;
+
+            // تجميع البيانات للجدول (Module Stats)
+            const modName = data.module || "General / Other";
+            if (!moduleStats[modName]) {
+                moduleStats[modName] = 0;
+            }
+            moduleStats[modName] += downloads;
         });
 
-        document.getElementById("decksCount").innerText = totalDecks;
+        // تحديث الأرقام في الشاشة
+        document.getElementById("decksCount").innerText = activeDecks;
         document.getElementById("downloadsCount").innerText = totalDownloads;
 
-        // 3. Load Visits Chart
+        // رسم جدول الموديولات
+        renderModulesTable(moduleStats);
+
+        // 3. جلب ورسم زيارات الموقع
         await loadVisitsData();
     } catch (error) {
-        console.error("Error loading analytics:", error);
-        document.getElementById("usersCount").innerText = "-";
-        document.getElementById("decksCount").innerText = "-";
+        console.error("Critical Error loading analytics:", error);
     }
 }
 
+// دالة رسم الجدول الجديد
+function renderModulesTable(stats) {
+    const tbody = document.getElementById("modulesTableBody");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    // تحويل الكائن لمصفوفة وترتيبها بالأكثر تنزيلاً
+    const sortedModules = Object.entries(stats).sort((a, b) => b[1] - a[1]);
+
+    if (sortedModules.length === 0) {
+        tbody.innerHTML =
+            '<tr><td colspan="2" style="text-align:center;">No data available yet</td></tr>';
+        return;
+    }
+
+    sortedModules.forEach(([name, count]) => {
+        const row = `
+            <tr>
+                <td>${name}</td>
+                <td><span class="badge-download">${count} Downloads</span></td>
+            </tr>
+        `;
+        tbody.innerHTML += row;
+    });
+}
+
+// دالة رسم الجراف (كما هي)
 async function loadVisitsData() {
-    // Reference to the specific document storing daily visits
     const docRef = doc(db, "analytics", "daily_visits");
     const docSnap = await getDoc(docRef);
-
     if (docSnap.exists()) {
         const data = docSnap.data();
-
-        // Sort dates to show timeline correctly
-        const sortedDates = Object.keys(data).sort();
-        // Take only the last 7 days
-        const last7Days = sortedDates.slice(-7);
-        const visitCounts = last7Days.map((date) => data[date]);
-
-        // Show today's visits
+        const sortedDates = Object.keys(data).sort().slice(-7);
+        const visitCounts = sortedDates.map((date) => data[date]);
         const today = new Date().toISOString().split("T")[0];
         document.getElementById("todayVisits").innerText = data[today] || 0;
-
-        renderChart(last7Days, visitCounts);
+        renderChart(sortedDates, visitCounts);
     } else {
         document.getElementById("todayVisits").innerText = 0;
         renderChart([], []);
@@ -74,9 +112,10 @@ async function loadVisitsData() {
 
 function renderChart(labels, data) {
     const ctx = document.getElementById("visitsChart").getContext("2d");
-
-    // Destroy old chart if exists to avoid overlap
     if (visitsChart) visitsChart.destroy();
+
+    // الألوان حسب الثيم (افتراضي)
+    const isDark = document.body.classList.contains("dark-mode");
 
     visitsChart = new Chart(ctx, {
         type: "line",
@@ -116,5 +155,4 @@ function renderChart(labels, data) {
     });
 }
 
-// Run when page loads
 document.addEventListener("DOMContentLoaded", initAnalytics);

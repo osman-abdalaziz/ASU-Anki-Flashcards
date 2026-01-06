@@ -4,20 +4,18 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin | Analytics</title>
+    <title>Admin | Analytics Dashboard</title>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="../css/styles.css" />
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* Simple Cards Styling matching your theme */
+        /* تنسيقات خاصة بالإحصائيات */
         .analytics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -26,18 +24,13 @@
         }
 
         .stat-card {
-            background: var(--card-color);
+            background: var(--card-color, #fff);
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
         }
 
         .stat-icon {
@@ -59,12 +52,48 @@
         }
 
         .chart-container {
-            background: var(--card-color);
+            background: var(--card-color, #fff);
             padding: 25px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            height: 400px;
-            position: relative;
+            height: 350px;
+            margin-bottom: 30px;
+        }
+
+        /* تنسيقات الجدول الجديد */
+        .modules-table-container {
+            background: var(--card-color, #fff);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            overflow-x: auto;
+        }
+
+        .modules-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .modules-table th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 2px solid #eee;
+            color: var(--text-secondary-color);
+        }
+
+        .modules-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            color: var(--text-color);
+        }
+
+        .badge-download {
+            background: #e0f2f1;
+            color: #00695c;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -76,47 +105,31 @@
                 <a href="../index.html"><img src="../images/logo.webp" alt="" /></a>
             </div>
             <ul class="admin-nav">
-                <li>
-                    <a href="index.html" class="active"><i class="fa-solid fa-chart-line fa-fw"></i> Platform
-                        Analytics</a>
-                </li>
-
-                <li>
-                    <a id="decksDropbtn" href="#" class="decksDropar"><i class="fa-solid fa-angle-down fa-fw"></i>
-                        Decks Management
-                    </a>
-                </li>
+                <li><a href="index.html" class="active"><i class="fa-solid fa-chart-line fa-fw"></i> Dashboard</a></li>
+                <li><a id="decksDropbtn" href="#" class="decksDropar"><i class="fa-solid fa-angle-down fa-fw"></i> Decks
+                        Management</a></li>
                 <div id="decksDrop" class="decksDrop">
                     <a href="add_decks.html"><i class="fa-solid fa-plus fa-fw"></i> Add New Deck</a>
                     <a href="manage_decks.html"><i class="fa-solid fa-box fa-fw"></i> Decks Table</a>
                     <a href="reviews.html"><i class="fa-solid fa-star fa-fw"></i> Reviews & Ratings</a>
                     <a href="reports.html"><i class="fa-solid fa-flag fa-fw"></i> Reports & Issues</a>
                 </div>
-
-                <li>
-                    <a id="notiDropbtn" href="#" class="notiDropar"><i class="fa-solid fa-angle-down fa-fw"></i>
-                        Notification Manage
-                    </a>
-                </li>
+                <li><a id="notiDropbtn" href="#" class="notiDropar"><i class="fa-solid fa-angle-down fa-fw"></i>
+                        Notifications</a></li>
                 <div id="notiDrop" class="decksDrop">
-                    <a href="notifications.html"><i class="fa-solid fa-plus fa-fw"></i> Add Notifications</a>
-                    <a href="manage_notifications.html"><i class="fa-solid fa-box fa-fw"></i> Notifications Table</a>
+                    <a href="notifications.html"><i class="fa-solid fa-plus fa-fw"></i> Send Notification</a>
+                    <a href="manage_notifications.html"><i class="fa-solid fa-box fa-fw"></i> Manage Notifications</a>
                 </div>
             </ul>
         </aside>
 
         <section class="dashboard-main">
             <nav>
-                <div class="search">
-                    <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
-                    <input type="text" id="searchInput" placeholder="Search..." />
-                </div>
+                <div class="search"><input type="text" placeholder="Search..." disabled style="opacity:0;"></div>
                 <div class="nav-actions">
                     <div class="userProfile-header">
-                        <div class="userimg">
-                            <img id="mobileUserAvatar" src="../images/user.webp" alt="User" />
-                        </div>
-                        <p id="mobileUserName" style="padding: 10px 15px; font-weight: 400; margin: 0;">Admin</p>
+                        <img id="mobileUserAvatar" src="../images/user.webp" alt="User" />
+                        <p id="mobileUserName">Admin</p>
                     </div>
                 </div>
             </nav>
@@ -125,9 +138,10 @@
                 <div class="container">
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h1 class="dashboard-title">Platform <span>Overview</span></h1>
-                        <button onclick="window.location.reload()" class="main-btn" style="width: auto;">
-                            Refresh <i class="fa-solid fa-rotate-right fa-fw"></i>
+                        <h1 class="dashboard-title">Analytics <span>Overview</span></h1>
+                        <button onclick="window.location.reload()" class="main-btn"
+                            style="width: auto; padding: 10px 20px;">
+                            <i class="fa-solid fa-rotate-right"></i> Refresh
                         </button>
                     </div>
 
@@ -154,16 +168,41 @@
                         </div>
                     </div>
 
-                    <h2 style="margin-bottom: 15px; font-weight: 500;">Traffic Overview (Last 7 Days)</h2>
-                    <div class="chart-container" style="margin-bottom: 20px;">
-                        <canvas id="visitsChart"></canvas>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
+
+                        <div>
+                            <h2 style="margin-bottom: 15px; font-weight: 500;">Traffic Overview (Last 7 Days)</h2>
+                            <div class="chart-container">
+                                <canvas id="visitsChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 style="margin-bottom: 15px; font-weight: 500;">Downloads by Module</h2>
+                            <div class="modules-table-container">
+                                <table class="modules-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Module Name</th>
+                                            <th>Total Downloads</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modulesTableBody">
+                                        <tr>
+                                            <td colspan="2">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
 
             <footer>
                 <div class="container">
-                    <p>&copy; 2025 ASU Anki Flashcards. All rights reserved.</p>
+                    <p>&copy; 2025 ASU Anki Flashcards.</p>
                 </div>
             </footer>
         </section>

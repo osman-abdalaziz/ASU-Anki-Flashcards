@@ -483,16 +483,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const grid = document.getElementById("flashcardsGrid");
     if (grid) {
         grid.addEventListener("click", (e) => {
-            // البحث عن الزر المضغوط
             const btn = e.target.closest(".download-trigger");
 
             if (btn) {
                 const deckId = btn.dataset.id;
                 const version = btn.dataset.version;
 
-                // حفظ العملية في الهستوري
-                console.log(`User downloaded: ${deckId} (${version})`);
+                // أ) حفظ في الهستوري المحلي (للمستخدم)
                 saveDownloadHistory(deckId, version);
+
+                // ب) 🔥 جديد: زيادة العداد في السيرفر للإحصائيات 🔥
+                // نستخدم import() ديناميكي لتجنب مشاكل التحميل
+                import("./db.js").then(({ incrementDeckDownloads }) => {
+                    incrementDeckDownloads(deckId);
+                });
             }
         });
     }
