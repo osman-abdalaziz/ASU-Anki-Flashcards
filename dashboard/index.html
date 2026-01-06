@@ -4,22 +4,69 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin | Decks Management</title>
-    <!-- Website Favicon -->
+    <title>Admin | Analytics</title>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
-    <!-- Google Fonts: Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+        crossorigin="anonymous" />
     <link rel="stylesheet" href="../css/styles.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://firestore.googleapis.com">
-    <link rel="preconnect" href="https://www.googleapis.com">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Simple Cards Styling matching your theme */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--card-color);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            color: var(--main-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-secondary-color);
+            margin: 5px 0;
+        }
+
+        .stat-label {
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        .chart-container {
+            background: var(--card-color);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            height: 400px;
+            position: relative;
+        }
+    </style>
 </head>
 
 <body>
@@ -30,14 +77,18 @@
             </div>
             <ul class="admin-nav">
                 <li>
-                    <a id="decksDropbtn" href="#" class="active decksDropar"><i class="fa-solid fa-angle-up fa-fw"></i>
+                    <a href="index.html" class="active"><i class="fa-solid fa-chart-line fa-fw"></i> Platform
+                        Analytics</a>
+                </li>
+
+                <li>
+                    <a id="decksDropbtn" href="#" class="decksDropar"><i class="fa-solid fa-angle-down fa-fw"></i>
                         Decks Management
                     </a>
                 </li>
-                <div id="decksDrop" class="decksDrop active">
-                    <a href="index.html" class="active"><i class="fa-solid fa-plus fa-fw"></i> Add New Deck</a>
-                    <a href="manage_decks.html" class=""><i class="fa-solid fa-box fa-fw"></i> Decks
-                        Table</a>
+                <div id="decksDrop" class="decksDrop">
+                    <a href="add_decks.html"><i class="fa-solid fa-plus fa-fw"></i> Add New Deck</a>
+                    <a href="manage_decks.html"><i class="fa-solid fa-box fa-fw"></i> Decks Table</a>
                     <a href="reviews.html"><i class="fa-solid fa-star fa-fw"></i> Reviews & Ratings</a>
                     <a href="reports.html"><i class="fa-solid fa-flag fa-fw"></i> Reports & Issues</a>
                 </div>
@@ -48,152 +99,79 @@
                     </a>
                 </li>
                 <div id="notiDrop" class="decksDrop">
-                    <a href="notifications.html"><i class="fa-solid fa-plus fa-fw"></i> Add
-                        Notifications</a>
-                    <a href="manage_notifications.html" class=""><i class="fa-solid fa-box fa-fw"></i> Notifications
-                        Table</a>
+                    <a href="notifications.html"><i class="fa-solid fa-plus fa-fw"></i> Add Notifications</a>
+                    <a href="manage_notifications.html"><i class="fa-solid fa-box fa-fw"></i> Notifications Table</a>
                 </div>
-
-
             </ul>
         </aside>
+
         <section class="dashboard-main">
             <nav>
                 <div class="search">
                     <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
                     <input type="text" id="searchInput" placeholder="Search..." />
                 </div>
-
                 <div class="nav-actions">
                     <div class="userProfile-header">
                         <div class="userimg">
-                            <img id="mobileUserAvatar" src="" alt="User" />
+                            <img id="mobileUserAvatar" src="../images/user.webp" alt="User" />
                         </div>
-                        <p id="mobileUserName" style="
-                                    padding: 10px 15px;
-                                    font-weight: 400;
-                                    margin: 0;
-                                ">
-                            User Name
-                        </p>
+                        <p id="mobileUserName" style="padding: 10px 15px; font-weight: 400; margin: 0;">Admin</p>
                     </div>
+                </div>
             </nav>
 
             <div class="dashboard-content">
                 <div class="container">
-                    <h1 class="dashboard-title">Add New <span>Deck</span></h1>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h1 class="dashboard-title">Platform <span>Overview</span></h1>
+                        <button onclick="window.location.reload()" class="main-btn" style="width: auto;">
+                            Refresh <i class="fa-solid fa-rotate-right fa-fw"></i>
+                        </button>
+                    </div>
 
-                    <form action="" class="decks-form">
-                        <div class="col">
-                            <label class="field">
-                                <span class="field-label">Title</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="title" placeholder="Enter Deck Title" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Description</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="description" placeholder="Enter Deck Description" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Module</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="module" placeholder="Enter Deck Module" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Creator</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="creator" placeholder="Enter Deck Creator" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Download URL</span>
-                                <div class="input-wrap">
-                                    <input type="url" name="downloadUrl" placeholder="Enter Deck Download URL" />
-                                </div>
-                            </label>
+                    <div class="analytics-grid">
+                        <div class="stat-card">
+                            <i class="fa-solid fa-users stat-icon"></i>
+                            <div class="stat-label">Total Students</div>
+                            <div class="stat-value" id="usersCount">...</div>
                         </div>
-                        <div class="col">
-                            <label class="field">
-                                <span class="field-label">Thumbnail URL</span>
-                                <div class="input-wrap">
-                                    <input type="url" name="thumbnailUrl" placeholder="Enter Deck Thumbnail URL" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Year</span>
-                                <div class="filters">
-                                    <select name="year" id="">
-                                        <option value="1st Year">1st Year</option>
-                                        <option value="2nd Year">2nd Year</option>
-                                        <option value="3rd Year">3rd Year</option>
-                                        <option value="4th Year">4th Year</option>
-                                        <option value="5th Year">5th Year</option>
-                                    </select>
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Category</span>
-                                <div class="filters">
-                                    <select name="category" id="">
-                                        <option value="practical">Practical</option>
-                                        <option value="theoretical">Theoretical</option>
-                                    </select>
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Version</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="version" placeholder="Enter Deck Version" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Last Updated</span>
-                                <div class="input-wrap">
-                                    <input type="date" name="lastUpdated" placeholder="Enter Deck Last Updated" />
-                                </div>
-                            </label>
-
+                        <div class="stat-card">
+                            <i class="fa-solid fa-download stat-icon"></i>
+                            <div class="stat-label">Total Downloads</div>
+                            <div class="stat-value" id="downloadsCount">...</div>
                         </div>
+                        <div class="stat-card">
+                            <i class="fa-solid fa-eye stat-icon"></i>
+                            <div class="stat-label">Visits Today</div>
+                            <div class="stat-value" id="todayVisits">...</div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fa-solid fa-layer-group stat-icon"></i>
+                            <div class="stat-label">Active Decks</div>
+                            <div class="stat-value" id="decksCount">...</div>
+                        </div>
+                    </div>
 
-
-                    </form>
-                    <button class="main-btn submit-deck" type="submit">
-                        Add Deck <i class="fa-solid fa-plus fa-fw"></i></button>
+                    <h2 style="margin-bottom: 15px; font-weight: 500;">Traffic Overview (Last 7 Days)</h2>
+                    <div class="chart-container" style="margin-bottom: 20px;">
+                        <canvas id="visitsChart"></canvas>
+                    </div>
                 </div>
             </div>
 
             <footer>
                 <div class="container">
                     <p>&copy; 2025 ASU Anki Flashcards. All rights reserved.</p>
-                    <p>
-                        Made With <i class="fa-solid fa-heart fa-fw"></i> By
-                        <a href="https://osmanabdalaziz-portfolio.netlify.app/" target="_blank"><img
-                                src="../images/mylogo_white.webp" alt="" /></a>
-                    </p>
                 </div>
             </footer>
         </section>
     </main>
-    <div id="customModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-icon"><i id="modalIconClass" class="fa-solid fa-check"></i></div>
-            <h3 id="modalTitle">Title</h3>
-            <p id="modalMessage">Message goes here.</p>
 
-            <div class="modal-actions" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
-                <button id="modalCancelBtn" class="action-btn"
-                    style="background: transparent; border: 1px solid var(--text-color); color: var(--text-color); display: none;">Cancel</button>
-                <button id="modalOkBtn" class="main-btn" style="width: auto; min-width: 100px;">OK</button>
-            </div>
-        </div>
-    </div>
+    <script type="module" src="../js/analytics.js"></script>
     <script type="module" src="../js/admin.js"></script>
     <script type="module" src="../js/main.js"></script>
-    <!-- <script type="module" src="../js/theme.js"></script> -->
 </body>
 
 </html>

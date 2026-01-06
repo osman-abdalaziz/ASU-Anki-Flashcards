@@ -39,13 +39,12 @@
                     </a>
                 </li>
                 <div id="decksDrop" class="decksDrop active">
-                    <a href="index.html" class=""><i class="fa-solid fa-plus fa-fw"></i> Add New Deck</a>
-                    <a href="manage_decks.html" class="active"><i class="fa-solid fa-box fa-fw"></i> Decks
+                    <a href="add_decks.html" class="active"><i class="fa-solid fa-plus fa-fw"></i> Add New Deck</a>
+                    <a href="manage_decks.html" class=""><i class="fa-solid fa-box fa-fw"></i> Decks
                         Table</a>
                     <a href="reviews.html"><i class="fa-solid fa-star fa-fw"></i> Reviews & Ratings</a>
                     <a href="reports.html"><i class="fa-solid fa-flag fa-fw"></i> Reports & Issues</a>
                 </div>
-
 
                 <li>
                     <a id="notiDropbtn" href="#" class="notiDropar"><i class="fa-solid fa-angle-down fa-fw"></i>
@@ -58,6 +57,8 @@
                     <a href="manage_notifications.html" class=""><i class="fa-solid fa-box fa-fw"></i> Notifications
                         Table</a>
                 </div>
+
+
             </ul>
         </aside>
         <section class="dashboard-main">
@@ -84,79 +85,88 @@
 
             <div class="dashboard-content">
                 <div class="container">
-                    <h1 class="dashboard-title">Decks <span>Management</span></h1>
+                    <h1 class="dashboard-title">Add New <span>Deck</span></h1>
 
-                    <div class="search" style="max-width: 100% !important; display: flex; gap: 15px;">
-                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input style="flex: 1;" type="text" id="searchDecksInput"
-                            placeholder="Search by title, module, year...">
-                        <div class="filters" style="display: flex; flex-direction: row; gap: 10px; margin-top: 0;">
-                            <select id="filterYear" style="padding: 12px 40px 12px 20px;">
-                                <option value="all">All Years</option>
-                                <option value="1st Year">1st Year</option>
-                                <option value="2nd Year">2nd Year</option>
-                                <option value="3rd Year">3rd Year</option>
-                                <option value="4th Year">4th Year</option>
-                                <option value="5th Year">5th Year</option>
-                            </select>
+                    <form action="" class="decks-form">
+                        <div class="col">
+                            <label class="field">
+                                <span class="field-label">Title</span>
+                                <div class="input-wrap">
+                                    <input type="text" name="title" placeholder="Enter Deck Title" />
+                                </div>
+                            </label>
+                            <label class="field">
+                                <span class="field-label">Description</span>
+                                <div class="input-wrap">
+                                    <input type="text" name="description" placeholder="Enter Deck Description" />
+                                </div>
+                            </label>
+                            <label class="field">
+                                <span class="field-label">Module</span>
+                                <div class="input-wrap">
+                                    <input type="text" name="module" placeholder="Enter Deck Module" />
+                                </div>
+                            </label>
+                            <label class="field">
+                                <span class="field-label">Creator</span>
+                                <div class="input-wrap">
+                                    <input type="text" name="creator" placeholder="Enter Deck Creator" />
+                                </div>
+                            </label>
+                            <label class="field">
+                                <span class="field-label">Download URL</span>
+                                <div class="input-wrap">
+                                    <input type="url" name="downloadUrl" placeholder="Enter Deck Download URL" />
+                                </div>
+                            </label>
+                        </div>
+                        <div class="col">
+                            <label class="field">
+                                <span class="field-label">Thumbnail URL</span>
+                                <div class="input-wrap">
+                                    <input type="url" name="thumbnailUrl" placeholder="Enter Deck Thumbnail URL" />
+                                </div>
+                            </label>
+                            <label class="field">
+                                <span class="field-label">Year</span>
+                                <div class="filters">
+                                    <select name="year" id="">
+                                        <option value="1st Year">1st Year</option>
+                                        <option value="2nd Year">2nd Year</option>
+                                        <option value="3rd Year">3rd Year</option>
+                                        <option value="4th Year">4th Year</option>
+                                        <option value="5th Year">5th Year</option>
+                                    </select>
+                                </div>
+                            </label>
+                            <label class="field">
+                                <span class="field-label">Category</span>
+                                <div class="filters">
+                                    <select name="category" id="">
+                                        <option value="practical">Practical</option>
+                                        <option value="theoretical">Theoretical</option>
+                                    </select>
+                                </div>
+                            </label>
+                            <label class="field">
+                                <span class="field-label">Version</span>
+                                <div class="input-wrap">
+                                    <input type="text" name="version" placeholder="Enter Deck Version" />
+                                </div>
+                            </label>
+                            <label class="field">
+                                <span class="field-label">Last Updated</span>
+                                <div class="input-wrap">
+                                    <input type="date" name="lastUpdated" placeholder="Enter Deck Last Updated" />
+                                </div>
+                            </label>
 
-                            <select id="filterCategory" style="padding: 12px 40px 12px 20px;">
-                                <option value="all">All Categories</option>
-                                <option value="theoretical">Theoretical</option>
-                                <option value="practical">Practical</option>
-                            </select>
                         </div>
 
-                    </div>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Module</th>
-                                    <th>Year</th>
-                                    <th>Last Upload</th>
-                                    <th>Version</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="decksTableBody">
-                            </tbody>
-                        </table>
-                    </div>
 
-                </div>
-            </div>
-            <div id="editDeckModal" class="edit-modal-overlay">
-                <div class="edit-modal-box">
-                    <div class="edit-modal-header">
-                        <h3 style="color: white;">Edit Deck</h3>
-                        <button class="close-modal" onclick="closeEditModal()">&times;</button>
-                    </div>
-                    <form id="editDeckForm" class="decks-form-edit">
-                        <input type="hidden" id="editDeckId"> <label class="field"><span
-                                class="field-label">Title</span>
-                            <div class="input-wrap"><input type="text" id="editTitle" style="width:100%; ">
-                            </div>
-                        </label>
-
-                        <label class="field"><span class="field-label">Download URL</span>
-                            <div class="input-wrap"><input type="text" id="editUrl" style="width:100%;">
-                            </div>
-                        </label>
-                        <label class="field"><span class="field-label">Image URL</span>
-                            <div class="input-wrap"><input type="text" id="editimgUrl" style="width:100%;">
-                            </div>
-                        </label>
-
-                        <label class="field"><span class="field-label">Version</span>
-                            <div class="input-wrap"><input type="text" id="editVersion" style="width:100%;"></div>
-                        </label>
-
-                        <div style="margin-top: 10px;">
-                            <button type="submit" class="main-btn">Save Changes</button>
-                        </div>
                     </form>
+                    <button class="main-btn submit-deck" type="submit">
+                        Add Deck <i class="fa-solid fa-plus fa-fw"></i></button>
                 </div>
             </div>
 
@@ -185,8 +195,8 @@
             </div>
         </div>
     </div>
+    <script type="module" src="../js/admin.js"></script>
     <script type="module" src="../js/main.js"></script>
-    <script type="module" src="../js/manage_decks.js"></script>
     <!-- <script type="module" src="../js/theme.js"></script> -->
 </body>
 
