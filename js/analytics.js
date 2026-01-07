@@ -155,10 +155,10 @@ function renderTopDecksTable(decks) {
     displayDecks.forEach((deck) => {
         const row = `
             <tr>
-                <td><strong>${deck.title}</strong></td>
+                <td><strong class="badge-download"><i class="fa-solid fa-box fa-fw"></i> ${deck.title}</strong></td>
                 <td>${deck.module}</td>
                 <td>${deck.category}</td>
-                <td><span style="font-size:0.85rem; color:#888;">${deck.year}</span></td>
+                <td><span style="font-size:0.85rem; background: #ffffff11; color:#888; padding: 4px 10px; border-radius: 6px;">${deck.year}</span></td>
                 <td><span class="badge-download">${deck.downloads} <i class="fa-solid fa-download" style="font-size:0.7rem; margin-left:3px;"></i></span></td>
             </tr>
         `;

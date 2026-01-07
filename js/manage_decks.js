@@ -50,11 +50,11 @@ async function loadDecks() {
 
             const row = `
                 <tr data-year="${yearVal}" data-category="${catVal}"> 
-                    <td>${data.title}</td>
+                    <td><span class="badge-download"><i class="fa-solid fa-box fa-fw"></i> ${data.title}</span></td>
                     <td>${data.module}</td>
                     <td>${data.year}</td>
                     <td>${data.lastUpdate}</td>
-                    <td>${data.version}</td>
+                    <td><span style="font-size:0.85rem; background: #ffffff11; color:#888; padding: 4px 10px; border-radius: 6px;">${data.version}</span></td>
                     <td>
                         <button class="action-btn edit" onclick="window.openEditModal('${docSnap.id}', '${data.title}', '${data.downloadUrl}', '${data.imageUrl}', '${data.version}')">
                             Edit <i class="fa-solid fa-pen"></i>

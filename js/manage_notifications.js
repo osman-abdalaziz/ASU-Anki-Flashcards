@@ -16,7 +16,8 @@ onAuthStateChanged(auth, (user) => {
 const tableBody = document.getElementById("notifTableBody");
 
 async function loadNotifs() {
-    tableBody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
+    tableBody.innerHTML =
+        '<tr><td colspan="4" style="text-align: center">Loading...</td></tr>';
     const querySnapshot = await getDocs(
         collection(db, "general_notifications")
     );
@@ -32,7 +33,9 @@ async function loadNotifs() {
         const data = docSnap.data();
         tableBody.innerHTML += `
             <tr>
-                <td>${data.title}</td>
+                <td><span class="badge-download"><i class="fa-solid fa-bell fa-fw"></i> ${
+                    data.title
+                }</span></td>
                 <td>${data.message.substring(0, 50)}...</td>
                 <td>${data.type}</td>
                 <td>

@@ -198,6 +198,15 @@ a {
     text-align: center;
 }
 
+.badge-download {
+            background: rgba(0, 136, 209, 0.1);
+            color: var(--main-color);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
 /* Base styles for navigation */
 nav {
     background-color: var(--sec-background-color);
@@ -1871,13 +1880,12 @@ footer p a {
     margin-top: 10px;
     margin-bottom: 20px;
     overflow-x: auto;
-    background: var(--card-color);
+    background: var(--sec-background-color);
     border-radius: 10px;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     -ms-border-radius: 10px;
     -o-border-radius: 10px;
-    /*padding: 20px;*/
 }
 
 .data-table {
@@ -1885,6 +1893,7 @@ footer p a {
     border-collapse: collapse;
     color: #eee;
     min-width: 600px;
+    
 }
 
 .data-table th,
@@ -1899,8 +1908,8 @@ footer p a {
 }
 
 .data-table th {
-    background-color: var(--sec-background-color);
-    color: var(--main-color);
+    background-color: #222526;
+    color: var(--text-color);
     font-weight: 400;
 }
 
@@ -1909,15 +1918,11 @@ footer p a {
 }
 
 .data-table tr {
-    background-color: var(--card-color);
-}
-
-.data-table tr:nth-child(odd) {
-    background-color: #2a2a2a;
+    background-color: var(--sec-background-color);
 }
 
 .data-table tr:hover {
-    background-color: #343434;
+    background-color: #0f0f0f;
 }
 
 .action-btn {
