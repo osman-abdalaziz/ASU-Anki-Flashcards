@@ -1908,7 +1908,7 @@ footer p a {
 }
 
 .data-table th {
-    background-color: #222526;
+    background-color: var(--card-color);
     color: var(--text-color);
     font-weight: 400;
 }
