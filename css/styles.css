@@ -1052,6 +1052,7 @@ textarea:focus {
     margin: 0 0 10px 0;
     /* 🔥 الكود الجديد لقص النص الطويل */
     display: -webkit-box;
+    line-clamp: 3;
     -webkit-line-clamp: 3; /* عدد الأسطر المسموح به */
     -webkit-box-orient: vertical;
     overflow: hidden;
