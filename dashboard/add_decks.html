@@ -83,87 +83,89 @@
             <div class="dashboard-content">
                 <div class="container">
                     <h1 class="dashboard-title">Add New <span>Deck</span></h1>
+                    <div class="adding-form">
+                        <form action="" class="decks-form">
+                            <div class="col">
+                                <label class="field">
+                                    <span class="field-label">Title</span>
+                                    <div class="input-wrap">
+                                        <input type="text" name="title" placeholder="Enter Deck Title" />
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Description</span>
+                                    <div class="input-wrap">
+                                        <input type="text" name="description" placeholder="Enter Deck Description" />
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Module</span>
+                                    <div class="input-wrap">
+                                        <input type="text" name="module" placeholder="Enter Deck Module" />
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Creator</span>
+                                    <div class="input-wrap">
+                                        <input type="text" name="creator" placeholder="Enter Deck Creator" />
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Download URL</span>
+                                    <div class="input-wrap">
+                                        <input type="url" name="downloadUrl" placeholder="Enter Deck Download URL" />
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="col">
+                                <label class="field">
+                                    <span class="field-label">Thumbnail URL</span>
+                                    <div class="input-wrap">
+                                        <input type="url" name="thumbnailUrl" placeholder="Enter Deck Thumbnail URL" />
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Year</span>
+                                    <div class="filters">
+                                        <select name="year" id="">
+                                            <option value="1st Year">1st Year</option>
+                                            <option value="2nd Year">2nd Year</option>
+                                            <option value="3rd Year">3rd Year</option>
+                                            <option value="4th Year">4th Year</option>
+                                            <option value="5th Year">5th Year</option>
+                                        </select>
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Category</span>
+                                    <div class="filters">
+                                        <select name="category" id="">
+                                            <option value="practical">Practical</option>
+                                            <option value="theoretical">Theoretical</option>
+                                        </select>
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Version</span>
+                                    <div class="input-wrap">
+                                        <input type="text" name="version" placeholder="Enter Deck Version" />
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Last Updated</span>
+                                    <div class="input-wrap">
+                                        <input type="date" name="lastUpdated" placeholder="Enter Deck Last Updated" />
+                                    </div>
+                                </label>
 
-                    <form action="" class="decks-form">
-                        <div class="col">
-                            <label class="field">
-                                <span class="field-label">Title</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="title" placeholder="Enter Deck Title" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Description</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="description" placeholder="Enter Deck Description" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Module</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="module" placeholder="Enter Deck Module" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Creator</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="creator" placeholder="Enter Deck Creator" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Download URL</span>
-                                <div class="input-wrap">
-                                    <input type="url" name="downloadUrl" placeholder="Enter Deck Download URL" />
-                                </div>
-                            </label>
-                        </div>
-                        <div class="col">
-                            <label class="field">
-                                <span class="field-label">Thumbnail URL</span>
-                                <div class="input-wrap">
-                                    <input type="url" name="thumbnailUrl" placeholder="Enter Deck Thumbnail URL" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Year</span>
-                                <div class="filters">
-                                    <select name="year" id="">
-                                        <option value="1st Year">1st Year</option>
-                                        <option value="2nd Year">2nd Year</option>
-                                        <option value="3rd Year">3rd Year</option>
-                                        <option value="4th Year">4th Year</option>
-                                        <option value="5th Year">5th Year</option>
-                                    </select>
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Category</span>
-                                <div class="filters">
-                                    <select name="category" id="">
-                                        <option value="practical">Practical</option>
-                                        <option value="theoretical">Theoretical</option>
-                                    </select>
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Version</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="version" placeholder="Enter Deck Version" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Last Updated</span>
-                                <div class="input-wrap">
-                                    <input type="date" name="lastUpdated" placeholder="Enter Deck Last Updated" />
-                                </div>
-                            </label>
-
-                        </div>
+                            </div>
 
 
-                    </form>
-                    <button class="main-btn submit-deck" type="submit">
-                        Add Deck <i class="fa-solid fa-plus fa-fw"></i></button>
+                        </form>
+                        <button class="main-btn submit-deck" type="submit">
+                            Add Deck <i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
+
                 </div>
             </div>
 

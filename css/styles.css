@@ -1886,11 +1886,13 @@ footer p a {
     margin-bottom: 20px;
     overflow-x: auto;
     background: var(--sec-background-color);
-    border-radius: 10px;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    -ms-border-radius: 10px;
-    -o-border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--ver-tag-color);
+    border-radius: 12px;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    -ms-border-radius: 12px;
+    -o-border-radius: 12px;
 }
 
 .data-table {
@@ -1905,11 +1907,13 @@ footer p a {
 .data-table td {
     padding: 15px;
     text-align: left;
-    border-bottom: 1px solid var(--ver-tag-color);
+}
+.data-table td:last-child{
+    text-align: center;
 }
 
-.data-table td {
-    border: 1px solid var(--ver-tag-color);
+.data-table td:not(:last-child) {
+    border-right: 1px solid var(--ver-tag-color);
 }
 
 .data-table th {
@@ -1925,6 +1929,9 @@ footer p a {
 .data-table tr {
     background-color: var(--sec-background-color);
 }
+.data-table tr:not(:last-child){
+    border-bottom: 1px solid var(--ver-tag-color);
+}
 
 .data-table tr:hover {
     background-color: #0f0f0f;
@@ -1932,7 +1939,7 @@ footer p a {
 
 .action-btn {
     border: none;
-    padding: 6px 20px;
+    padding: 5px 15px;
     font-size: 15px;
     cursor: pointer;
     margin-right: 5px;
@@ -2230,10 +2237,6 @@ html[data-theme="light"] .report-btn:hover {
     }
 }
 
-.submit-deck{
-    margin-bottom: 20px;
-}
-
 .dashboard-title{
     margin-bottom: 10px;
 }
@@ -2246,4 +2249,17 @@ html[data-theme="light"] .report-btn:hover {
             flex-wrap: wrap;
             gap: 15px;
             align-items: center;
-        }
+}
+
+.adding-form{
+    padding: 20px;
+    background-color: var(--sec-background-color);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--ver-tag-color);
+    margin-bottom: 20px;
+    border-radius: 12px;
+    -webkit-border-radius: 12px;
+    -moz-border-radius: 12px;
+    -ms-border-radius: 12px;
+    -o-border-radius: 12px;
+}

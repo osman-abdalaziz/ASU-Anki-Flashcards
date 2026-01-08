@@ -84,47 +84,49 @@
             <div class="dashboard-content">
                 <div class="container">
                     <h1 class="dashboard-title">Add New <span>Notification</span></h1>
-
-                    <form action="" class="decks-form">
-                        <div class="not-col">
-                            <label class="field">
-                                <span class="field-label">Title</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="title" placeholder="Enter Notification Title" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Message</span>
-                                <div class="input-wrap">
-                                    <input type="text" name="message" placeholder="Enter Notification Message" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Link</span>
-                                <div class="input-wrap">
-                                    <input type="url" name="link" placeholder="Enter Notification Link" />
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Type</span>
-                                <div class="filters">
-                                    <select name="type" id="">
-                                        <option value="info">Info</option>
-                                        <option value="danger">Danger</option>
-                                        <option value="success">Success</option>
-                                    </select>
-                                </div>
-                            </label>
-                            <label class="field">
-                                <span class="field-label">Created Date</span>
-                                <div class="input-wrap">
-                                    <input type="date" name="createdDate" placeholder="Enter Notification Date" />
-                                </div>
-                            </label>
-                        </div>
-                    </form>
-                    <button class="main-btn submit-deck" type="submit">
-                        Push Notification <i class="fa-solid fa-plus fa-fw"></i></button>
+                    <div class="adding-form">
+                        <form action="" class="decks-form">
+                            <div class="not-col">
+                                <label class="field">
+                                    <span class="field-label">Title</span>
+                                    <div class="input-wrap">
+                                        <input type="text" name="title" placeholder="Enter Notification Title" />
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Message</span>
+                                    <div class="input-wrap">
+                                        <textarea type="text" name="message" rows="5"
+                                            placeholder="Enter Notification Message"></textarea>
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Link</span>
+                                    <div class="input-wrap">
+                                        <input type="url" name="link" placeholder="Enter Notification Link" />
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Type</span>
+                                    <div class="filters">
+                                        <select name="type" id="">
+                                            <option value="info">Info</option>
+                                            <option value="danger">Danger</option>
+                                            <option value="success">Success</option>
+                                        </select>
+                                    </div>
+                                </label>
+                                <label class="field">
+                                    <span class="field-label">Created Date</span>
+                                    <div class="input-wrap">
+                                        <input type="date" name="createdDate" placeholder="Enter Notification Date" />
+                                    </div>
+                                </label>
+                            </div>
+                        </form>
+                        <button class="main-btn submit-deck" type="submit">
+                            Push Notification <i class="fa-solid fa-plus fa-fw"></i></button>
+                    </div>
                 </div>
             </div>
 
