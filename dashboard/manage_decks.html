@@ -60,7 +60,7 @@
         </aside>
         <section class="dashboard-main">
             <nav>
-                <div class="search">
+                <div class="search" disabled style="opacity:0;">
                     <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
                     <input type="text" id="searchInput" placeholder="Search..." />
                 </div>
@@ -84,29 +84,32 @@
                 <div class="container">
                     <h1 class="dashboard-title">Decks <span>Management</span></h1>
 
-                    <div class="search" style="max-width: 100% !important; display: flex; gap: 15px;">
-                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input style="flex: 1;" type="text" id="searchDecksInput"
-                            placeholder="Search by title, module, year...">
-                        <div class="filters" style="display: flex; flex-direction: row; gap: 10px; margin-top: 0;">
-                            <select id="filterYear" style="padding: 12px 40px 12px 20px;">
-                                <option value="all">All Years</option>
-                                <option value="1st Year">1st Year</option>
-                                <option value="2nd Year">2nd Year</option>
-                                <option value="3rd Year">3rd Year</option>
-                                <option value="4th Year">4th Year</option>
-                                <option value="5th Year">5th Year</option>
-                            </select>
-
-                            <select id="filterCategory" style="padding: 12px 40px 12px 20px;">
-                                <option value="all">All Categories</option>
-                                <option value="theoretical">Theoretical</option>
-                                <option value="practical">Practical</option>
-                            </select>
-                        </div>
-
-                    </div>
                     <div class="table-container">
+                        <div class="controls-wrapper">
+                            <div class="search" style="max-width: 100% !important; display: flex; gap: 15px;">
+                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                <input style="flex: 1;" type="text" id="searchDecksInput"
+                                    placeholder="Search by title, module, year...">
+                                <div class="filters"
+                                    style="display: flex; flex-direction: row; gap: 10px; margin-top: 0;">
+                                    <select id="filterYear" style="padding: 12px 40px 12px 20px;">
+                                        <option value="all">All Years</option>
+                                        <option value="1st Year">1st Year</option>
+                                        <option value="2nd Year">2nd Year</option>
+                                        <option value="3rd Year">3rd Year</option>
+                                        <option value="4th Year">4th Year</option>
+                                        <option value="5th Year">5th Year</option>
+                                    </select>
+
+                                    <select id="filterCategory" style="padding: 12px 40px 12px 20px;">
+                                        <option value="all">All Categories</option>
+                                        <option value="theoretical">Theoretical</option>
+                                        <option value="practical">Practical</option>
+                                    </select>
+                                </div>
+
+                            </div>
+                        </div>
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -129,7 +132,8 @@
                 <div class="edit-modal-box">
                     <div class="edit-modal-header">
                         <h3 style="color: white;">Edit Deck</h3>
-                        <button class="close-modal" onclick="closeEditModal()">&times;</button>
+                        <button class="close-modal" onclick="closeEditModal()"><i
+                                class="fa-solid fa-xmark"></i></button>
                     </div>
                     <form id="editDeckForm" class="decks-form-edit">
                         <input type="hidden" id="editDeckId"> <label class="field"><span

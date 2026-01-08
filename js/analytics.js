@@ -148,14 +148,14 @@ function renderTopDecksTable(decks) {
             allDecksData.length === 0
                 ? "No downloads recorded yet."
                 : "No decks match filters.";
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">${msg}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 15px;">${msg}</td></tr>`;
         return;
     }
 
     displayDecks.forEach((deck) => {
         const row = `
             <tr>
-                <td><strong class="badge-download"><i class="fa-solid fa-box fa-fw"></i> ${deck.title}</strong></td>
+                <td><strong class="badge-download"><i class="fa-solid fa-folder-closed fa-fw"></i> ${deck.title}</strong></td>
                 <td>${deck.module}</td>
                 <td>${deck.category}</td>
                 <td><span style="font-size:0.85rem; background: #ffffff11; color:#888; padding: 4px 10px; border-radius: 6px;">${deck.year}</span></td>

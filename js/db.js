@@ -502,7 +502,12 @@ export async function loadAllNotifications(allDecks) {
         } else {
             dateStr = "Now";
         }
-
+        let notifLinks = ``;
+        if (notif.link) {
+            notifLinks = `<a href="${notif.link}" target="_blank"  class="notif-action-btn main-btn">Visit Link <i class="fa-solid fa-arrow-up-right-from-square fa-fw"></i></a>`;
+        } else {
+            notifLinks = ``;
+        }
         htmlContent += `
             <div class="notif-item unread" style="align-items: flex-start;">
                 <div class="notif-icon ${bg}"><i class="fa-solid ${icon}"></i></div>
@@ -513,7 +518,8 @@ export async function loadAllNotifications(allDecks) {
                     </div>
                     <p class="notif-text" style="margin-top: 5px;">${notif.message}</p>
                     <div class="notif-actions">
-                         <button onclick="window.markGeneralAsRead('${notif.id}')" class="notif-action-btn ignore">Mark read</button>
+                        ${notifLinks}
+                        <button onclick="window.markGeneralAsRead('${notif.id}')" class="notif-action-btn ignore">Mark read</button>
                     </div>
                 </div>
             </div>`;

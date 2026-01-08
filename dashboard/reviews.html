@@ -53,7 +53,7 @@
 
         <section class="dashboard-main">
             <nav>
-                <div class="search">
+                <div class="search" disabled style="opacity:0;">
                     <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
                     <input type="text" id="searchInput" placeholder="Search reviews..." />
                 </div>
@@ -71,13 +71,14 @@
                 <div class="container">
                     <h1 class="dashboard-title">Reviews <span>Management</span></h1>
 
-                    <div class="search" style="max-width: 100% !important; margin-bottom: 20px;">
-                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input type="text" id="searchReviewsInput"
-                            placeholder="Search by deck name, user, or comment...">
-                    </div>
-
                     <div class="table-container">
+                        <div class="controls-wrapper">
+                            <div class="search" style="max-width: 100% !important;">
+                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                <input type="text" id="searchReviewsInput"
+                                    placeholder="Search by deck name, user, or comment...">
+                            </div>
+                        </div>
                         <table class="data-table">
                             <thead>
                                 <tr>

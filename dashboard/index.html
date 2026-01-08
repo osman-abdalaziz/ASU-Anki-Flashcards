@@ -73,15 +73,7 @@
         }
 
         /* تنسيقات الفلاتر الجديدة (مطابقة للموقع) */
-        .controls-wrapper {
-            background: var(--sec-background-color);
-            padding: 20px;
-            /* border-radius: 12px 0 0 12px; */
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
-        }
+
 
         .search-box {
             flex: 1;
@@ -145,7 +137,7 @@
 
         <section class="dashboard-main">
             <nav>
-                <div class="search">
+                <div class="search" disabled style="opacity:0;">
                     <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
                     <input type="text" id="searchInput" placeholder="Search..." />
                 </div>

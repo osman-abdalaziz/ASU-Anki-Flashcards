@@ -50,7 +50,7 @@ async function loadDecks() {
 
             const row = `
                 <tr data-year="${yearVal}" data-category="${catVal}"> 
-                    <td><span class="badge-download"><i class="fa-solid fa-box fa-fw"></i> ${data.title}</span></td>
+                    <td><span class="badge-download"><i class="fa-solid fa-folder-closed fa-fw"></i> ${data.title}</span></td>
                     <td>${data.module}</td>
                     <td>${data.year}</td>
                     <td>${data.lastUpdate}</td>

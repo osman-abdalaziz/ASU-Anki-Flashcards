@@ -61,7 +61,7 @@
         </aside>
         <section class="dashboard-main">
             <nav>
-                <div class="search">
+                <div class="search" disabled style="opacity:0;">
                     <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
                     <input type="text" id="searchInput" placeholder="Search..." />
 
@@ -86,12 +86,15 @@
                 <div class="container">
                     <h1>Notifications <span>Management</span></h1>
 
-                    <div class="search" style="max-width: 100% !important;">
-                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                        <input type="text" id="searchNotifInput" placeholder="Search notifications...">
 
-                    </div>
                     <div class="table-container">
+                        <div class="controls-wrapper">
+                            <div class="search" style="max-width: 100% !important;">
+                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                                <input type="text" id="searchNotifInput" placeholder="Search notifications...">
+
+                            </div>
+                        </div>
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -123,7 +126,7 @@
         <div class="edit-modal-box">
             <div class="edit-modal-header">
                 <h3 style="color: white;">Edit Notification</h3>
-                <button class="close-modal" onclick="closeEditModal()">&times;</button>
+                <button class="close-modal" onclick="closeEditModal()"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="editNotifForm">
                 <input type="hidden" id="editNotifId">
@@ -131,7 +134,7 @@
                     <div class="input-wrap"><input type="text" id="editTitle" style="width:100%;"></div>
                 </label>
                 <label class="field"><span class="field-label">Message</span>
-                    <div class="input-wrap"><input id="editMessage" rows="3" style="width:100%;"></div>
+                    <div class="input-wrap"><textarea id="editMessage" rows="5" style="width:100%;"></textarea></div>
                 </label>
                 <button type="submit" class="main-btn" style="margin-top:10px;">Save Changes</button>
             </form>
