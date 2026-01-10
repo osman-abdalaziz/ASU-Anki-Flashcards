@@ -30,9 +30,12 @@
             </div>
             <ul class="admin-nav">
                 <li><a href="index.html"><i class="fa-solid fa-chart-line fa-fw"></i> Dashboard</a></li>
+                <li><a href="manage_users.html"><i class="fa-solid fa-users fa-fw"></i> Users & Roles</a>
+                </li>
                 <li>
-                    <a id="decksDropbtn" href="#" class="active decksDropar"><i class="fa-solid fa-angle-up fa-fw"></i>
-                        Decks Management
+                    <a id="decksDropbtn" href="#" class="active decksDropar"><i
+                            class="fa-solid fa-layer-group fa-fw"></i>
+                        Decks Manage
                     </a>
                 </li>
                 <div id="decksDrop" class="decksDrop active">
@@ -43,8 +46,17 @@
                     <a href="reports.html"><i class="fa-solid fa-flag fa-fw"></i> Reports & Issues</a>
                 </div>
 
+                <li><a id="tasksDropbtn" href="#" class="taskDroper"><i class="fa-solid fa-users-gear fa-fw"></i>
+                        Team
+                        Tasks</a></li>
+                <div id="tasksDrop" class="decksDrop" style="display: none;"> <a href="add_task.html"><i
+                            class="fa-solid fa-plus fa-fw"></i> Add Task</a>
+                    <a href="manage_tasks.html"><i class="fa-solid fa-list-check fa-fw"></i> Manage Tasks</a>
+                    <a href="task_submissions.html"><i class="fa-solid fa-file-import fa-fw"></i> Submissions</a>
+                </div>
+
                 <li>
-                    <a id="notiDropbtn" href="#" class="notiDropar"><i class="fa-solid fa-angle-down fa-fw"></i>
+                    <a id="notiDropbtn" href="#" class="notiDropar"><i class="fa-solid fa-bullhorn fa-fw"></i></i>
                         Notification Manage
                     </a>
                 </li>
@@ -65,19 +77,43 @@
                     <input type="text" id="searchInput" placeholder="Search..." />
                 </div>
 
-                <div class="nav-actions">
+                <div class="nav-actions" style="display: flex; align-items: center;  align-items: center;">
+
+                    <div style="position: relative;">
+
+                        <button id="dashNotifBtn" class="notif-btn" aria-label="Notifications">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="dashNotifBadge" class="notif-badge" style="display: none;">0</span>
+                        </button>
+
+                        <div id="dashNotifDropdown" class="notif-dropdown" style="display: none;">
+                            <div class="notif-header">
+                                <h3>Notifications</h3>
+                                <span id="dashMarkAllRead" class="mark-read" style="cursor: pointer;">Mark all as
+                                    read</span>
+                            </div>
+
+                            <div id="dashNotifList" class="notif-list">
+                                <div style="padding: 20px; text-align: center; color: var(--text-secondary-color);">
+                                    Loading...</div>
+                            </div>
+                        </div>
+
+                    </div>
+
                     <div class="userProfile-header">
                         <div class="userimg">
                             <img id="mobileUserAvatar" src="" alt="User" />
                         </div>
                         <p id="mobileUserName" style="
-                                    padding: 10px 15px;
-                                    font-weight: 400;
-                                    margin: 0;
-                                ">
+                                                                                                    padding: 10px 15px;
+                                                                                                    font-weight: 400;
+                                                                                                    margin: 0;
+                                                                                                ">
                             User Name
                         </p>
                     </div>
+                </div>
             </nav>
 
             <div class="dashboard-content">

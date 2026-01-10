@@ -4,67 +4,74 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin | Reports Management</title>
+    <title>Admin | Manage All Tasks</title>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="stylesheet" href="../css/styles.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://firestore.googleapis.com">
-    <link rel="preconnect" href="https://www.googleapis.com">
+    <!-- <style>
+        /* شريط الفلترة */
+        .controls-wrapper {
+            background: var(--sex-background-color);
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-color);
+            cursor: pointer;
+        }
+    </style> -->
 </head>
 
 <body>
     <main class="dashboard-container">
         <aside>
-            <div class="admin-logo">
-                <a href="../index.html"><img src="../images/logo.webp" alt="" /></a>
-            </div>
+            <div class="admin-logo"><a href="../index.html"><img src="../images/logo.webp" alt="" /></a></div>
             <ul class="admin-nav">
                 <li><a href="index.html"><i class="fa-solid fa-chart-line fa-fw"></i> Dashboard</a></li>
                 <li><a href="manage_users.html"><i class="fa-solid fa-users fa-fw"></i> Users & Roles</a>
                 </li>
-                <li>
-                    <a id="decksDropbtn" href="#" class="decksDropar"><i class="fa-solid fa-layer-group fa-fw"></i>
-                        Decks Manage
-                    </a>
-                </li>
-                <div id="decksDrop" class="decksDrop active">
+                <li><a id="decksDropbtn" href="#" class="decksDropar"><i class="fa-solid fa-layer-group fa-fw"></i>
+                        Decks
+                        Manage</a></li>
+                <div id="decksDrop" class="decksDrop">
                     <a href="add_decks.html"><i class="fa-solid fa-plus fa-fw"></i> Add New Deck</a>
                     <a href="manage_decks.html"><i class="fa-solid fa-box fa-fw"></i> Decks Table</a>
-                    <a href="reviews.html"><i class="fa-solid fa-star fa-fw"></i> Reviews & Ratings</a>
-                    <a href="reports.html" class="active"><i class="fa-solid fa-flag fa-fw"></i> Reports & Issues</a>
+                    <a href="reviews.html"><i class="fa-solid fa-star fa-fw"></i> Reviews</a>
+                    <a href="reports.html"><i class="fa-solid fa-flag fa-fw"></i> Reports</a>
                 </div>
 
-                <li><a id="tasksDropbtn" href="#" class="taskDroper"><i class="fa-solid fa-users-gear fa-fw"></i>
-                        Team
+                <li><a id="tasksDropbtn" href="#" class="active"><i class="fa-solid fa-users-gear fa-fw"></i> Team
                         Tasks</a></li>
-                <div id="tasksDrop" class="decksDrop" style="display: none;"> <a href="add_task.html"><i
-                            class="fa-solid fa-plus fa-fw"></i> Add Task</a>
-                    <a href="manage_tasks.html"><i class="fa-solid fa-list-check fa-fw"></i> Manage Tasks</a>
+                <div id="tasksDrop" class="decksDrop active" style="display: none;">
+                    <a href="add_task.html"><i class="fa-solid fa-plus fa-fw"></i> Add Task</a>
+                    <a href="manage_tasks.html" class="active"><i class="fa-solid fa-list-check fa-fw"></i> Manage
+                        Tasks</a>
                     <a href="task_submissions.html"><i class="fa-solid fa-file-import fa-fw"></i> Submissions</a>
                 </div>
 
-                <li>
-                    <a id="notiDropbtn" href="#" class="notiDropar"><i class="fa-solid fa-bullhorn fa-fw"></i>
-                        Notification Manage
-                    </a>
-                </li>
+                <li><a id="notiDropbtn" href="#" class="notiDropar"><i class="fa-solid fa-bullhorn fa-fw"></i>
+                        Notifications</a></li>
                 <div id="notiDrop" class="decksDrop">
-                    <a href="notifications.html"><i class="fa-solid fa-plus fa-fw"></i> Add Notifications</a>
-                    <a href="manage_notifications.html"><i class="fa-solid fa-box fa-fw"></i> Notifications Table</a>
+                    <a href="notifications.html"><i class="fa-solid fa-plus fa-fw"></i> Send Notification</a>
+                    <a href="manage_notifications.html"><i class="fa-solid fa-box fa-fw"></i> Manage Notifications</a>
                 </div>
             </ul>
         </aside>
 
         <section class="dashboard-main">
             <nav>
-                <div class="search" disabled style="opacity:0;">
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input type="text" id="searchInput" placeholder="Search reports..." />
-                </div>
+                <div style="flex:1;"></div>
                 <div class="nav-actions" style="display: flex; align-items: center;  align-items: center;">
 
                     <div style="position: relative;">
@@ -106,33 +113,52 @@
 
             <div class="dashboard-content">
                 <div class="container">
-                    <h1 style="margin-bottom: 20px;" class="dashboard-title">Reports <span>Management</span></h1>
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h1 style="margin-bottom: 0px;" class="dashboard-title">Manage <span>All Tasks</span></h1>
+                        <button onclick="window.location.reload()" class="main-btn" style="width: auto;">
+                            Refresh <i class="fa-solid fa-rotate-right fa-fw"></i>
+                        </button>
+                    </div>
+
+
+
                     <div class="table-container">
                         <div class="controls-wrapper">
-                            <div class="search" style="max-width: 100% !important;">
-                                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                                <input type="text" id="searchReportsInput"
-                                    placeholder="Search by deck, reason, or details...">
+                            <label style="color:var(--text-secondary-color); font-size:0.9rem;">Filter Status:</label>
+                            <div class="filters" style="margin: 0;">
+                                <select id="statusFilter" class="filter-select">
+                                    <option value="all">All Tasks</option>
+                                    <option value="open">Open (Available)</option>
+                                    <option value="assigned">In Progress</option>
+                                    <option value="review">Under Review</option>
+                                    <option value="approved">Completed</option>
+                                </select>
+                            </div>
+
+                            <div style="flex:1; text-align:right; font-size:0.9rem; color:var(--text-secondary-color);">
+                                <span id="tasksCount" class="badge-download">Total: 0</span>
                             </div>
                         </div>
                         <table class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Deck Title</th>
-                                    <th>Issue Reason</th>
-                                    <th>Details</th>
-                                    <th>Reporter</th>
-                                    <th>Date</th>
+                                    <th>Task Title</th>
+                                    <th>Status</th>
+                                    <th>Assigned To</th>
+                                    <th>Created At</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody id="reportsTableBody">
+                            <tbody id="allTasksTable">
+                                <tr>
+                                    <td colspan="5" style="text-align:center; padding: 20px;">Loading tasks...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-
             <footer>
                 <div class="container">
                     <p>&copy; 2025 ASU Anki Flashcards.</p>
@@ -146,16 +172,13 @@
             <div class="modal-icon"><i id="modalIconClass" class="fa-solid fa-check"></i></div>
             <h3 id="modalTitle">Title</h3>
             <p id="modalMessage">Message goes here.</p>
-
             <div class="modal-actions" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
-                <button id="modalCancelBtn" class="action-btn"
-                    style="background: transparent; border: 1px solid var(--text-color); color: var(--text-color); display: none;">Cancel</button>
                 <button id="modalOkBtn" class="main-btn" style="width: auto; min-width: 100px;">OK</button>
             </div>
         </div>
     </div>
 
-    <script type="module" src="../js/manage_reports.js"></script>
+    <script type="module" src="../js/admin_manage_tasks.js"></script>
     <script type="module" src="../js/main.js"></script>
 </body>
 

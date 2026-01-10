@@ -7,7 +7,8 @@ import {
     setDoc,
     serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+// استيراد الملف الجديد المنفصل
+import { initDashboardNotifications } from "./dashboard_notifications.js";
 // 🔴 هام: ضع إيميلك هنا (نفس الإيميل الموجود في قواعد الأمان)
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
 
@@ -17,6 +18,7 @@ const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
 function initAdminGuard() {
     onAuthStateChanged(auth, (user) => {
         if (user) {
+            initDashboardNotifications(user.uid);
             // هل المستخدم هو الأدمن؟
             if (user.email !== ADMIN_EMAIL) {
                 showModal("Access Denied!", "⛔ Admins Only!", "error");

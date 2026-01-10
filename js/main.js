@@ -222,31 +222,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const decks = document.getElementById("decksDropbtn");
-    const decksArrow = document.querySelector(".decksDropar i");
     if (decks) {
         decks.addEventListener("click", (e) => {
             e.stopPropagation();
             e.preventDefault();
             toggleDropdown("decksDrop");
-
-            if (decksArrow) {
-                decksArrow.classList.toggle("fa-angle-up");
-                decksArrow.classList.toggle("fa-angle-down");
-            }
         });
     }
+
     const noti = document.getElementById("notiDropbtn");
-    const notiarrw = document.querySelector(".notiDropar i");
     if (noti) {
         noti.addEventListener("click", (e) => {
             e.stopPropagation();
             e.preventDefault();
             toggleDropdown("notiDrop");
+        });
+    }
 
-            if (notiarrw) {
-                notiarrw.classList.toggle("fa-angle-up");
-                notiarrw.classList.toggle("fa-angle-down");
-            }
+    const tasks = document.getElementById("tasksDropbtn");
+    if (tasks) {
+        tasks.addEventListener("click", (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            toggleDropdown("tasksDrop");
         });
     }
 
@@ -265,10 +263,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("click", () => {
         const dropdown = document.getElementById("userDropdown");
-        if (dropdown) dropdown.classList.remove("active");
-        if (!dropdown.classList.contains("active")) {
-            arrow.classList.add("fa-angle-down");
-            arrow.classList.remove("fa-angle-up");
+
+        // ✅ التصحيح: التأكد من وجود القائمة أولاً
+        if (dropdown) {
+            dropdown.classList.remove("active");
+
+            // التأكد من وجود السهم أيضاً قبل تعديله
+            if (arrow) {
+                if (!dropdown.classList.contains("active")) {
+                    arrow.classList.add("fa-angle-down");
+                    arrow.classList.remove("fa-angle-up");
+                }
+            }
         }
     });
 

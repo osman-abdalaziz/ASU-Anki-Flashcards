@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Creators | Upload Deck</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+        body {
+            display: flex !important;
+        }
+
+        .dashboard-container {
+            min-height: 100vh;
+        }
+
+        /* تنسيق منطقة السحب والإفلات */
+        .upload-area {
+            border: 2px dashed var(--ver-tag-color);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: var(--card-color);
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .upload-area:hover,
+        .upload-area.active {
+            border-color: var(--main-color);
+            background: rgba(0, 136, 209, 0.05);
+            transform: scale(1.01);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--main-color);
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="dashboard-container">
+        <aside>
+            <div class="admin-logo"><a href="../index.html"><img src="../images/logo.webp" alt="ASU Anki" /></a></div>
+            <ul class="admin-nav">
+                <li><a href="index.html"><i class="fa-solid fa-list-check fa-fw"></i> Tasks Board</a></li>
+                <li><a href="upload_deck.html" class="active"><i class="fa-solid fa-cloud-arrow-up fa-fw"></i> Upload
+                        Deck</a></li>
+                <li><a href="my_tasks.html"><i class="fa-solid fa-user-clock fa-fw"></i> My Tasks</a></li>
+            </ul>
+        </aside>
+
+        <section class="dashboard-main">
+            <nav>
+                <div style="flex:1;"></div>
+
+                <div class="nav-actions" style="display: flex; align-items: center;  align-items: center;">
+
+                    <div style="position: relative;">
+
+                        <button id="dashNotifBtn" class="notif-btn" aria-label="Notifications">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="dashNotifBadge" class="notif-badge" style="display: none;">0</span>
+                        </button>
+
+                        <div id="dashNotifDropdown" class="notif-dropdown" style="display: none;">
+                            <div class="notif-header">
+                                <h3>Notifications</h3>
+                                <span id="dashMarkAllRead" class="mark-read" style="cursor: pointer;">Mark all as
+                                    read</span>
+                            </div>
+
+                            <div id="dashNotifList" class="notif-list">
+                                <div style="padding: 20px; text-align: center; color: var(--text-secondary-color);">
+                                    Loading...</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="userProfile-header">
+                        <div class="userimg">
+                            <img id="mobileUserAvatar" src="" alt="User" />
+                        </div>
+                        <p id="mobileUserName" style="
+                                                                                    padding: 10px 15px;
+                                                                                    font-weight: 400;
+                                                                                    margin: 0;
+                                                                                ">
+                            User Name
+                        </p>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="dashboard-content">
+                <div class="container">
+                    <h1 style="font-size: 40px; margin-top: 30px; margin-right: auto; margin-left: auto; text-align: center;"
+                        class="dashboard-title">
+                        Submit <span>Work</span>
+                    </h1>
+
+                    <div style=" margin: 0 auto; max-width: 900px;">
+                        <form id="uploadForm">
+                            <label class="field-label" style="display:block; margin-bottom:8px;">Select Task to
+                                Submit</label>
+                            <div class="filters" style="margin: 15px 0; width: 100%;">
+                                <select style="width: 100%;" id="taskSelect" required>
+                                    <option value="">Loading your tasks...</option>
+                                </select>
+                            </div>
+
+                            <label class="field-label" style="display:block; margin-bottom:8px;">Upload File
+                                (.apkg)</label>
+
+                            <div class="upload-area" id="dropZone">
+                                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                                <h3 id="fileNameDisplay">Drag & Drop file here or Click to Browse</h3>
+                                <p style="font-size: 0.8rem; color: #777;">Supported format: .apkg</p>
+                                <input type="file" id="fileInput" accept=".apkg" style="display: none;" required />
+                            </div>
+
+                            <button type="submit" class="main-btn" id="submitBtn"
+                                style="margin: 20px auto; display: block; width: 100%;">
+                                Submit for Review <i class="fa-solid fa-paper-plane fa-fw"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div class="container">
+                    <p>&copy; 2025 ASU Anki Flashcards.</p>
+                </div>
+            </footer>
+        </section>
+    </main>
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon"><i id="modalIconClass" class="fa-solid fa-check"></i></div>
+            <h3 id="modalTitle">Title</h3>
+            <p id="modalMessage">Message goes here.</p>
+            <div class="modal-actions" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button id="modalOkBtn" class="main-btn" style="width: auto; min-width: 100px;">OK</button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="../js/maker.js"></script>
+    <script type="module" src="../js/main.js"></script>
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-import { db } from "./config.js";
+import { db, auth } from "./config.js";
 import {
     collection,
     getDocs,
@@ -8,9 +8,21 @@ import {
     query,
     where,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
 let visitsChart = null;
 let allDecksData = [];
+
+// 1. الحماية والتهيئة (تم التصحيح)
+document.addEventListener("DOMContentLoaded", () => {
+    onAuthStateChanged(auth, (user) => {
+        if (!user || user.email !== ADMIN_EMAIL) {
+            window.location.href = "../index";
+            return; // 🔥 هذا السطر مهم جداً لمنع الانهيار
+        }
+        initAnalytics();
+    });
+});
 
 async function initAnalytics() {
     try {
@@ -224,5 +236,3 @@ function renderChart(labels, data) {
         },
     });
 }
-
-document.addEventListener("DOMContentLoaded", initAnalytics);

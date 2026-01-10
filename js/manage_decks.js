@@ -8,12 +8,13 @@ import {
     updateDoc,
     serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+import { initDashboardNotifications } from "./dashboard_notifications.js";
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
 onAuthStateChanged(auth, (user) => {
     if (!user || user.email !== ADMIN_EMAIL) {
         window.location.href = "../index";
     }
+    initDashboardNotifications(user.uid);
 });
 
 const tableBody = document.getElementById("decksTableBody");

@@ -8,7 +8,7 @@ import {
     query,
     orderBy,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+import { initDashboardNotifications } from "./dashboard_notifications.js";
 // 1. حماية الصفحة
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
 onAuthStateChanged(auth, (user) => {
@@ -17,6 +17,7 @@ onAuthStateChanged(auth, (user) => {
     } else {
         const avatar = document.getElementById("mobileUserAvatar");
         if (avatar) avatar.src = user.photoURL || "../images/user.png";
+        initDashboardNotifications(user.uid);
     }
 });
 

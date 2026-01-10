@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Creators | My Tasks</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+        body {
+            display: flex !important;
+        }
+
+        .dashboard-container {
+            min-height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="dashboard-container">
+        <aside>
+            <div class="admin-logo"><a href="../index.html"><img src="../images/logo.webp" alt="ASU Anki" /></a></div>
+            <ul class="admin-nav">
+                <li><a href="index.html"><i class="fa-solid fa-list-check fa-fw"></i> Tasks Board</a></li>
+                <li><a href="upload_deck.html"><i class="fa-solid fa-cloud-arrow-up fa-fw"></i> Upload Deck</a></li>
+                <li><a href="my_tasks.html" class="active"><i class="fa-solid fa-user-clock fa-fw"></i> My Tasks</a>
+                </li>
+            </ul>
+        </aside>
+
+        <section class="dashboard-main">
+            <nav>
+                <div class="search" disabled style="opacity:0;">
+                    <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+                    <input type="text" id="searchInput" placeholder="Search..." />
+                </div>
+
+                <div class="nav-actions" style="display: flex; align-items: center;  align-items: center;">
+
+                    <div style="position: relative;">
+
+                        <button id="dashNotifBtn" class="notif-btn" aria-label="Notifications">
+                            <i class="fa-solid fa-bell"></i>
+                            <span id="dashNotifBadge" class="notif-badge" style="display: none;">0</span>
+                        </button>
+
+                        <div id="dashNotifDropdown" class="notif-dropdown" style="display: none;">
+                            <div class="notif-header">
+                                <h3>Notifications</h3>
+                                <span id="dashMarkAllRead" class="mark-read" style="cursor: pointer;">Mark all as
+                                    read</span>
+                            </div>
+
+                            <div id="dashNotifList" class="notif-list">
+                                <div style="padding: 20px; text-align: center; color: var(--text-secondary-color);">
+                                    Loading...</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="userProfile-header">
+                        <div class="userimg">
+                            <img id="mobileUserAvatar" src="" alt="User" />
+                        </div>
+                        <p id="mobileUserName" style="
+                                                                                    padding: 10px 15px;
+                                                                                    font-weight: 400;
+                                                                                    margin: 0;
+                                                                                ">
+                            User Name
+                        </p>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="dashboard-content">
+                <div class="container">
+                    <h1 class="dashboard-title">My Active <span>Tasks</span></h1>
+                    <div style="margin-top: 20px; margin-bottom: 50px;">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Task Title</th>
+                                        <th>Module</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myTasksTable">
+                                    <tr>
+                                        <td colspan="4" style="text-align:center; padding: 20px;">Loading active
+                                            tasks...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <h3 style=" font-weight: 500; margin-bottom: 15px; color: var(--text-color);">
+                        Completed History
+                    </h3>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Task Title</th>
+                                    <th>Finished At</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="completedTasksTable">
+                                <tr>
+                                    <td colspan="3" style="text-align:center; padding: 20px;">No completed tasks yet.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+            <footer>
+                <div class="container">
+                    <p>&copy; 2025 ASU Anki Flashcards.</p>
+                </div>
+            </footer>
+        </section>
+    </main>
+    <div id="customModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-icon"><i id="modalIconClass" class="fa-solid fa-check"></i></div>
+            <h3 id="modalTitle">Title</h3>
+            <p id="modalMessage">Message goes here.</p>
+            <div class="modal-actions" style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button id="modalOkBtn" class="main-btn" style="width: auto; min-width: 100px;">OK</button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="../js/maker.js"></script>
+    <script type="module" src="../js/main.js"></script>
+</body>
+
+</html>

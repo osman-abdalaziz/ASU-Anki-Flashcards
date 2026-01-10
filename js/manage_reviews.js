@@ -12,7 +12,7 @@ import {
     increment,
     serverTimestamp, // 👈 1. تم إضافة استيراد التوقيت
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+import { initDashboardNotifications } from "./dashboard_notifications.js";
 // 1. حماية الصفحة + تشغيل التحميل بعد التأكد من الهوية
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
 onAuthStateChanged(auth, (user) => {
@@ -21,6 +21,7 @@ onAuthStateChanged(auth, (user) => {
     } else {
         const avatar = document.getElementById("mobileUserAvatar");
         if (avatar) avatar.src = user.photoURL || "../images/user.png";
+        initDashboardNotifications(user.uid);
         loadReviews();
     }
 });

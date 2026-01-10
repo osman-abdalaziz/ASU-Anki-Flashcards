@@ -1,7 +1,7 @@
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com"; // 🔴 إيميلك هنا
 
-export function updateNavbarUI(user, userData) {
-    // عناصر سطح المكتب
+export function updateNavbarUI(user) {
+    // عناصر الكمبيوتر
     const loginBtn = document.getElementById("loginBtn");
     const userProfile = document.getElementById("userProfile");
     const userAvatar = document.getElementById("userAvatar");
@@ -18,16 +18,17 @@ export function updateNavbarUI(user, userData) {
 
     if (user) {
         // --- حالة: مسجل دخول ---
+
+        // 1. إخفاء أزرار الدخول وإظهار البروفايل
         if (loginBtn) loginBtn.style.display = "none";
         if (mobileLoginBtn) mobileLoginBtn.style.display = "none";
-
         if (userProfile) userProfile.style.display = "flex";
         if (notifWrapper) notifWrapper.style.display = "flex";
         if (mobileUserProfile) mobileUserProfile.style.display = "flex";
         if (mobileNotifWrapper) mobileNotifWrapper.style.display = "flex";
         if (mobileLogoutBtn) mobileLogoutBtn.style.display = "flex";
 
-        // تعبئة البيانات
+        // 2. تعبئة البيانات (الصور والاسم)
         const photo = user.photoURL || "images/user.webp";
         const fullName = user.displayName || "Student";
         const firstName = "Welcome, " + fullName.split(" ")[0];
@@ -37,23 +38,12 @@ export function updateNavbarUI(user, userData) {
         if (mobileUserAvatar) mobileUserAvatar.src = photo;
         if (mobileUserName) mobileUserName.textContent = firstName;
 
-        // 🔥🔥🔥 منطق زر الداشبورد الذكي 🔥🔥🔥
-        let dashboardUrl = null;
-
-        // 1. هل هو الأدمن (أنت)؟
+        // 🔥🔥🔥 3. إضافة زر الداشبورد (للأدمن فقط) 🔥🔥🔥
         if (user.email === ADMIN_EMAIL) {
-            dashboardUrl = "dashboard/index.html";
-        }
-        // 2. هل هو صانع (Maker)؟
-        else if (userData && userData.role === "maker") {
-            dashboardUrl = "creators/index.html";
-        }
-
-        // إذا تم تحديد رابط، أضف الزر، وإلا احذفه
-        if (dashboardUrl) {
-            addDashboardBtn("userDropdown", dashboardUrl);
-            addDashboardBtn("mobileUserDropdown", dashboardUrl);
+            addDashboardBtn("userDropdown"); // للقائمة العلوية
+            addDashboardBtn("mobileUserDropdown"); // لقائمة الموبايل
         } else {
+            // إزالة الزر إذا دخل طالب عادي (في حال كنت مسجلاً كأدمن قبله)
             removeDashboardBtn("userDropdown");
             removeDashboardBtn("mobileUserDropdown");
         }
@@ -61,29 +51,30 @@ export function updateNavbarUI(user, userData) {
         // --- حالة: زائر ---
         if (loginBtn) loginBtn.style.display = "flex";
         if (mobileLoginBtn) mobileLoginBtn.style.display = "flex";
-
         if (userProfile) userProfile.style.display = "none";
         if (notifWrapper) notifWrapper.style.display = "none";
+        if (mobileLogoutBtn) mobileLogoutBtn.style.display = "none";
         if (mobileUserProfile) mobileUserProfile.style.display = "none";
         if (mobileNotifWrapper) mobileNotifWrapper.style.display = "none";
-        if (mobileLogoutBtn) mobileLogoutBtn.style.display = "none";
     }
 }
 
-// دالة إضافة الزر (تقبل الرابط كمتغير)
-function addDashboardBtn(dropdownId, targetUrl) {
+// --- دوال مساعدة لحقن الزر ---
+
+function addDashboardBtn(dropdownId) {
     const dropdown = document.getElementById(dropdownId);
     if (!dropdown) return;
 
-    // منع التكرار
+    // نتأكد أولاً أن الزر غير موجود (عشان ما نكرره)
     if (dropdown.querySelector(".admin-dash-btn")) return;
 
+    // إنشاء رابط الداشبورد
     const link = document.createElement("a");
-    link.href = targetUrl; // 🔗 الرابط الديناميكي
+    link.href = "dashboard/index.html";
     link.className = "admin-dash-btn";
     link.innerHTML = 'Dashboard <i class="fa-solid fa-gauge-high fa-fw"></i>';
 
-    // تنسيق الزر
+    // تنسيق الزر ليبدو مثل الأزرار الأخرى لكن بلونك الأزرق المميز
     link.style.cssText = `
         display: flex;
         justify-content: space-between;
@@ -102,7 +93,7 @@ function addDashboardBtn(dropdownId, targetUrl) {
         transition: 0.3s;
     `;
 
-    // إضافته في بداية القائمة
+    // وضعه في بداية القائمة (فوق زر الخروج)
     dropdown.insertBefore(link, dropdown.firstChild);
 }
 

@@ -12,6 +12,7 @@ import {
     limit,
     where,
     Timestamp,
+    onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { auth, db } from "./config.js";
 
@@ -682,4 +683,120 @@ export async function incrementDeckDownloads(deckId) {
     } catch (error) {
         console.error("Error incrementing downloads:", error);
     }
+}
+
+// ==========================================
+// 🔥 نظام الإشعارات (Notification System) 🔥
+// ==========================================
+
+// 1. دالة إرسال إشعار لشخص محدد
+export async function sendUserNotification(
+    targetUid,
+    title,
+    message,
+    link = "#",
+    type = "info"
+) {
+    try {
+        if (!targetUid) return;
+        await addDoc(collection(db, "users", targetUid, "notifications"), {
+            title: title,
+            body: message,
+            link: link,
+            type: type, // 'success', 'error', 'info', 'warning'
+            read: false,
+            createdAt: serverTimestamp(),
+        });
+        console.log("Notification sent to:", targetUid);
+    } catch (e) {
+        console.error("Failed to send notification:", e);
+    }
+}
+
+// 2. دالة جلب UID الأدمن (لإرسال الإشعارات له)
+export async function getAdminUID() {
+    // نبحث عن الأدمن بالإيميل
+    const q = query(
+        collection(db, "users"),
+        where("email", "==", "osmanabdalaziz2005@gmail.com")
+    );
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+        return snapshot.docs[0].id;
+    }
+    return null;
+}
+
+// 3. تشغيل جرس الإشعارات (Live Listener)
+export function initNotificationSystem(user) {
+    if (!user) return;
+
+    const notifList = document.getElementById("notificationList"); // تأكد أن هذا الـ ID موجود في قائمة الجرس
+    const badge = document.getElementById("notifBadge");
+
+    // إذا لم يكن هناك قائمة إشعارات في الصفحة الحالية، لا تفعل شيئاً
+    if (!notifList) return;
+
+    const q = query(
+        collection(db, "users", user.uid, "notifications"),
+        orderBy("createdAt", "desc"),
+        limit(20)
+    );
+
+    onSnapshot(q, (snapshot) => {
+        const notifs = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+        // تحديث العداد (فقط للإشعارات غير المقروءة)
+        const unreadCount = notifs.filter((n) => !n.read).length;
+        if (badge) {
+            badge.style.display = unreadCount > 0 ? "block" : "none";
+            badge.innerText = unreadCount;
+        }
+
+        // رسم القائمة
+        notifList.innerHTML = "";
+        if (notifs.length === 0) {
+            notifList.innerHTML =
+                '<li class="dropdown-item empty">No notifications</li>';
+            return;
+        }
+
+        notifs.forEach((n) => {
+            const date = n.createdAt
+                ? n.createdAt.toDate().toLocaleDateString()
+                : "Just now";
+            const icon =
+                n.type === "success"
+                    ? "fa-circle-check"
+                    : n.type === "error"
+                    ? "fa-circle-xmark"
+                    : "fa-bell";
+            const color =
+                n.type === "success"
+                    ? "green"
+                    : n.type === "error"
+                    ? "red"
+                    : "blue";
+
+            // رابط (اختياري)
+            const linkHTML =
+                n.link && n.link !== "#"
+                    ? `<a href="${n.link}" style="font-size:0.75rem; color:var(--main-color); display:block; margin-top:5px;">Open Link <i class="fa-solid fa-arrow-up-right-from-square"></i></a>`
+                    : "";
+
+            notifList.innerHTML += `
+                <li class="dropdown-item ${n.read ? "read" : "unread"}">
+                    <div class="notif-icon bg-${color}"><i class="fa-solid ${icon}"></i></div>
+                    <div class="notif-content">
+                        <div class="notif-header">
+                            <span class="notif-title">${n.title}</span>
+                            <span class="notif-date">${date}</span>
+                        </div>
+                        <p class="notif-body">${n.body}</p>
+                        ${linkHTML}
+                    </div>
+                </li>
+            `;
+        });
+    });
 }

@@ -5,7 +5,7 @@ import {
     addDoc,
     Timestamp,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+import { initDashboardNotifications } from "./dashboard_notifications.js";
 // 🔴 هام: ضع إيميلك هنا
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com";
 
@@ -25,7 +25,7 @@ function initAdminGuard() {
                 const name = document.getElementById("mobileUserName");
                 if (avatar) avatar.src = user.photoURL || "../images/user.webp";
                 // if (name) name.textContent = "Welcome, " + (user.displayName || "Osman Abdalaziz");
-
+                initDashboardNotifications(user.uid);
                 // إظهار المحتوى
                 document.body.style.display = "flex";
             }

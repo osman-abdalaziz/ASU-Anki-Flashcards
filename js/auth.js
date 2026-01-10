@@ -240,31 +240,40 @@ export async function handleLogout() {
 }
 
 export function initAuth() {
-    onAuthStateChanged(auth, (user) => {
-        updateNavbarUI(user);
-
+    onAuthStateChanged(auth, async (user) => {
         if (user) {
             if (!user.emailVerified) {
                 if (isLoggingIn) return;
-
                 signOut(auth);
                 return;
             }
 
-            // 🔥 إضافة أمان: التأكد من تسجيل المستخدم في الداتابيز (للمستخدمين القدامى)
-            saveUserToFirestore(user);
-
-            loadFlashcards();
-            const path = window.location.pathname;
-
-            if (path.includes("signin") || path.includes("signup")) {
-                if (!isLoggingIn) {
-                    console.log("User already logged in, redirecting...");
-                    window.location.replace("index.html");
+            // 🔥 1. جلب بيانات المستخدم لمعرفة الرتبة (Role)
+            let userData = null;
+            try {
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    userData = userDoc.data();
                 }
+            } catch (error) {
+                console.error("Error fetching user role:", error);
+            }
+
+            // 🔥 2. تحديث الواجهة مع تمرير بيانات المستخدم
+            updateNavbarUI(user, userData);
+
+            saveUserToFirestore(user);
+            loadFlashcards();
+
+            const path = window.location.pathname;
+            if (path.includes("signin") || path.includes("signup")) {
+                if (!isLoggingIn) window.location.replace("index.html");
             }
         } else {
-            // (كودك الأصلي للقفل)
+            // حالة الخروج
+            updateNavbarUI(null, null);
+
+            // قفل المحتوى
             const grid = document.getElementById("page-content");
             if (grid) {
                 grid.innerHTML = `
