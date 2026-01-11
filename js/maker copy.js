@@ -17,6 +17,7 @@ import {
     getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+// 🔥 استيراد دوال الإشعارات من ملف db.js
 import {
     sendUserNotification,
     getAdminUID,
@@ -38,6 +39,7 @@ function initMakerGuard() {
                 const userSnap = await getDoc(userRef);
                 if (userSnap.exists()) {
                     const role = userSnap.data().role || "student";
+                    // السماح للصناع والأدمن
                     if (
                         role === "maker" ||
                         role === "admin" ||
@@ -70,26 +72,21 @@ function updateUI(user, data) {
 }
 
 // ==========================================
-// 2. موجه الصفحات (Router) - تم التصحيح 🔥
+// 2. موجه الصفحات (Router)
 // ==========================================
 function routePageLogic(user) {
-    // تشغيل الإشعارات والعدادات في كل الصفحات
+    const path = window.location.pathname;
+
+    // 🔥 تشغيل نظام الإشعارات في كل الصفحات
     initNotificationSystem(user);
     initCounters(user);
 
-    // 🔥 بدلاً من الاعتماد على الرابط، نتحقق من وجود العنصر في الصفحة
-    // هذا يضمن العمل سواء كان الرابط /creators/ أو /creators/index.html
-
-    if (document.getElementById("openTasksTable")) {
-        initTaskBoard(user); // صفحة index.html
-    }
-
-    if (document.getElementById("myTasksTable")) {
-        initMyTasks(user); // صفحة my_tasks.html
-    }
-
-    if (document.getElementById("uploadForm")) {
-        initUploadPage(user); // صفحة upload_deck.html
+    if (path.includes("index.html")) {
+        initTaskBoard(user);
+    } else if (path.includes("my_tasks.html")) {
+        initMyTasks(user);
+    } else if (path.includes("upload_deck.html")) {
+        initUploadPage(user);
     }
 }
 
@@ -97,65 +94,54 @@ function routePageLogic(user) {
 // 3. صفحة اللوحة الرئيسية (Board)
 // ==========================================
 function initTaskBoard(user) {
-    const tbody = document.getElementById("openTasksTable");
-    if (!tbody) return;
-
     const q = query(collection(db, "tasks"), where("status", "==", "open"));
+    onSnapshot(q, (snapshot) => {
+        const tasks = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const tbody = document.getElementById("openTasksTable");
+        const countEl = document.getElementById("statOpenTasks");
 
-    // إضافة معالجة للأخطاء (Error Handling) لمعرفة سبب المشكلة لو تكررت
-    onSnapshot(
-        q,
-        (snapshot) => {
-            const tasks = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
-            const countEl = document.getElementById("statOpenTasks");
+        if (countEl) countEl.innerText = tasks.length;
+        if (!tbody) return;
 
-            if (countEl) countEl.innerText = tasks.length;
+        tbody.innerHTML = "";
+        if (tasks.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="4" style="text-align:center; padding:20px; color:#777;">No available tasks.</td></tr>';
+            return;
+        }
 
-            tbody.innerHTML = "";
-            if (tasks.length === 0) {
-                tbody.innerHTML =
-                    '<tr><td colspan="4" style="text-align:center; padding:20px; color:#777;">No available tasks.</td></tr>';
-                return;
+        // ترتيب محلي
+        tasks.sort((a, b) => (b.priority === "High" ? 1 : -1));
+
+        tasks.forEach((t) => {
+            let badge = "";
+            if (t.priority === "High") {
+                badge = `<span class="badge-download badge-red ">High</span>`;
+            } else if (t.priority === "Low") {
+                badge = `<span class="badge-download badge-gray">Low</span>`;
+            } else {
+                badge = `<span class="badge-download">Normal</span>`;
             }
 
-            tasks.sort((a, b) => (b.priority === "High" ? 1 : -1));
-
-            tasks.forEach((t) => {
-                let badge = "";
-                if (t.priority === "High") {
-                    badge = `<span class="badge-download badge-red ">High</span>`;
-                } else if (t.priority === "Low") {
-                    badge = `<span class="badge-download badge-gray">Low</span>`;
-                } else {
-                    badge = `<span class="badge-download">Normal</span>`;
-                }
-
-                tbody.innerHTML += `
+            tbody.innerHTML += `
                 <tr>
                     <td><strong>${
                         t.title
                     }</strong><br><small style="color:#777">${
-                    t.description || ""
-                }</small></td>
+                t.description || ""
+            }</small></td>
                     <td>${t.module}</td>
                     <td>${badge}</td>
                     <td>
                         <button style="padding: 5px 15px" class="main-btn" onclick="window.claimTask('${
                             t.id
                         }', '${
-                    t.title
-                }')">Take Task <i class="fa-solid fa-handshake-angle fa-fw"></i></button>
+                t.title
+            }')">Take Task <i class="fa-solid fa-handshake-angle fa-fw"></i></button>
                     </td>
                 </tr>`;
-            });
-        },
-        (error) => {
-            // 🔥 في حال وجود خطأ في الصلاحيات أو الاتصال
-            console.error("Task Loading Error:", error);
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:red; padding:20px;">Error loading tasks: ${error.message}</td></tr>`;
-        }
-    );
-
+        });
+    });
     window.currentUser = user;
 }
 
@@ -163,6 +149,7 @@ function initTaskBoard(user) {
 // 4. صفحة مهامي (My Tasks)
 // ==========================================
 function initMyTasks(user) {
+    // بدون orderBy لتجنب الأخطاء
     const q = query(
         collection(db, "tasks"),
         where("assignedTo", "==", user.uid)
@@ -182,6 +169,7 @@ function initMyTasks(user) {
         const activeTasks = tasks.filter((t) => t.status !== "approved");
         const completedTasks = tasks.filter((t) => t.status === "approved");
 
+        // ترتيب محلي
         activeTasks.sort(
             (a, b) =>
                 (b.assignedAt?.seconds || 0) - (a.assignedAt?.seconds || 0)
@@ -191,6 +179,7 @@ function initMyTasks(user) {
                 (b.approvedAt?.seconds || 0) - (a.approvedAt?.seconds || 0)
         );
 
+        // رسم المهام النشطة
         if (activeTasks.length === 0) {
             activeTable.innerHTML =
                 '<tr><td colspan="4" style="text-align:center; padding:30px; color:#777;">No active tasks currently.</td></tr>';
@@ -216,6 +205,7 @@ function initMyTasks(user) {
             });
         }
 
+        // رسم المهام المكتملة
         if (completedTasks.length === 0) {
             completedTable.innerHTML =
                 '<tr><td colspan="3" style="text-align:center; padding:30px; color:#777;">No completed tasks yet.</td></tr>';
@@ -252,11 +242,16 @@ async function initUploadPage(user) {
     const dropZone = document.getElementById("dropZone");
     const fileInput = document.getElementById("fileInput");
     const fileNameDisplay = document.getElementById("fileNameDisplay");
-    const taskSelect = document.getElementById("taskSelect");
+    const taskSelect = document.getElementById("taskSelect"); // تأكد من تعريفه
+
+    // 🔥 التصحيح: تعريف الفورم هنا 🔥
     const form = document.getElementById("uploadForm");
 
+    // 1. تفعيل النقر
     if (dropZone) {
         dropZone.addEventListener("click", () => fileInput.click());
+
+        // 2. تفعيل السحب والإفلات (Drag & Drop)
         ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
             dropZone.addEventListener(eventName, preventDefaults, false);
         });
@@ -264,17 +259,28 @@ async function initUploadPage(user) {
             e.preventDefault();
             e.stopPropagation();
         }
-        ["dragenter", "dragover"].forEach((eventName) =>
-            dropZone.classList.add("active")
-        );
-        ["dragleave", "drop"].forEach((eventName) =>
-            dropZone.classList.remove("active")
-        );
+
+        ["dragenter", "dragover"].forEach((eventName) => {
+            dropZone.addEventListener(
+                eventName,
+                () => dropZone.classList.add("active"),
+                false
+            );
+        });
+        ["dragleave", "drop"].forEach((eventName) => {
+            dropZone.addEventListener(
+                eventName,
+                () => dropZone.classList.remove("active"),
+                false
+            );
+        });
+
         dropZone.addEventListener("drop", (e) => {
             const dt = e.dataTransfer;
-            if (dt.files.length > 0) {
-                fileInput.files = dt.files;
-                updateFileName(dt.files[0].name);
+            const files = dt.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFileName(files[0].name);
             }
         });
     }
@@ -291,6 +297,7 @@ async function initUploadPage(user) {
             fileNameDisplay.innerHTML = `<span style="color:var(--main-color); font-weight:600;">${name}</span>`;
     }
 
+    // جلب التاسكات للقائمة
     const q = query(
         collection(db, "tasks"),
         where("assignedTo", "==", user.uid),
@@ -303,11 +310,13 @@ async function initUploadPage(user) {
             const t = doc.data();
             taskSelect.innerHTML += `<option value="${doc.id}">${t.title}</option>`;
         });
+
         const urlParams = new URLSearchParams(window.location.search);
         const preSelectedId = urlParams.get("taskId");
         if (preSelectedId) taskSelect.value = preSelectedId;
     });
 
+    // معالجة الرفع
     if (form) {
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -315,6 +324,7 @@ async function initUploadPage(user) {
             const file = fileInput.files[0];
 
             if (!taskId || !file) {
+                // استخدام المودال بدلاً من alert (اختياري، أو اتركه alert للسرعة)
                 showModal("error", "Please select a task and a file.");
                 return;
             }
@@ -326,6 +336,7 @@ async function initUploadPage(user) {
             btn.disabled = true;
 
             try {
+                // 1. رفع الملف
                 const storageRef = ref(
                     storage,
                     `submissions/${taskId}_${file.name}`
@@ -333,6 +344,7 @@ async function initUploadPage(user) {
                 await uploadBytes(storageRef, file);
                 const downloadUrl = await getDownloadURL(storageRef);
 
+                // 2. تحديث التاسك
                 await updateDoc(doc(db, "tasks", taskId), {
                     status: "review",
                     submissionUrl: downloadUrl,
@@ -340,6 +352,7 @@ async function initUploadPage(user) {
                     fileName: file.name,
                 });
 
+                // 3. إشعار الأدمن
                 const adminUID = await getAdminUID();
                 if (adminUID) {
                     await sendUserNotification(
@@ -379,6 +392,8 @@ async function initUploadPage(user) {
 // ==========================================
 function initCounters(user) {
     const tasksRef = collection(db, "tasks");
+
+    // My Active
     const qActive = query(
         tasksRef,
         where("assignedTo", "==", user.uid),
@@ -389,6 +404,7 @@ function initCounters(user) {
         if (el) el.innerText = snap.size;
     });
 
+    // Completed
     const qDone = query(
         tasksRef,
         where("assignedTo", "==", user.uid),
@@ -405,6 +421,7 @@ function initCounters(user) {
 // ==========================================
 window.claimTask = async function (taskId, title) {
     const user = window.currentUser;
+    // بدلاً من confirm نستخدم المودال الجديد
     showConfirmModal(
         "Claim Task",
         `Are you sure you want to take "${title}"?`,
@@ -422,20 +439,24 @@ window.claimTask = async function (taskId, title) {
             }
         },
         "Yes, Start",
-        "info"
+        "info" // 🔥 النوع: أزرق
     );
 };
 
 // ==========================================
-// 8. دوال واجهة الإشعارات
+// 8. دوال واجهة الإشعارات (UI Helpers)
 // ==========================================
 window.toggleNotifications = function () {
     const dropdown = document.getElementById("notificationDropdown");
     const badge = document.getElementById("notifBadge");
+
     if (dropdown) {
         const isHidden = dropdown.style.display === "none";
         dropdown.style.display = isHidden ? "block" : "none";
-        if (isHidden && badge) badge.style.display = "none";
+
+        if (isHidden && badge) {
+            badge.style.display = "none";
+        }
     }
 };
 
