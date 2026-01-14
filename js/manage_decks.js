@@ -16,12 +16,30 @@ onAuthStateChanged(auth, (user) => {
     }
     initDashboardNotifications(user.uid);
 });
+import { notifySubscribers } from "./telegram_service.js";
+import { showConfirmModal, showModal } from "./ui.js"; // تأكد من وجود ui.js
 
 const tableBody = document.getElementById("decksTableBody");
 
 // ... (دالة loadDecks كما هي بدون تغيير) ...
 // تأكد من وضع دالة loadDecks هنا (أو اتركها كما هي في ملفك)
 
+// ✅ دالة جديدة: تحسب الإصدار التالي تلقائياً
+function incrementVersion(oldVersion) {
+    if (!oldVersion) return "v1.0";
+    const match = oldVersion.match(/(\d+)\.(\d+)/);
+    if (match) {
+        let major = parseInt(match[1]);
+        let minor = parseInt(match[2]);
+        minor++;
+        if (minor > 9) {
+            minor = 0;
+            major++;
+        }
+        return `v${major}.${minor}`;
+    }
+    return oldVersion;
+}
 async function loadDecks() {
     // ... (نفس كود التحميل السابق) ...
     // اختصاراً للمساحة، افترض أن الكود هنا هو نفسه الموجود عندك
@@ -134,7 +152,7 @@ window.showConfirm = (title, message, type = "warning") => {
     });
 };
 
-// دالة showModal العادية (للتنبيهات فقط بدون Cancel)
+// // دالة showModal العادية (للتنبيهات فقط بدون Cancel)
 window.showModal = (title, message, type = "success") => {
     const overlay = document.getElementById("customModal");
     const box = overlay.querySelector(".modal-box");
@@ -240,6 +258,7 @@ window.openEditModal = (id, title, url, img, version) => {
     document.getElementById("editVersion").value = version;
     document.getElementById("editDeckModal").classList.add("active");
 };
+
 window.closeEditModal = () => {
     document.getElementById("editDeckModal").classList.remove("active");
 };
@@ -263,6 +282,61 @@ if (editForm) {
                 "success"
             );
             closeEditModal();
+
+            showConfirmModal(
+                "Notify Students? 📢",
+                "Do you want to send a Telegram notification to all students who subscribed to this deck?",
+                async () => {
+                    const title = document.getElementById("editTitle").value;
+                    const newVersion =
+                        document.getElementById("editVersion").value; // الإصدار الجديد
+                    const standardMessage =
+                        "✨ New Cards, content improvements, and fixes applied."; // الرسالة الموحدة
+
+                    const unifiedImage =
+                        "https://i.ibb.co/CsXMbc0t/Orange-White-Modern-Bold-Company-Annual-Report-Presentation-48.png"; // صورة موحدة للإشعار
+                    // إظهار رسالة "جارِ الإرسال"
+                    showModal(
+                        "Sending...",
+                        "Please wait while we notify users...",
+                        "info"
+                    );
+
+                    try {
+                        const count = await notifySubscribers(
+                            id,
+                            title,
+                            standardMessage,
+                            newVersion,
+                            unifiedImage
+                        );
+
+                        // رسالة النهاية
+                        if (count > 0) {
+                            showModal(
+                                "Success",
+                                `Notification sent to ${count} students successfully!`,
+                                "success"
+                            );
+                        } else {
+                            showModal(
+                                "Done",
+                                "No linked subscribers found for this deck.",
+                                "warning"
+                            );
+                        }
+                    } catch (e) {
+                        showModal(
+                            "Error",
+                            "Failed to send notifications.",
+                            "error"
+                        );
+                    }
+                },
+                "Yes, Notify", // نص زر الموافقة
+                "info"
+            );
+
             loadDecks();
         } catch (error) {
             window.showModal("Error", error.message, "error");

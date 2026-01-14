@@ -1,7 +1,8 @@
+import { getTelegramBotLink } from "./db.js";
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com"; // 🔴 إيميلك هنا
 
-export function updateNavbarUI(user) {
-    // عناصر الكمبيوتر
+export function updateNavbarUI(user, userData) {
+    // عناصر سطح المكتب
     const loginBtn = document.getElementById("loginBtn");
     const userProfile = document.getElementById("userProfile");
     const userAvatar = document.getElementById("userAvatar");
@@ -18,17 +19,16 @@ export function updateNavbarUI(user) {
 
     if (user) {
         // --- حالة: مسجل دخول ---
-
-        // 1. إخفاء أزرار الدخول وإظهار البروفايل
         if (loginBtn) loginBtn.style.display = "none";
         if (mobileLoginBtn) mobileLoginBtn.style.display = "none";
+
         if (userProfile) userProfile.style.display = "flex";
         if (notifWrapper) notifWrapper.style.display = "flex";
         if (mobileUserProfile) mobileUserProfile.style.display = "flex";
         if (mobileNotifWrapper) mobileNotifWrapper.style.display = "flex";
         if (mobileLogoutBtn) mobileLogoutBtn.style.display = "flex";
 
-        // 2. تعبئة البيانات (الصور والاسم)
+        // تعبئة البيانات
         const photo = user.photoURL || "images/user.webp";
         const fullName = user.displayName || "Student";
         const firstName = "Welcome, " + fullName.split(" ")[0];
@@ -38,43 +38,124 @@ export function updateNavbarUI(user) {
         if (mobileUserAvatar) mobileUserAvatar.src = photo;
         if (mobileUserName) mobileUserName.textContent = firstName;
 
-        // 🔥🔥🔥 3. إضافة زر الداشبورد (للأدمن فقط) 🔥🔥🔥
+        // 🔥🔥🔥 منطق زر الداشبورد الذكي 🔥🔥🔥
+        let dashboardUrl = null;
+
+        // 1. هل هو الأدمن (أنت)؟
         if (user.email === ADMIN_EMAIL) {
-            addDashboardBtn("userDropdown"); // للقائمة العلوية
-            addDashboardBtn("mobileUserDropdown"); // لقائمة الموبايل
+            dashboardUrl = "dashboard/index.html";
+        }
+        // 2. هل هو صانع (Maker)؟
+        else if (userData && userData.role === "maker") {
+            dashboardUrl = "creators/index.html";
+        }
+
+        // إذا تم تحديد رابط، أضف الزر، وإلا احذفه
+        if (dashboardUrl) {
+            addDashboardBtn("userDropdown", dashboardUrl);
+            addDashboardBtn("mobileUserDropdown", dashboardUrl);
         } else {
-            // إزالة الزر إذا دخل طالب عادي (في حال كنت مسجلاً كأدمن قبله)
             removeDashboardBtn("userDropdown");
             removeDashboardBtn("mobileUserDropdown");
         }
+        // ==========================================
+        // 🤖 إضافة زر Telegram (Desktop & Mobile)
+        // ==========================================
+
+        // دالة مساعدة لإنشاء وإضافة الزر لأي قائمة
+        const addTeleBtnToDropdown = (dropdownId, logoutBtnId, btnId) => {
+            const dropdown = document.getElementById(dropdownId);
+            const logoutBtn = document.getElementById(logoutBtnId);
+
+            // نتأكد أن القائمة موجودة وأن الزر غير مضاف مسبقاً
+            if (dropdown && !document.getElementById(btnId)) {
+                const a = document.createElement("a");
+                a.id = btnId;
+                a.href = "#";
+                a.target = "_blank";
+
+                // تنسيق الزر (نفس الستايل بالضبط)
+                a.style.cssText = `
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 100%;
+                    padding: 10px 15px;
+                    margin-bottom: 8px;
+                    background-color: #229ED9;
+                    color: white;
+                    text-decoration: none;
+                    border: none;
+                    font-size: 14px;
+                    border-radius: 10px;
+                    box-sizing: border-box;
+                    font-weight: 400;
+                    cursor: pointer;
+                    transition: opacity 0.2s;
+                    font-family: inherit;
+                `;
+
+                a.onmouseover = () => (a.style.opacity = "0.9");
+                a.onmouseout = () => (a.style.opacity = "1");
+
+                a.innerHTML = `Link Telegram <i class="fa-brands fa-telegram fa-fw"></i>`;
+
+                // جلب الرابط
+                getTelegramBotLink(user).then((link) => {
+                    if (link && link !== "#") {
+                        a.href = link;
+                    }
+                });
+
+                // إضافته قبل زر الخروج
+                if (logoutBtn && dropdown.contains(logoutBtn)) {
+                    dropdown.insertBefore(a, logoutBtn);
+                } else {
+                    dropdown.appendChild(a);
+                }
+            }
+        };
+
+        // 1. إضافة لسطح المكتب
+        addTeleBtnToDropdown(
+            "userDropdown",
+            "logoutBtn",
+            "teleLinkBtn_desktop"
+        );
+
+        // 2. إضافة للموبايل
+        addTeleBtnToDropdown(
+            "mobileUserDropdown",
+            "mobileLogoutBtn",
+            "teleLinkBtn_mobile"
+        );
     } else {
         // --- حالة: زائر ---
         if (loginBtn) loginBtn.style.display = "flex";
         if (mobileLoginBtn) mobileLoginBtn.style.display = "flex";
+
         if (userProfile) userProfile.style.display = "none";
         if (notifWrapper) notifWrapper.style.display = "none";
-        if (mobileLogoutBtn) mobileLogoutBtn.style.display = "none";
         if (mobileUserProfile) mobileUserProfile.style.display = "none";
         if (mobileNotifWrapper) mobileNotifWrapper.style.display = "none";
+        if (mobileLogoutBtn) mobileLogoutBtn.style.display = "none";
     }
 }
 
-// --- دوال مساعدة لحقن الزر ---
-
-function addDashboardBtn(dropdownId) {
+// دالة إضافة الزر (تقبل الرابط كمتغير)
+function addDashboardBtn(dropdownId, targetUrl) {
     const dropdown = document.getElementById(dropdownId);
     if (!dropdown) return;
 
-    // نتأكد أولاً أن الزر غير موجود (عشان ما نكرره)
+    // منع التكرار
     if (dropdown.querySelector(".admin-dash-btn")) return;
 
-    // إنشاء رابط الداشبورد
     const link = document.createElement("a");
-    link.href = "dashboard/index.html";
+    link.href = targetUrl; // 🔗 الرابط الديناميكي
     link.className = "admin-dash-btn";
     link.innerHTML = 'Dashboard <i class="fa-solid fa-gauge-high fa-fw"></i>';
 
-    // تنسيق الزر ليبدو مثل الأزرار الأخرى لكن بلونك الأزرق المميز
+    // تنسيق الزر
     link.style.cssText = `
         display: flex;
         justify-content: space-between;
@@ -93,7 +174,7 @@ function addDashboardBtn(dropdownId) {
         transition: 0.3s;
     `;
 
-    // وضعه في بداية القائمة (فوق زر الخروج)
+    // إضافته في بداية القائمة
     dropdown.insertBefore(link, dropdown.firstChild);
 }
 

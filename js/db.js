@@ -2,6 +2,9 @@ import {
     getFirestore,
     collection,
     getDocs,
+    getDoc, // 👈 تمت الإضافة
+    setDoc, // 👈 تمت الإضافة
+    arrayUnion, // 👈 تمت الإضافة
     query,
     orderBy,
     doc,
@@ -24,6 +27,9 @@ const READ_NOTIFS_KEY = "asu_anki_read_general";
 const CACHED_DECKS_KEY = "asu_anki_cached_decks_v1"; // 📦 مخزن الكروت
 const CACHED_NOTIFS_KEY = "asu_anki_cached_notifs_v1"; // 📦 مخزن الإشعارات
 const LAST_SYNC_KEY = "asu_anki_last_sync_timestamp"; // 🕒 وقت آخر مزامنة ناجحة
+
+// 🤖 اسم بوت التيليجرام (بدون @)
+const BOT_USERNAME = "asu_anki_bot"; // 🔴 استبدله لاحقاً باسم بوتك الحقيقي
 
 // ==========================================
 // 1. المتغيرات العامة (Global Variables)
@@ -79,6 +85,25 @@ export async function loadFlashcards(isLoadMore = false) {
 
         // 🔥 تشغيل المزامنة الذكية (Smart Delta Sync) 🔥
         syncDecksWithServer().then(() => {
+            // 👇 بداية الكود الجديد (تجميل البحث) 👇
+            const deepLinkInput = document.getElementById("deepLinkDeckId");
+            const searchInput = document.getElementById("searchInput");
+
+            if (deepLinkInput && deepLinkInput.value) {
+                // نبحث عن الملف في البيانات المحملة
+                const targetDeck = allFlashcards.find(
+                    (c) => c.id === deepLinkInput.value.trim()
+                );
+                if (targetDeck && searchInput) {
+                    searchInput.value = targetDeck.title; // نكتب الاسم للمستخدم
+                    console.log(
+                        "🔗 Auto-filled search with:",
+                        targetDeck.title
+                    );
+                }
+            }
+            // 👆 نهاية الكود الجديد 👆
+
             // تحديث الواجهة فقط إذا كنا في الوضع الافتراضي
             if (searchTerm === "" && subjectFilter === "all") {
                 applyClientSideFilters(false);
@@ -94,6 +119,10 @@ function applyClientSideFilters(isLoadMore) {
     const grid = document.getElementById("flashcardsGrid");
     const loadMoreBtn = document.getElementById("loadMoreBtn");
 
+    // قراءة الـ Input المخفي
+    const deepLinkInput = document.getElementById("deepLinkDeckId");
+    const deepLinkId = deepLinkInput ? deepLinkInput.value.trim() : "";
+
     const searchInput = document.getElementById("searchInput");
     const searchTerm = searchInput
         ? searchInput.value.trim().toLowerCase()
@@ -106,6 +135,9 @@ function applyClientSideFilters(isLoadMore) {
 
     // 1. التصفية
     let filteredCards = allFlashcards.filter((card) => {
+        if (deepLinkId) {
+            return card.id === deepLinkId;
+        }
         // 🔥 شرط الإخفاء: لو الكارت مخفي، لا تعرضه أبداً 🔥
         if (card.isHidden === true) return false;
 
@@ -538,11 +570,65 @@ export function filterFlashcards(searchText, category, year) {
     loadFlashcards(false);
 }
 
-export function saveDownloadHistory(deckId, version) {
+// ==========================================
+// 🔗 نظام ربط التيليجرام (Telegram Deep Linking)
+// ==========================================
+export async function getTelegramBotLink(user) {
+    if (!user) return "#";
+
+    try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+            const data = userSnap.data();
+
+            // أ) إذا كان لديه كود مسبقاً، نستخدمه (لضمان الثبات)
+            if (data.telegramLinkCode) {
+                return `https://t.me/${BOT_USERNAME}?start=${data.telegramLinkCode}`;
+            }
+
+            // ب) إذا لم يكن لديه، نولد كود جديد ونحفظه
+            // الكود عبارة عن: uid_randomString (لضمان التفرد)
+            const uniqueCode = `${user.uid}_${Math.random()
+                .toString(36)
+                .substring(2, 8)}`;
+
+            await updateDoc(userRef, {
+                telegramLinkCode: uniqueCode,
+            });
+
+            return `https://t.me/${BOT_USERNAME}?start=${uniqueCode}`;
+        }
+    } catch (e) {
+        console.error("Error generating Telegram link:", e);
+    }
+    return "#";
+}
+
+export async function saveDownloadHistory(deckId, version) {
+    // 1. التخزين المحلي (لجعل الزر يتغير لونه وتظهر العلامة) - كما هو
     let history = JSON.parse(localStorage.getItem(DOWNLOADS_KEY)) || {};
     history[deckId] = version;
     localStorage.setItem(DOWNLOADS_KEY, JSON.stringify(history));
+
+    // تحديث الواجهة فوراً
     loadAllNotifications(allFlashcards);
+
+    // 2. 🔥 الجديد: تسجيل الاشتراك في السيرفر (Firebase) 🔥
+    const user = auth.currentUser;
+    if (user) {
+        try {
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, {
+                subscribedDecks: arrayUnion(deckId), // يضيف الملف للقائمة بدون تكرار
+                lastActive: serverTimestamp(), // لتحديث نشاط المستخدم
+            });
+            console.log("✅ User subscribed to deck updates:", deckId);
+        } catch (e) {
+            console.error("Subscription Error:", e);
+        }
+    }
 }
 
 export function markGeneralAsRead(notifId) {

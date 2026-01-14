@@ -35,6 +35,10 @@
     --reset-btn-border: 1px solid var(--card-color);
     --reset-btn-hover-bg: rgba(255, 255, 255, 0.03);
     --reset-btn-color: var(--text-color);
+    
+
+    --green-color: rgba(51, 217, 178);
+    --red-color: #ff5252
 }
 
 /* Light theme: make select arrow darker for contrast */
@@ -78,6 +82,9 @@ html[data-theme="light"] {
     --reset-btn-border: 1px solid #e6edf3;
     --reset-btn-hover-bg: rgba(119, 119, 119, 0.06);
     --reset-btn-color: var(--text-color);
+
+    --green-color: #218c74;
+    --red-color: #b33939
 }
 
 /* Smooth color transitions */
@@ -462,12 +469,7 @@ nav ul li a:hover::after {
     width: 100%;
 }
 
-.mobile-menu button#mobileLogoutBtn {
-    background-color: transparent;
-    margin-top: auto;
-    border: 2px solid #ff4f43;
-    color: #ff4f43;
-}
+
 .mobile-menu #mobileUserName {
     transition: 0.3s ease-in-out;
     -webkit-transition: 0.3s ease-in-out;
@@ -493,6 +495,8 @@ nav ul li a:hover::after {
     display: flex;
     animation: fadeIn 0.2s ease-out;
     -webkit-animation: fadeIn 0.2s ease-out;
+    flex-direction: column;
+    gap: 10px;
 }
 
 @media screen and (max-width: 992px) {
@@ -629,7 +633,7 @@ nav ul li a:hover::after {
     right: 0;
     background-color: var(--card-color);
     border-radius: 10px;
-    width: 150px;
+    width: 200px;
     box-shadow: 0 0 10px -1px var(--shadow-color);
     z-index: 1000;
     overflow: hidden;
@@ -638,35 +642,15 @@ nav ul li a:hover::after {
     -moz-border-radius: 10px;
     -ms-border-radius: 10px;
     -o-border-radius: 10px;
+    flex-direction: column;
+    gap: 5px;
 }
 
 /* إظهار القائمة عند إضافة كلاس 'active' بالجافاسكريبت */
 .dropdown-menu.active {
-    display: block;
+    display: flex;
+    
 }
-
-.dropdown-menu button {
-    width: 100%;
-    text-align: left;
-    padding: 10px 15px;
-    background-color: #f44336;
-    color: #ffffff;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-    border-radius: 10px;
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    -ms-border-radius: 10px;
-    -o-border-radius: 10px;
-}
-
-.dropdown-menu a:hover,
-.dropdown-menu button:hover {
-    background-color: rgb(254, 83, 83);
-    /* color: white; */
-}
-
 /* --- Notification System Styles --- */
 
 /* زر الجرس */
@@ -1864,7 +1848,12 @@ footer p a {
     box-shadow: 0 10px 25px var(--shadow-color);
     transform: scale(0.8);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border: 1px solid var(--ver-tag-color);
+    
+    /* border: 1px solid var(--ver-tag-color); */
+}
+.modal-box.error,
+#customModal{
+z-index: 20001 !important;
 }
 
 .modal-overlay.active .modal-box {
@@ -1905,7 +1894,7 @@ footer p a {
     cursor: pointer;
     font-size: 1rem;
     transition: 0.2s;
-    width: 100%;
+    width: 100px;
     border-radius: 10px;
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
@@ -2102,7 +2091,7 @@ background-color: #ff793f !important;
 
 .close-modal i {
     font-size: 30px;
-    color: #535353;
+    color: #b5b5b5;
     transition: .3s ease-in-out;
     -webkit-transition: .3s ease-in-out;
     -moz-transition: .3s ease-in-out;
@@ -2436,4 +2425,37 @@ html[data-theme="light"] .report-btn:hover {
 
 .last-link{
     margin-top: auto;
+}
+
+/* Buttons */
+.drop-btn{
+    padding: 8px 12px 8px 8px;
+    text-align: left;
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    display: flex !important;
+    align-items: center;
+    position: relative;
+}
+
+
+.drop-btn i{
+    margin-right: 10px;
+}
+
+.drop-btn:hover{
+    background-color: var(--ver-tag-color);
+}
+.telegram-link-btn{}
+.admin-dash-btn{}
+.logout-btn{
+    background-color: transparent;
+    color: var(--red-color);
 }

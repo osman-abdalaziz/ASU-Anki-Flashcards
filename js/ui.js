@@ -1,3 +1,4 @@
+import { getTelegramBotLink } from "./db.js";
 const ADMIN_EMAIL = "osmanabdalaziz2005@gmail.com"; // 🔴 إيميلك هنا
 
 export function updateNavbarUI(user, userData) {
@@ -37,6 +38,69 @@ export function updateNavbarUI(user, userData) {
         if (mobileUserAvatar) mobileUserAvatar.src = photo;
         if (mobileUserName) mobileUserName.textContent = firstName;
 
+        // ==========================================
+        // 🤖 إضافة زر Telegram (Desktop & Mobile)
+        // ==========================================
+
+        // دالة مساعدة لإنشاء وإضافة الزر لأي قائمة
+        // الدالة المسؤولة عن إضافة زر التيليجرام للقائمة
+        const addTeleBtnToDropdown = (dropdownId, logoutBtnId, btnId) => {
+            const dropdown = document.getElementById(dropdownId);
+            const logoutBtn = document.getElementById(logoutBtnId);
+
+            // نتأكد أن القائمة موجودة وأن الزر غير مضاف مسبقاً
+            if (dropdown && !document.getElementById(btnId)) {
+                const a = document.createElement("a");
+                a.id = btnId;
+
+                // تنسيق الزر الأساسي (مشترك بين الحالتين)
+                a.className = "telegram-link-btn drop-btn";
+
+                // 🔥 التحقق: هل المستخدم ربط حسابه من قبل؟
+                if (userData && userData.telegramId) {
+                    // ✅ الحالة الأولى: الحساب مرتبط (Linked)
+                    a.innerHTML = `<i class="fa-solid fa-check-circle fa-fw"></i> Telegram Linked`;
+                    a.style.color = "var(--green-color)"; // لون أخضر للنجاح
+                    a.style.cursor = "not-allowed"; // إلغاء شكل اليد (غير قابل للنقر)
+                    a.href = "javascript:void(0)"; // لا يوجد رابط
+                    a.title = "Your account is already connected to Telegram";
+                } else {
+                    // 🔗 الحالة الثانية: غير مرتبط (Link Now)
+                    a.innerHTML = `<i class="fa-brands fa-telegram fa-fw"></i> Link Telegram`;
+                    // a.style.backgroundColor = ""; // لون تيليجرام الأزرق
+                    a.style.cursor = "pointer";
+                    a.target = "_blank";
+                    a.href = "#"; // مبدئياً
+
+                    // جلب رابط البوت من السيرفر
+                    getTelegramBotLink(user).then((link) => {
+                        if (link && link !== "#") {
+                            a.href = link;
+                        }
+                    });
+                }
+
+                // إضافة الزر للقائمة (قبل زر تسجيل الخروج)
+                if (logoutBtn && dropdown.contains(logoutBtn)) {
+                    dropdown.insertBefore(a, logoutBtn);
+                } else {
+                    dropdown.appendChild(a);
+                }
+            }
+        };
+        // 1. إضافة لسطح المكتب
+        addTeleBtnToDropdown(
+            "userDropdown",
+            "logoutBtn",
+            "teleLinkBtn_desktop"
+        );
+
+        // 2. إضافة للموبايل
+        addTeleBtnToDropdown(
+            "mobileUserDropdown",
+            "mobileLogoutBtn",
+            "teleLinkBtn_mobile"
+        );
         // 🔥🔥🔥 منطق زر الداشبورد الذكي 🔥🔥🔥
         let dashboardUrl = null;
 
@@ -68,6 +132,11 @@ export function updateNavbarUI(user, userData) {
         if (mobileNotifWrapper) mobileNotifWrapper.style.display = "none";
         if (mobileLogoutBtn) mobileLogoutBtn.style.display = "none";
     }
+
+    setTimeout(() => {
+        addDividersToDropdown("userDropdown"); // للقائمة العادية
+        addDividersToDropdown("mobileUserDropdown"); // للموبايل
+    }, 200);
 }
 
 // دالة إضافة الزر (تقبل الرابط كمتغير)
@@ -80,27 +149,8 @@ function addDashboardBtn(dropdownId, targetUrl) {
 
     const link = document.createElement("a");
     link.href = targetUrl; // 🔗 الرابط الديناميكي
-    link.className = "admin-dash-btn";
-    link.innerHTML = 'Dashboard <i class="fa-solid fa-gauge-high fa-fw"></i>';
-
-    // تنسيق الزر
-    link.style.cssText = `
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        padding: 10px 15px;
-        background-color: var(--main-color); 
-        color: #ffffff;
-        border: none;
-        font-size: 14px;
-        cursor: pointer;
-        border-radius: 10px;
-        margin-bottom: 8px;
-        text-decoration: none;
-        box-sizing: border-box;
-        transition: 0.3s;
-    `;
+    link.className = "admin-dash-btn drop-btn";
+    link.innerHTML = '<i class="fa-solid fa-gauge-high fa-fw"></i> Dashboard';
 
     // إضافته في بداية القائمة
     dropdown.insertBefore(link, dropdown.firstChild);
@@ -394,4 +444,44 @@ export function showInputModal(title, placeholder, onSubmit, type = "danger") {
         overlay.classList.remove("active");
         cleanup();
     };
+}
+
+// ✅ دالة لإضافة فواصل <hr> حقيقية بين الأزرار
+export function addDividersToDropdown(dropdownId) {
+    const dropdown = document.getElementById(dropdownId);
+    if (!dropdown) return;
+
+    // 1. تنظيف الفواصل القديمة (حتى لا تتكرر عند تحديث الصفحة)
+    const oldDividers = dropdown.querySelectorAll(".custom-divider");
+    oldDividers.forEach((hr) => hr.remove());
+
+    // 2. جلب كل العناصر (أزرار وروابط) الظاهرة فقط
+    // نستثني العناصر المخفية (display: none)
+    const items = Array.from(dropdown.querySelectorAll("a, button")).filter(
+        (item) => item.style.display !== "none"
+    );
+
+    // 3. إضافة فاصل بعد كل عنصر (ما عدا الأخير)
+    items.forEach((item, index) => {
+        if (index < items.length - 1) {
+            const hr = document.createElement("hr");
+            hr.className = "custom-divider"; // كلاس لتمييز الفواصل
+
+            // تنسيق الخط الفاصل
+            hr.style.cssText = `
+                border: 1px solid var(--ver-tag-color);
+                border-radius: 1px;
+                margin: 0 auto;                 /* مسافة فوق وتحت الخط */
+                width: 90%;
+                opacity: 0.6;
+            `;
+
+            // إدراج الخط بعد العنصر الحالي مباشرة
+            if (item.nextSibling) {
+                dropdown.insertBefore(hr, item.nextSibling);
+            } else {
+                dropdown.appendChild(hr);
+            }
+        }
+    });
 }

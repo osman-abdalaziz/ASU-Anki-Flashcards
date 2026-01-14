@@ -32,6 +32,7 @@
 </head>
 
 <body>
+    <input type="hidden" id="deepLinkDeckId" value="">
     <span itemprop="image" itemscope itemtype="image/png">
         <link itemprop="url" href="https://i.ibb.co/kgNrJm8N/preveiw.webp" />
     </span>
@@ -97,9 +98,9 @@
                         <i class="fa-solid fa-angle-down"></i>
                     </div>
                     <div id="userDropdown" class="dropdown-menu">
-                        <button id="logoutBtn">
-                            Logout
+                        <button id="logoutBtn" class="logout-btn drop-btn">
                             <i class="fa-solid fa-right-from-bracket fa-fw"></i>
+                            Logout
                         </button>
                     </div>
                 </div>
@@ -176,9 +177,9 @@
 
                     <div class="userProfile" id="mobileUserProfile" style="display: none; position: relative">
                         <div id="mobileUserDropdown" class="mobile-dropdown-menu">
-                            <button id="mobileLogoutBtn" class="main-btn" style="display: block">
-                                Logout
+                            <button id="mobileLogoutBtn" class="logout-btn drop-btn">
                                 <i class="fa-solid fa-right-from-bracket fa-fw"></i>
+                                Logout
                             </button>
                         </div>
                         <div class="userProfile-header">
@@ -288,7 +289,8 @@
             <div class="modal-header" style="margin-bottom: 20px;">
                 <h3>Rate this Deck</h3>
                 <button class="close-modal" id="closeRatingModal"
-                    style="position: absolute; right: 20px; top: 20px; font-size: 24px;">&times;</button>
+                    style="position: absolute; right: 20px; top: 20px; font-size: 24px;"><i
+                        class="fa-solid fa-times"></i></button>
             </div>
 
             <div class="star-rating-input" style="margin-bottom: 20px; font-size: 2rem; color: #ddd; cursor: pointer;">
@@ -317,7 +319,8 @@
                 style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="margin: 0; color: #ff6b6b;">Report Issue 🚩</h3>
                 <button class="close-modal" id="closeReportModal"
-                    style="background:none; border:none; font-size: 24px; cursor: pointer; color: var(--text-color);">&times;</button>
+                    style="background:none; border:none; font-size: 24px; cursor: pointer; color: var(--text-color);"><i
+                        class="fa-solid fa-times"></i></button>
             </div>
 
             <p style="text-align: left; margin-bottom: 10px; font-size: 0.9rem;">What is the issue with this deck?</p>

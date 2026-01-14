@@ -34,6 +34,24 @@ import { db } from "./config.js";
 initAuth();
 
 document.addEventListener("DOMContentLoaded", () => {
+    // ==========================================
+    // 🔗 Deep Linking Logic (بداية الكود الجديد)
+    // ==========================================
+    const params = new URLSearchParams(window.location.search);
+    const deepLinkId = params.get("deck");
+
+    if (deepLinkId) {
+        const hiddenInput = document.getElementById("deepLinkDeckId");
+        if (hiddenInput) {
+            // نضع الـ ID وننتظر ملف db.js ليقوم بالباقي
+            hiddenInput.value = deepLinkId;
+            console.log("🔗 Deep Link ID set:", deepLinkId);
+
+            // تنظيف الرابط من المتصفح
+            // window.history.replaceState({}, document.title, "/");
+        }
+    }
+
     // -------------------------------------------
     // 1. معالجة صفحة إنشاء الحساب (Sign Up)
     // -------------------------------------------
@@ -437,6 +455,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // 1. البحث مع تأخير (Debounce) لتقليل القراءات من السيرفر
     if (searchInput) {
         searchInput.addEventListener("input", () => {
+            const deepLinkInput = document.getElementById("deepLinkDeckId");
+            if (deepLinkInput) {
+                deepLinkInput.value = ""; // تنظيف الرابط فوراً
+            }
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
                 performFilter();
@@ -453,6 +475,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 3. زر إعادة التعيين
     if (resetBtn) {
         resetBtn.addEventListener("click", () => {
+            document.getElementById("deepLinkDeckId").value = "";
             searchInput.value = "";
             categorySelect.value = "all";
             yearSelect.value = "all";
