@@ -461,6 +461,7 @@ nav ul li a:hover::after {
     gap: 10px;
     margin-bottom: 30px;
     flex-direction: row-reverse;
+    padding: 0 20px;
 }
 
 .mobile-menu .userProfile {
