@@ -1,6 +1,7 @@
 /* styles.css - base styles */
 :root {
-    --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto,
+    --font-sans:
+        "Poppins", system-ui, -apple-system, "Segoe UI", Roboto,
         "Helvetica Neue", Arial;
     --main-color: #0088d1;
     --secondary-color: #00669d;
@@ -13,7 +14,7 @@
     --ver-tag-color: rgba(255, 255, 255, 0.06);
     --noti-border-color: rgba(255, 255, 255, 0.1);
     --mobile-menu-bg: #0f1112dc;
-    --spinner-color:#0f1720;
+    --spinner-color: #0f1720;
     --spinner-color-bg: #0f17204d;
 
     /* Input colors (defaults; overridden in light theme) */
@@ -35,10 +36,9 @@
     --reset-btn-border: 1px solid var(--card-color);
     --reset-btn-hover-bg: rgba(255, 255, 255, 0.03);
     --reset-btn-color: var(--text-color);
-    
 
     --green-color: rgba(51, 217, 178);
-    --red-color: #ff5252
+    --red-color: #ff5252;
 }
 
 /* Light theme: make select arrow darker for contrast */
@@ -57,14 +57,9 @@ html[data-theme="light"] {
     --ver-tag-color: rgba(0, 0, 0, 0.06);
     --noti-border-color: rgba(0, 0, 0, 0.1);
     --mobile-menu-bg: #dedededd;
-    --spinner-color:#fff;
+    --spinner-color: #fff;
     --spinner-color-bg: rgba(255, 255, 255, 0.3)
-
-    
-
-
-    /* Light theme input overrides */
-    --input-bg: #ffffff;
+        /* Light theme input overrides */ --input-bg: #ffffff;
     --input-border: #e6edf3;
     --input-text: var(--text-color);
     --input-placeholder-color: #9ca3af;
@@ -84,12 +79,14 @@ html[data-theme="light"] {
     --reset-btn-color: var(--text-color);
 
     --green-color: #218c74;
-    --red-color: #b33939
+    --red-color: #b33939;
 }
 
 /* Smooth color transitions */
 * {
-    transition: background-color 0.18s ease, color 0.18s ease,
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
         border-color 0.18s ease;
 }
 
@@ -209,54 +206,54 @@ a {
 
 .badge-download,
 .st-open {
-            background: rgba(0, 136, 209, 0.1) !important;
-            color: var(--main-color) !important;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-.modal-icon.info{
     background: rgba(0, 136, 209, 0.1) !important;
-            color: var(--main-color) !important;
+    color: var(--main-color) !important;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.modal-icon.info {
+    background: rgba(0, 136, 209, 0.1) !important;
+    color: var(--main-color) !important;
 }
 
 .badge-red,
 .role-admin,
 .modal-box.error .modal-icon,
-.modal-icon.danger{
-    background: rgba(255, 82, 82,.2) !important;
+.modal-icon.danger {
+    background: rgba(255, 82, 82, 0.2) !important;
     color: #ff5252 !important;
 }
 
 .badge-green,
 .st-approved,
 .modal-box.success .modal-icon,
-.modal-icon.success{
-    background: rgba(51, 217, 178,.2) !important;
+.modal-icon.success {
+    background: rgba(51, 217, 178, 0.2) !important;
     color: #33d9b2 !important;
 }
 
-.st-review{
-    background: rgba(112, 111, 211,.2) !important;
-    color: rgba(112, 111, 211,1.0) !important;
+.st-review {
+    background: rgba(112, 111, 211, 0.2) !important;
+    color: rgba(112, 111, 211, 1) !important;
 }
 
 .badge-orange,
 .role-maker,
-.modal-icon.warning{
-    background: rgba(255, 121, 63,.2) !important;
+.modal-icon.warning {
+    background: rgba(255, 121, 63, 0.2) !important;
     color: #ff793f !important;
 }
 
 .badge-yellow,
-.st-assigned{
-    background: rgba(255, 177, 66,.2) !important;
+.st-assigned {
+    background: rgba(255, 177, 66, 0.2) !important;
     color: #ffb142 !important;
 }
 
 .badge-gray,
-.role-student{
+.role-student {
     background: #ffffff11 !important;
     color: #888 !important;
 }
@@ -395,7 +392,8 @@ nav ul li a:hover::after {
     width: 280px;
     /* start off-screen and slide in from right */
     transform: translateX(100%);
-    transition: transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1),
+    transition:
+        transform 260ms cubic-bezier(0.2, 0.9, 0.2, 1),
         opacity 220ms ease;
     opacity: 0;
     overflow-y: auto;
@@ -470,7 +468,6 @@ nav ul li a:hover::after {
     width: 100%;
 }
 
-
 .mobile-menu #mobileUserName {
     transition: 0.3s ease-in-out;
     -webkit-transition: 0.3s ease-in-out;
@@ -481,6 +478,10 @@ nav ul li a:hover::after {
 
 .mobile-menu #mobileUserName:hover {
     opacity: 0.6;
+}
+
+#mobileUserName {
+    font-size: 15px;
 }
 
 .mobile-dropdown-menu {
@@ -532,8 +533,11 @@ nav ul li a:hover::after {
     justify-content: center;
     cursor: pointer;
     margin-right: 0px;
-    transition: background-color 0.18s ease, color 0.18s ease,
-        transform 0.18s ease, border-color 0.18s ease;
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        transform 0.18s ease,
+        border-color 0.18s ease;
     -webkit-border-radius: 50%;
     -moz-border-radius: 50%;
     -ms-border-radius: 50%;
@@ -650,7 +654,6 @@ nav ul li a:hover::after {
 /* إظهار القائمة عند إضافة كلاس 'active' بالجافاسكريبت */
 .dropdown-menu.active {
     display: flex;
-    
 }
 /* --- Notification System Styles --- */
 
@@ -913,7 +916,9 @@ main h1 span {
     background-color: var(--input-bg);
     color: var(--input-text);
     font-size: 15px;
-    transition: box-shadow 0.18s ease, border-color 0.18s ease,
+    transition:
+        box-shadow 0.18s ease,
+        border-color 0.18s ease,
         background-color 0.18s ease;
 }
 
@@ -974,11 +979,21 @@ main h1 span {
     background: var(--reset-btn-bg);
     color: var(--reset-btn-color);
     border: var(--reset-btn-border);
-    transition: all 0.3s ease, color 0.18s ease-in-out;
-    -webkit-transition: all 0.3s ease, color 0.18s ease-in-out;
-    -moz-transition: all 0.3s ease, color 0.18s ease-in-out;
-    -ms-transition: all 0.3s ease, color 0.18s ease-in-out;
-    -o-transition: all 0.3s ease, color 0.18s ease-in-out;
+    transition:
+        all 0.3s ease,
+        color 0.18s ease-in-out;
+    -webkit-transition:
+        all 0.3s ease,
+        color 0.18s ease-in-out;
+    -moz-transition:
+        all 0.3s ease,
+        color 0.18s ease-in-out;
+    -ms-transition:
+        all 0.3s ease,
+        color 0.18s ease-in-out;
+    -o-transition:
+        all 0.3s ease,
+        color 0.18s ease-in-out;
 }
 
 .reset-btn:focus {
@@ -1226,7 +1241,7 @@ footer p a {
     color: var(--input-text);
     font-size: 14px;
 }
-.input-wrap textarea{
+.input-wrap textarea {
     resize: none;
 }
 
@@ -1326,7 +1341,9 @@ footer p a {
     font-weight: 500;
     cursor: pointer;
     margin-top: 10px;
-    transition: background-color 0.18s ease, color 0.18s ease,
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
         box-shadow 0.18s ease;
     box-shadow: var(--google-btn-boxshadow);
 }
@@ -1593,7 +1610,6 @@ footer p a {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7); /* خلفية سوداء شفافة */
     backdrop-filter: blur(5px); /* تأثير ضبابي جميل */
-
 }
 
 .modal-content {
@@ -1724,11 +1740,21 @@ footer p a {
     align-items: center;
     gap: 12px;
     padding: 15px 12px;
-    transition: background-color 0.18s ease, color 0.18s ease;
-    -webkit-transition: background-color 0.18s ease, color 0.18s ease;
-    -moz-transition: background-color 0.18s ease, color 0.18s ease;
-    -ms-transition: background-color 0.18s ease, color 0.18s ease;
-    -o-transition: background-color 0.18s ease, color 0.18s ease;
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease;
+    -webkit-transition:
+        background-color 0.18s ease,
+        color 0.18s ease;
+    -moz-transition:
+        background-color 0.18s ease,
+        color 0.18s ease;
+    -ms-transition:
+        background-color 0.18s ease,
+        color 0.18s ease;
+    -o-transition:
+        background-color 0.18s ease,
+        color 0.18s ease;
 }
 
 .dashboard-container aside ul li a.active,
@@ -1849,12 +1875,12 @@ footer p a {
     box-shadow: 0 10px 25px var(--shadow-color);
     transform: scale(0.8);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    
+
     /* border: 1px solid var(--ver-tag-color); */
 }
 .modal-box.error,
-#customModal{
-z-index: 20001 !important;
+#customModal {
+    z-index: 20001 !important;
 }
 
 .modal-overlay.active .modal-box {
@@ -1871,8 +1897,6 @@ z-index: 20001 !important;
     margin: 0 auto 15px;
     font-size: 24px;
 }
-
-
 
 .modal-box h3 {
     margin-bottom: 10px;
@@ -1901,46 +1925,45 @@ z-index: 20001 !important;
     -moz-border-radius: 10px;
     -ms-border-radius: 10px;
     -o-border-radius: 10px;
-    transition: .3s;
-    -webkit-transition: .3s;
-    -moz-transition: .3s;
-    -ms-transition: .3s;
-    -o-transition: .3s;
+    transition: 0.3s;
+    -webkit-transition: 0.3s;
+    -moz-transition: 0.3s;
+    -ms-transition: 0.3s;
+    -o-transition: 0.3s;
 }
 
-.btn-info{
+.btn-info {
     background: var(--main-color) !important;
-    color: white; 
+    color: white;
 }
-.btn-info:hover{
+.btn-info:hover {
     background: var(--secondary-color) !important;
     color: white;
 }
 
-.btn-error{
-background-color: #ff5252 !important;
+.btn-error {
+    background-color: #ff5252 !important;
     color: white;
 }
-.btn-error:hover{
+.btn-error:hover {
     background-color: #b33939 !important;
 }
 
-.btn-success{
-background-color: #33d9b2 !important;
+.btn-success {
+    background-color: #33d9b2 !important;
     color: white;
 }
-.btn-success:hover{
+.btn-success:hover {
     background-color: #218c74 !important;
 }
 
-.btn-warning{
-background-color: #ff793f !important;
+.btn-warning {
+    background-color: #ff793f !important;
     color: white;
 }
-.btn-warning:hover{
+.btn-warning:hover {
     background-color: #cd6133 !important;
 }
-
 
 .modal-box.error #modalOkBtn {
     background: #ff5252;
@@ -1971,7 +1994,6 @@ background-color: #ff793f !important;
     border-collapse: collapse;
     color: #eee;
     min-width: 600px;
-    
 }
 
 .data-table th,
@@ -1979,7 +2001,7 @@ background-color: #ff793f !important;
     padding: 15px;
     text-align: left;
 }
-.data-table td:last-child{
+.data-table td:last-child {
     text-align: center;
 }
 
@@ -2000,7 +2022,7 @@ background-color: #ff793f !important;
 .data-table tr {
     background-color: var(--sec-background-color);
 }
-.data-table tr:not(:last-child){
+.data-table tr:not(:last-child) {
     border-bottom: 1px solid var(--ver-tag-color);
 }
 
@@ -2093,14 +2115,14 @@ background-color: #ff793f !important;
 .close-modal i {
     font-size: 30px;
     color: #b5b5b5;
-    transition: .3s ease-in-out;
-    -webkit-transition: .3s ease-in-out;
-    -moz-transition: .3s ease-in-out;
-    -ms-transition: .3s ease-in-out;
-    -o-transition: .3s ease-in-out;
+    transition: 0.3s ease-in-out;
+    -webkit-transition: 0.3s ease-in-out;
+    -moz-transition: 0.3s ease-in-out;
+    -ms-transition: 0.3s ease-in-out;
+    -o-transition: 0.3s ease-in-out;
 }
-.close-modal i:hover{
-    opacity: .5;
+.close-modal i:hover {
+    opacity: 0.5;
 }
 
 .edit-modal-box h3 {
@@ -2312,21 +2334,21 @@ html[data-theme="light"] .report-btn:hover {
     }
 }
 
-.dashboard-title{
+.dashboard-title {
     margin-bottom: 10px;
 }
 
 .controls-wrapper {
-            background: var(--sec-background-color);
-            padding: 20px;
-            /* border-radius: 12px 0 0 12px; */
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
+    background: var(--sec-background-color);
+    padding: 20px;
+    /* border-radius: 12px 0 0 12px; */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
 }
 
-.adding-form{
+.adding-form {
     padding: 20px;
     background-color: var(--sec-background-color);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -2385,10 +2407,19 @@ html[data-theme="light"] .report-btn:hover {
     transition: 0.2s;
     margin-right: 5px;
 }
-.btn-action-labeled:hover { opacity: 0.9; transform: translateY(-2px); }
-.btn-dl { background-color: var(--main-color); }
-.btn-ok { background-color: #2ecc71; }
-.btn-no { background-color: #e74c3c; }
+.btn-action-labeled:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+.btn-dl {
+    background-color: var(--main-color);
+}
+.btn-ok {
+    background-color: #2ecc71;
+}
+.btn-no {
+    background-color: #e74c3c;
+}
 
 /* 3. نافذة الرفض (Rejection Modal) */
 /* =========================================
@@ -2424,12 +2455,12 @@ html[data-theme="light"] .report-btn:hover {
     background-color: #c0392b !important;
 }
 
-.last-link{
+.last-link {
     margin-top: auto;
 }
 
 /* Buttons */
-.drop-btn{
+.drop-btn {
     padding: 8px 12px 8px 8px;
     text-align: left;
     color: var(--text-color);
@@ -2446,17 +2477,18 @@ html[data-theme="light"] .report-btn:hover {
     position: relative;
 }
 
-
-.drop-btn i{
+.drop-btn i {
     margin-right: 10px;
 }
 
-.drop-btn:hover{
+.drop-btn:hover {
     background-color: var(--ver-tag-color);
 }
-.telegram-link-btn{}
-.admin-dash-btn{}
-.logout-btn{
+.telegram-link-btn {
+}
+.admin-dash-btn {
+}
+.logout-btn {
     background-color: transparent;
     color: var(--red-color);
 }
