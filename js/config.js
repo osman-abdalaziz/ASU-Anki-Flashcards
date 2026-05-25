@@ -1,5 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+    getAuth,
+    GoogleAuthProvider,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; // <--- جديد
 
 const firebaseConfig = {
@@ -9,7 +12,7 @@ const firebaseConfig = {
     storageBucket: "asu-anki-flashcards.firebasestorage.app",
     messagingSenderId: "422843832096",
     appId: "1:422843832096:web:085f661b3aab5081cbe945",
-    measurementId: "G-W0N6VJZRCY"
+    measurementId: "G-W0N6VJZRCY",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -19,3 +22,5 @@ const db = getFirestore(app); // <--- جديد: تشغيل قاعدة البيا
 
 // تصدير الأدوات (أضفنا db للقائمة)
 export { auth, provider, db };
+
+export const DEFAULT_BANNER_URL = "images/default_banner.webp";

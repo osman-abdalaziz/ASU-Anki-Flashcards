@@ -92,13 +92,13 @@ export async function loadFlashcards(isLoadMore = false) {
             if (deepLinkInput && deepLinkInput.value) {
                 // نبحث عن الملف في البيانات المحملة
                 const targetDeck = allFlashcards.find(
-                    (c) => c.id === deepLinkInput.value.trim()
+                    (c) => c.id === deepLinkInput.value.trim(),
                 );
                 if (targetDeck && searchInput) {
                     searchInput.value = targetDeck.title; // نكتب الاسم للمستخدم
                     console.log(
                         "🔗 Auto-filled search with:",
-                        targetDeck.title
+                        targetDeck.title,
                     );
                 }
             }
@@ -215,7 +215,7 @@ async function syncDecksWithServer() {
             q = query(
                 collection(db, "decks"),
                 orderBy("createdAt", "desc"),
-                limit(500)
+                limit(500),
             );
             fetchAll = true;
         }
@@ -228,7 +228,7 @@ async function syncDecksWithServer() {
             // ملاحظة: هذا يتطلب أن يكون الـ Deck يحتوي على حقل updatedAt
             q = query(
                 collection(db, "decks"),
-                where("updatedAt", ">", lastDate)
+                where("updatedAt", ">", lastDate),
             );
         }
 
@@ -247,8 +247,12 @@ async function syncDecksWithServer() {
             allFlashcards = [];
             snapshot.forEach((doc) => {
                 const data = doc.data();
-                // لو بنجيب الكل، نتجاهل المحذوف تماماً
-                if (data.isDeleted !== true) {
+
+                // السطر السحري: الملف مقبول لو حالته approved أو لو ملوش حالة (يعني ملف قديم)
+                const isApproved = data.status === "approved" || !data.status;
+
+                // لا تعرض إلا الملفات المقبولة وغير المحذوفة
+                if (data.isDeleted !== true && isApproved) {
                     allFlashcards.push({ id: doc.id, ...data });
                 }
             });
@@ -258,25 +262,28 @@ async function syncDecksWithServer() {
             snapshot.forEach((doc) => {
                 const serverDeck = { id: doc.id, ...doc.data() };
                 const localIndex = allFlashcards.findIndex(
-                    (d) => d.id === serverDeck.id
+                    (d) => d.id === serverDeck.id,
                 );
 
-                // 1. هل وصلتنا إشارة بأن الملف "محذوف"؟
-                if (serverDeck.isDeleted === true) {
+                // التحقق من حالة الملف
+                const isApproved =
+                    serverDeck.status === "approved" || !serverDeck.status;
+
+                // 1. هل الملف محذوف، أو تم رفعه حديثاً ومعلق (Pending)، أو تراجع الإدمن ورفضه؟
+                if (serverDeck.isDeleted === true || !isApproved) {
                     if (localIndex !== -1) {
-                        // الملف موجود عندنا؟ امسحه فوراً من الذاكرة!
+                        // امسحه فوراً من أجهزة الطلاب!
                         allFlashcards.splice(localIndex, 1);
                         hasChanges = true;
                         console.log(
-                            "♻️ Deck removed from cache:",
-                            serverDeck.title
+                            "♻️ Deck hidden/removed from cache:",
+                            serverDeck.title,
                         );
                     }
-                    // لا تكمل باقي الكود لهذا الملف
-                    return;
+                    return; // تجاهل ولا تكمل الإضافة
                 }
 
-                // 2. لو مش محذوف، كمل عادي (إضافة جديد أو تحديث)
+                // 2. لو الملف مقبول ومش محذوف: ضيفه كجديد أو حدثه
                 if (localIndex === -1) {
                     allFlashcards.unshift(serverDeck);
                     console.log("New Deck Found:", serverDeck.title);
@@ -292,7 +299,7 @@ async function syncDecksWithServer() {
             // حفظ الكاش الجديد
             localStorage.setItem(
                 CACHED_DECKS_KEY,
-                JSON.stringify(allFlashcards)
+                JSON.stringify(allFlashcards),
             );
 
             // حفظ وقت اللحظة الحالية كآخر وقت مزامنة
@@ -385,7 +392,7 @@ export async function loadAllNotifications(allDecks) {
 
     const listDesktop = document.querySelector("#notifDropdown .notif-list");
     const listMobile = document.querySelector(
-        "#mobileNotifDropdown .notif-list"
+        "#mobileNotifDropdown .notif-list",
     );
     const badgeDesktop = document.getElementById("notifBadge");
     const badgeMobile = document.getElementById("mobileNotifBadge");
@@ -415,7 +422,7 @@ export async function loadAllNotifications(allDecks) {
         const q = query(
             collection(db, "general_notifications"),
             orderBy("createdAt", "desc"),
-            limit(5)
+            limit(5),
         );
         const snapshot = await getDocs(q);
         let notifsChanged = false;
@@ -431,7 +438,7 @@ export async function loadAllNotifications(allDecks) {
         if (notifsChanged) {
             localStorage.setItem(
                 CACHED_NOTIFS_KEY,
-                JSON.stringify(generalNotifs)
+                JSON.stringify(generalNotifs),
             );
         }
     } catch (error) {
@@ -439,7 +446,7 @@ export async function loadAllNotifications(allDecks) {
     }
 
     let displayGeneralNotifs = generalNotifs.filter(
-        (n) => !readGeneralIds.includes(n.id)
+        (n) => !readGeneralIds.includes(n.id),
     );
     window.currentGeneralIds = displayGeneralNotifs.map((n) => n.id);
 
@@ -500,13 +507,13 @@ export async function loadAllNotifications(allDecks) {
                         <a href="${
                             deck.downloadUrl
                         }" target="_blank" onclick="window.handleUpdateClick('${
-            deck.id
-        }', '${deck.version}')" class="notif-action-btn download">Download</a>
+                            deck.id
+                        }', '${deck.version}')" class="notif-action-btn download">Download</a>
                         <button onclick="window.handleUpdateClick('${
                             deck.id
                         }', '${
-            deck.version
-        }')" class="notif-action-btn ignore">Mark read</button>
+                            deck.version
+                        }')" class="notif-action-btn ignore">Mark read</button>
                     </div>
                 </div>
             </div>`;
@@ -517,14 +524,14 @@ export async function loadAllNotifications(allDecks) {
             notif.type === "danger"
                 ? "fa-triangle-exclamation"
                 : notif.type === "success"
-                ? "fa-check"
-                : "fa-bell";
+                  ? "fa-check"
+                  : "fa-bell";
         let bg =
             notif.type === "danger"
                 ? "bg-red"
                 : notif.type === "success"
-                ? "bg-green"
-                : "bg-blue";
+                  ? "bg-green"
+                  : "bg-blue";
         let dateStr = "";
         if (notif.createdAt && notif.createdAt.seconds) {
             const dateObj = new Date(notif.createdAt.seconds * 1000);
@@ -730,7 +737,7 @@ export async function getUserReview(deckId) {
         const q = query(
             collection(db, "decks", deckId, "reviews"),
             where("userId", "==", user.uid),
-            limit(1)
+            limit(1),
         );
         const snapshot = await getDocs(q);
         return !snapshot.empty ? snapshot.docs[0].data() : null;
@@ -781,7 +788,7 @@ export async function sendUserNotification(
     title,
     message,
     link = "#",
-    type = "info"
+    type = "info",
 ) {
     try {
         if (!targetUid) return;
@@ -804,7 +811,7 @@ export async function getAdminUID() {
     // نبحث عن الأدمن بالإيميل
     const q = query(
         collection(db, "users"),
-        where("email", "==", "osmanabdalaziz2005@gmail.com")
+        where("email", "==", "osmanabdalaziz2005@gmail.com"),
     );
     const snapshot = await getDocs(q);
     if (!snapshot.empty) {
@@ -826,7 +833,7 @@ export function initNotificationSystem(user) {
     const q = query(
         collection(db, "users", user.uid, "notifications"),
         orderBy("createdAt", "desc"),
-        limit(20)
+        limit(20),
     );
 
     onSnapshot(q, (snapshot) => {
@@ -855,14 +862,14 @@ export function initNotificationSystem(user) {
                 n.type === "success"
                     ? "fa-circle-check"
                     : n.type === "error"
-                    ? "fa-circle-xmark"
-                    : "fa-bell";
+                      ? "fa-circle-xmark"
+                      : "fa-bell";
             const color =
                 n.type === "success"
                     ? "green"
                     : n.type === "error"
-                    ? "red"
-                    : "blue";
+                      ? "red"
+                      : "blue";
 
             // رابط (اختياري)
             const linkHTML =
