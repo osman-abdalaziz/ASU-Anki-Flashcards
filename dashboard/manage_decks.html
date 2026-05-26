@@ -123,6 +123,17 @@
                 <div class="container">
                     <h1 style="margin-bottom: 20px;" class="dashboard-title">Decks <span>Management</span></h1>
 
+                    <div class="dashboard-tabs">
+                        <button type="button" id="tabApproved" class="tab-btn active"
+                            onclick="window.switchTab('approved')">
+                            <i class="fa-solid fa-check-circle fa-fw"></i> Approved Decks
+                        </button>
+                        <button type="button" id="tabPending" class="tab-btn" onclick="window.switchTab('pending')">
+                            <i class="fa-solid fa-clock fa-fw"></i> Pending Review
+                            <span id="pendingBadge" class="pending-badge" style="display: none;">0</span>
+                        </button>
+                    </div>
+
                     <div class="table-container">
                         <div class="controls-wrapper">
                             <div class="search" style="max-width: 100% !important; display: flex; gap: 15px;">

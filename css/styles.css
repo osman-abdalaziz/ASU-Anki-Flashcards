@@ -2492,3 +2492,158 @@ html[data-theme="light"] .report-btn:hover {
     background-color: transparent;
     color: var(--red-color);
 }
+
+/* =========================================
+   Admin Dashboard Tabs (Approved / Pending)
+   ========================================= */
+.dashboard-tabs {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    border-bottom: 2px solid var(--ver-tag-color);
+    padding-bottom: 10px;
+}
+
+.dashboard-tabs .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary-color);
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.dashboard-tabs .tab-btn:hover {
+    color: var(--text-color);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.dashboard-tabs .tab-btn.active {
+    color: var(--main-color);
+    background: rgba(0, 136, 209, 0.1);
+}
+
+/* شريط التحديد السفلي الأنيق للتاب النشط */
+.dashboard-tabs .tab-btn.active::after {
+    content: "";
+    position: absolute;
+    bottom: -12px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--main-color);
+    border-radius: 5px 5px 0 0;
+}
+
+/* =========================================
+   Review & Approve Action Buttons
+   ========================================= */
+/* زر المراجعة (برتقالي/ذهبي يدل على الفحص) */
+.action-btn.review {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+.action-btn.review:hover {
+    background: #ffc107;
+    color: #000;
+}
+
+/* زر الموافقة (أخضر يدل على النجاح) */
+.action-btn.approve {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+.action-btn.approve:hover {
+    background: #28a745;
+    color: #fff;
+}
+
+/* زر الرفض (أحمر) - يعتمد على التنسيق الأصلي لك ولكن أكدناه هنا */
+.action-btn.reject {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+.action-btn.reject:hover {
+    background: #dc3545;
+    color: #fff;
+}
+
+/* حركة نبض (Pulse) للشارة الحمراء للملفات المعلقة */
+.pending-badge {
+    background: #dc3545;
+    color: white;
+    width: 20px;
+    height: 20px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: bold;
+    border-radius: 100px;
+    -webkit-border-radius: 100px;
+    -moz-border-radius: 100px;
+    -ms-border-radius: 100px;
+    -o-border-radius: 100px;
+}
+
+@keyframes pulseBadge {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Color Swatch Styles */
+.color-swatch {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition:
+        transform 0.2s,
+        box-shadow 0.2s;
+    border: 2px solid transparent;
+}
+.color-swatch:hover {
+    transform: scale(1.1);
+}
+.color-swatch.active {
+    transform: scale(1.15);
+    border: 2px solid #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Icon Option Styles */
+.icon-option {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+    padding: 5px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid transparent;
+}
+.icon-option:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+.icon-option.active {
+    border: 2px solid var(--main-color);
+    background: rgba(0, 136, 209, 0.2);
+}

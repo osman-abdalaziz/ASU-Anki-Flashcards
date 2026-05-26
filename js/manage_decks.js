@@ -20,7 +20,7 @@ import { notifySubscribers } from "./telegram_service.js";
 import { showConfirmModal, showModal } from "./ui.js"; // تأكد من وجود ui.js
 
 const tableBody = document.getElementById("decksTableBody");
-
+let currentTab = "approved";
 // ... (دالة loadDecks كما هي بدون تغيير) ...
 // تأكد من وضع دالة loadDecks هنا (أو اتركها كما هي في ملفك)
 
@@ -41,24 +41,33 @@ function incrementVersion(oldVersion) {
     return oldVersion;
 }
 async function loadDecks() {
-    // ... (نفس كود التحميل السابق) ...
-    // اختصاراً للمساحة، افترض أن الكود هنا هو نفسه الموجود عندك
-    // المهم هو ما سيأتي في الأسفل
     tableBody.innerHTML =
         '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
+    let pendingCount = 0; // لحساب عدد الملفات المعلقة
+
     try {
         const querySnapshot = await getDocs(collection(db, "decks"));
         tableBody.innerHTML = "";
+
         if (querySnapshot.empty) {
             tableBody.innerHTML =
                 '<tr><td colspan="6" style="text-align:center;">No Decks found yet.</td></tr>';
             return;
         }
+
         querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
 
-            // 🔥 شرط جديد: لو الملف محذوف (Soft Delete)، لا تظهره في الجدول
+            // 🔥 فلترة: تجاهل الملفات المحذوفة
             if (data.isDeleted === true) return;
+
+            // تحديد حالة الملف (إذا لم يكن له حالة، فهو قديم ومعتمد)
+            const status = data.status || "approved";
+
+            if (status === "pending") pendingCount++;
+
+            // لا ترسم الصف إذا لم يكن يطابق التبويب الحالي
+            if (status !== currentTab) return;
 
             const yearVal = data.year ? data.year.toLowerCase() : "";
             const catVal = data.category ? data.category.toLowerCase() : "";
@@ -67,28 +76,59 @@ async function loadDecks() {
             const hideBtnText = isHidden ? "Unhide" : "Hide";
             const hideBtnIcon = isHidden ? "fa-eye" : "fa-eye-slash";
 
+            let actionButtons = "";
+
+            if (currentTab === "approved") {
+                // أزرار لوحة المعتمد (القديمة)
+                actionButtons = `
+                    <button class="action-btn edit" onclick="window.openEditModal('${docSnap.id}', '${data.title}', '${data.downloadUrl}', '${data.imageUrl}', '${data.version}')">
+                        Edit <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="action-btn ${hideBtnClass}" onclick="window.toggleDeckVisibility('${docSnap.id}', ${isHidden})">
+                        ${hideBtnText} <i class="fa-solid ${hideBtnIcon}"></i>
+                    </button>
+                    <button class="action-btn delete" onclick="window.deleteDeck('${docSnap.id}')">
+                        Delete <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+            } else {
+                // أزرار لوحة المراجعة (بتنسيق CSS الجديد)
+                actionButtons = `
+                    <a href="${data.downloadUrl}" target="_blank" class="action-btn review" style="text-decoration: none; display: inline-block;">
+                        Review <i class="fa-solid fa-up-right-from-square"></i>
+                    </a>
+                    <button class="action-btn approve" onclick="window.approveDeck('${docSnap.id}', '${data.title}')">
+                        Approve <i class="fa-solid fa-check"></i>
+                    </button>
+                    <button class="action-btn reject" onclick="window.rejectDeck('${docSnap.id}')">
+                        Reject <i class="fa-solid fa-xmark"></i>
+                    </button>
+                `;
+            }
+
             const row = `
                 <tr data-year="${yearVal}" data-category="${catVal}"> 
                     <td><span class="badge-download"><i class="fa-solid fa-folder-closed fa-fw"></i> ${data.title}</span></td>
-                    <td>${data.module}</td>
-                    <td>${data.year}</td>
-                    <td>${data.lastUpdate}</td>
-                    <td><span style="font-size:0.85rem; background: #ffffff11; color:#888; padding: 4px 10px; border-radius: 6px;">${data.version}</span></td>
-                    <td>
-                        <button class="action-btn edit" onclick="window.openEditModal('${docSnap.id}', '${data.title}', '${data.downloadUrl}', '${data.imageUrl}', '${data.version}')">
-                            Edit <i class="fa-solid fa-pen"></i>
-                        </button>
-                        <button class="action-btn ${hideBtnClass}" onclick="window.toggleDeckVisibility('${docSnap.id}', ${isHidden})">
-                            ${hideBtnText} <i class="fa-solid ${hideBtnIcon}"></i>
-                        </button>
-                        <button class="action-btn delete" onclick="window.deleteDeck('${docSnap.id}')">
-                            Delete <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </td>
+                    <td>${data.module || "N/A"}</td>
+                    <td>${data.year || "N/A"}</td>
+                    <td>${data.lastUpdate || "New"}</td>
+                    <td><span style="font-size:0.85rem; background: #ffffff11; color:#888; padding: 4px 10px; border-radius: 6px;">${data.version || "v1.0"}</span></td>
+                    <td>${actionButtons}</td>
                 </tr>
             `;
             tableBody.innerHTML += row;
         });
+
+        // تحديث الرقم الأحمر للملفات المعلقة
+        const pendingBadge = document.getElementById("pendingBadge");
+        if (pendingBadge) {
+            pendingBadge.innerText = pendingCount;
+            pendingBadge.style.display = pendingCount > 0 ? "flex" : "none";
+        }
+
+        if (tableBody.innerHTML === "") {
+            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 30px; color:#777;">No ${currentTab} decks found.</td></tr>`;
+        }
     } catch (error) {
         console.error("Error:", error);
     }
@@ -191,7 +231,7 @@ window.deleteDeck = async (id) => {
     const isConfirmed = await window.showConfirm(
         "Delete Deck?",
         "Are you sure you want to delete this deck? Users will lose access to it immediately.",
-        "warning"
+        "warning",
     );
 
     if (isConfirmed) {
@@ -208,7 +248,7 @@ window.deleteDeck = async (id) => {
             window.showModal(
                 "Deleted!",
                 "The Deck has been removed successfully.",
-                "success"
+                "success",
             );
             loadDecks(); // إعادة تحميل الجدول لإخفاء الكارت
         } catch (error) {
@@ -237,7 +277,7 @@ window.toggleDeckVisibility = async (id, currentStatus) => {
         window.showModal(
             "Status Updated!",
             `The deck is now ${actionText}.`,
-            "success"
+            "success",
         );
         loadDecks();
     } catch (error) {
@@ -279,7 +319,7 @@ if (editForm) {
             window.showModal(
                 "Updated!",
                 "Deck updated successfully",
-                "success"
+                "success",
             );
             closeEditModal();
 
@@ -299,7 +339,7 @@ if (editForm) {
                     showModal(
                         "Sending...",
                         "Please wait while we notify users...",
-                        "info"
+                        "info",
                     );
 
                     try {
@@ -308,7 +348,7 @@ if (editForm) {
                             title,
                             standardMessage,
                             newVersion,
-                            unifiedImage
+                            unifiedImage,
                         );
 
                         // رسالة النهاية
@@ -316,25 +356,25 @@ if (editForm) {
                             showModal(
                                 "Success",
                                 `Notification sent to ${count} students successfully!`,
-                                "success"
+                                "success",
                             );
                         } else {
                             showModal(
                                 "Done",
                                 "No linked subscribers found for this deck.",
-                                "warning"
+                                "warning",
                             );
                         }
                     } catch (e) {
                         showModal(
                             "Error",
                             "Failed to send notifications.",
-                            "error"
+                            "error",
                         );
                     }
                 },
                 "Yes, Notify", // نص زر الموافقة
-                "info"
+                "info",
             );
 
             loadDecks();
@@ -366,5 +406,65 @@ function filterDecks() {
 if (searchInput) searchInput.addEventListener("keyup", filterDecks);
 if (yearSelect) yearSelect.addEventListener("change", filterDecks);
 if (catSelect) catSelect.addEventListener("change", filterDecks);
+
+// التبديل بين التبويبات
+window.switchTab = function (tabName) {
+    currentTab = tabName;
+
+    // تغيير الشكل الخارجي للزر
+    document.getElementById("tabApproved").classList.remove("active");
+    document.getElementById("tabPending").classList.remove("active");
+
+    if (tabName === "approved")
+        document.getElementById("tabApproved").classList.add("active");
+    if (tabName === "pending")
+        document.getElementById("tabPending").classList.add("active");
+
+    // إعادة تحميل الجدول
+    loadDecks();
+};
+
+// الموافقة على الملف المعلق
+window.approveDeck = async function (id, title) {
+    const isConfirmed = await window.showConfirm(
+        "Approve Deck?",
+        `Are you sure you want to approve "${title}"? It will go live immediately.`,
+        "success",
+    );
+    if (!isConfirmed) return;
+
+    try {
+        await updateDoc(doc(db, "decks", id), {
+            status: "approved",
+            lastUpdate: new Date().toLocaleDateString("en-GB"),
+        });
+        showModal("Success", "Deck has been approved and is now live!");
+        loadDecks(); // تحديث الجدول
+
+        // إرسال إشعار للطلاب بوجود ملف جديد (اختياري)
+        // notifySubscribers(id, title, "A new deck is available for download!", "v1.0");
+    } catch (error) {
+        console.error("Approval Error:", error);
+        showModal("Error", "Failed to approve the deck.");
+    }
+};
+
+// رفض الملف المعلق (حذفه نهائياً)
+window.rejectDeck = async function (id) {
+    const isConfirmed = await window.showConfirm(
+        "Reject Deck?",
+        "Are you sure you want to reject this deck? It will be deleted permanently.",
+        "warning",
+    );
+    if (!isConfirmed) return;
+
+    try {
+        await deleteDoc(doc(db, "decks", id));
+        showModal("Deleted", "Deck has been rejected and removed.");
+        loadDecks();
+    } catch (error) {
+        console.error("Rejection Error:", error);
+    }
+};
 
 document.addEventListener("DOMContentLoaded", loadDecks);
