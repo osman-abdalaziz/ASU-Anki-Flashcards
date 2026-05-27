@@ -437,6 +437,7 @@ window.approveDeck = async function (id, title) {
         await updateDoc(doc(db, "decks", id), {
             status: "approved",
             lastUpdate: new Date().toLocaleDateString("en-GB"),
+            updatedAt: serverTimestamp(), // 🔥 السطر السحري اللي هيحل المشكلة جذرياً
         });
         showModal("Success", "Deck has been approved and is now live!");
         loadDecks(); // تحديث الجدول
