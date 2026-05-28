@@ -1,0 +1,15 @@
+Options +FollowSymLinks -MultiViews
+RewriteEngine On
+
+# 1. إزالة .html من الرابط
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.html -f
+RewriteRule ^(.*)$ $1.html [NC,L]
+
+# 2. تحويل http إلى https (اختياري ومفضل)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+
+ErrorDocument 404 /404.html
+# ملاحظة: قمت بإزالة جزء Header set لأنه غالباً سبب المشكلة في الاستضافات المجانية
