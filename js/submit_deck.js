@@ -390,22 +390,58 @@ initPickers();
 const submitForm = document.getElementById("submitDeckForm");
 const submitBtn = document.getElementById("submitBtn");
 
-// 🔴 التحقق مما إذا كنا في وضع التعديل (Edit Mode) 🔴
+// متغيرات التحكم في واجهة التعديل
 const urlParams = new URLSearchParams(window.location.search);
 const editDeckId = urlParams.get("id");
 const isEditMode = !!editDeckId;
 
-// إذا كان وضع تعديل، نقوم بجلب البيانات وتعبئة الخانات
+const editBannerToggleWrapper = document.getElementById(
+    "editBannerToggleWrapper",
+);
+const updateImageCheckbox = document.getElementById("updateImageCheckbox");
+const bannerDesignSection = document.getElementById("bannerDesignSection");
+const canvasPreviewWrapper = document.getElementById("canvasPreviewWrapper");
+const staticImageWrapper = document.getElementById("staticImageWrapper");
+const staticImagePreview = document.getElementById("staticImagePreview");
+
+// 🔴 تجهيز واجهة وضع التعديل (Edit Mode)
 if (isEditMode) {
     document.querySelector(".dashboard-title").innerHTML =
         `Update <span>Deck</span>`;
     if (submitBtn) {
         submitBtn.innerHTML =
             'Update Deck <i class="fa-solid fa-arrows-rotate fa-fw"></i>';
-        submitBtn.style.background = "#ff9800"; // تمييز لون زر التحديث
+        submitBtn.style.background = "#ff9800";
     }
 
-    // جلب بيانات الكارت القديم
+    if (editBannerToggleWrapper)
+        editBannerToggleWrapper.style.display = "block";
+    if (bannerDesignSection) bannerDesignSection.style.display = "none";
+    if (canvasPreviewWrapper) canvasPreviewWrapper.style.display = "none";
+    if (staticImageWrapper) staticImageWrapper.style.display = "block";
+
+    if (updateImageCheckbox) {
+        updateImageCheckbox.addEventListener("change", (e) => {
+            if (e.target.checked) {
+                if (bannerDesignSection)
+                    bannerDesignSection.style.display = "block";
+                if (canvasPreviewWrapper)
+                    canvasPreviewWrapper.style.display = "block";
+                if (staticImageWrapper)
+                    staticImageWrapper.style.display = "none";
+                drawCanvas();
+            } else {
+                if (bannerDesignSection)
+                    bannerDesignSection.style.display = "none";
+                if (canvasPreviewWrapper)
+                    canvasPreviewWrapper.style.display = "none";
+                if (staticImageWrapper)
+                    staticImageWrapper.style.display = "block";
+            }
+        });
+    }
+
+    // جلب بيانات الكارت القديم وتعبئتها
     getDoc(doc(db, "decks", editDeckId))
         .then((docSnap) => {
             if (docSnap.exists()) {
@@ -420,11 +456,12 @@ if (isEditMode) {
                 if (document.getElementById("deckVersion"))
                     document.getElementById("deckVersion").value =
                         data.version || "v1.0";
-                document.getElementById("driveLink").value = data.downloadUrl; // نعرض الرابط القديم كمرجع
+                document.getElementById("driveLink").value = data.downloadUrl;
                 document.getElementById("deckDesc").value =
                     data.description || "";
 
-                // إعادة رسم الكانفاس بالبيانات الجديدة
+                if (staticImagePreview) staticImagePreview.src = data.imageUrl;
+
                 setTimeout(drawCanvas, 500);
             }
         })
@@ -433,7 +470,7 @@ if (isEditMode) {
         );
 }
 
-// 🔴 كود الإرسال المشترك (إنشاء جديد أو تحديث) 🔴
+// 🔴 كود الإرسال الذكي (يعالج الـ 3 حالات)
 if (submitForm) {
     submitForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -456,8 +493,6 @@ if (submitForm) {
                 ? currentCreatorName
                 : "ASU Students";
 
-        // إذا الرابط مش مباشر في وضع التعديل (يعني معدلوش)، هنحاول نحوله.
-        // ولو حولناه وطلع صح، ناخده، لو طلع غلط، نرفضه.
         let directLink = driveLink;
         if (driveLink.includes("/d/") || driveLink.includes("id=")) {
             directLink = getDirectDriveLink(driveLink);
@@ -478,7 +513,6 @@ if (submitForm) {
         }
 
         try {
-            // توليد الـ ID إذا كان كارت جديد، أو استخدام الـ ID القديم إذا كنا في وضع التعديل
             const customDeckId = isEditMode
                 ? editDeckId
                 : `${title
@@ -490,7 +524,37 @@ if (submitForm) {
                           "-",
                       )}-${Math.random().toString(36).substring(2, 7)}`;
 
-            // استخراج وتوليد الصورة مباشرة (سيتم تحديث الصورة في وضع التعديل أيضاً)
+            // 🟢 حالة رقم 1: وضع التعديل + المستخدم لا يريد تحديث الصورة (حفظ سريع للنصوص فقط)
+            if (
+                isEditMode &&
+                updateImageCheckbox &&
+                !updateImageCheckbox.checked
+            ) {
+                await updateDoc(doc(db, "decks", customDeckId), {
+                    title: title,
+                    module: moduleName,
+                    year: year,
+                    category: category,
+                    type: type,
+                    version: version,
+                    description: desc,
+                    downloadUrl: directLink,
+                    creator: finalCreatorName,
+                    lastUpdate: new Date().toLocaleDateString("en-GB"),
+                    updatedAt: serverTimestamp(),
+                });
+
+                showModal(
+                    "Success!",
+                    "Deck details updated successfully without changing the image.",
+                );
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 2000);
+                return;
+            }
+
+            // 🟢 حالة رقم 2 & 3: إنشاء جديد أو تعديل مع تحديث الصورة
             canvas.toBlob(
                 async (blob) => {
                     if (!blob) {
@@ -528,23 +592,19 @@ if (submitForm) {
                         };
 
                         if (isEditMode) {
-                            // 🔴 وضع التحديث 🔴
                             deckData.updatedAt = serverTimestamp();
-                            // ممكن نغير حالة الملف للـ pending تاني عشان يتدقق لو حابب، أو نسيبها زي ما هي
-                            // deckData.status = "pending";
                             await updateDoc(
                                 doc(db, "decks", customDeckId),
                                 deckData,
                             );
                             showModal(
                                 "Success!",
-                                "Deck has been successfully updated.",
+                                "Deck and image have been successfully updated.",
                             );
                             setTimeout(() => {
-                                window.location.href = "my_decks.html";
+                                window.location.href = "index.html";
                             }, 2000);
                         } else {
-                            // 🔴 وضع إنشاء جديد 🔴
                             deckData.status = "pending";
                             deckData.createdAt = serverTimestamp();
                             deckData.isDeleted = false;

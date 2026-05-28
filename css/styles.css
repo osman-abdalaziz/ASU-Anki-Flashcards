@@ -2043,6 +2043,7 @@ footer p a {
     -moz-border-radius: 10px;
     -ms-border-radius: 10px;
     -o-border-radius: 10px;
+    text-decoration: none;
 }
 
 .action-btn.edit {

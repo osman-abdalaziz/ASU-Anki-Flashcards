@@ -90,8 +90,10 @@
                 <a href="../index.html"><img src="../images/logo.webp" alt="ASU Anki" /></a>
             </div>
             <ul class="admin-nav">
+                <li><a href="index.html"><i class="fa-solid fa-layer-group fa-fw"></i> My Decks</a>
                 <li><a href="submit_deck.html" class="active"><i class="fa-solid fa-cloud-arrow-up fa-fw"></i> Submit
                         Deck</a></li>
+                </li>
             </ul>
         </aside>
 
@@ -180,7 +182,19 @@
                                     </div>
                                 </div>
 
-                                <div
+                                <div id="editBannerToggleWrapper"
+                                    style="display: none; background: rgba(255, 152, 0, 0.1); padding: 15px; border-radius: 12px; border: 1px solid #ff9800; margin-bottom: 20px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="updateImageCheckbox"
+                                            style="width: 20px; height: 20px; accent-color: #ff9800; cursor: pointer;">
+                                        <label for="updateImageCheckbox"
+                                            style="color: #ff9800; font-weight: 600; cursor: pointer; margin: 0;">I want
+                                            to
+                                            redesign/update the banner image</label>
+                                    </div>
+                                </div>
+
+                                <div id="bannerDesignSection"
                                     style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--ver-tag-color);">
                                     <h3
                                         style="margin-top: 0; margin-bottom: 20px; font-size: 1.1rem; color: var(--main-color);">
@@ -282,15 +296,25 @@
                                     <i class="fa-solid fa-eye"></i> Live Preview
                                 </h3>
 
-                                <div class="banner-preview-wrapper" style="text-align: center;">
+                                <div id="canvasPreviewWrapper" class="banner-preview-wrapper"
+                                    style="text-align: center;">
                                     <canvas id="bannerCanvas" width="1920" height="1080"
                                         style="width: 100%; max-width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid var(--ver-tag-color); background: #000; cursor: grab;"></canvas>
+
+                                    <p
+                                        style="font-size: 0.85rem; color: var(--main-color); text-align: center; margin-top: 15px; margin-bottom: 0; font-weight: 500;">
+                                        <i class="fa-solid fa-hand-pointer"></i> Drag the text freely with your mouse!
+                                    </p>
                                 </div>
 
-                                <p
-                                    style="font-size: 0.85rem; color: var(--main-color); text-align: center; margin-top: 15px; margin-bottom: 0; font-weight: 500;">
-                                    <i class="fa-solid fa-hand-pointer"></i> Drag the text freely with your mouse!
-                                </p>
+                                <div id="staticImageWrapper" style="display: none; text-align: center;">
+                                    <img id="staticImagePreview" src="" alt="Current Banner"
+                                        style="width: 100%; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid var(--ver-tag-color);">
+                                    <p
+                                        style="font-size: 0.85rem; color: var(--text-secondary-color); text-align: center; margin-top: 15px; margin-bottom: 0;">
+                                        <i class="fa-solid fa-lock"></i> Image is locked. Check the box above to edit.
+                                    </p>
+                                </div>
                             </div>
 
                         </div>
