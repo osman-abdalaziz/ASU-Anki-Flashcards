@@ -2485,10 +2485,10 @@ html[data-theme="light"] .report-btn:hover {
 .drop-btn:hover {
     background-color: var(--ver-tag-color);
 }
-.telegram-link-btn {
+/* .telegram-link-btn {
 }
 .admin-dash-btn {
-}
+} */
 .logout-btn {
     background-color: transparent;
     color: var(--red-color);
