@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Creators | My Decks</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+        body {
+            display: flex !important;
+        }
+
+        .table-container {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+            border: 1px solid var(--ver-tag-color);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--main-color);
+        }
+
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .status-approved {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .action-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--ver-tag-color);
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-color);
+            padding: 8px 12px;
+            font-size: 1rem;
+            transition: 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover {
+            background: var(--main-color);
+            color: #fff;
+            border-color: var(--main-color);
+        }
+
+        .banner-thumb {
+            width: 80px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid var(--ver-tag-color);
+        }
+    </style>
+</head>
+
+<body>
+    <main class="dashboard-container">
+        <aside>
+            <div class="admin-logo">
+                <a href="../index.html"><img src="../images/logo.webp" alt="ASU Anki" /></a>
+            </div>
+            <ul class="admin-nav">
+                <li><a href="index.html"><i class="fa-solid fa-list-check fa-fw"></i> Tasks Board</a></li>
+                <li><a href="submit_deck.html"><i class="fa-solid fa-cloud-arrow-up fa-fw"></i> Submit Deck</a></li>
+                <li><a href="my_decks.html" class="active"><i class="fa-solid fa-layer-group fa-fw"></i> My Decks</a>
+                </li>
+                <li><a href="my_tasks.html"><i class="fa-solid fa-user-clock fa-fw"></i> My Tasks</a></li>
+            </ul>
+        </aside>
+
+        <section class="dashboard-main">
+            <nav>
+                <div style="flex:1;"></div>
+                <div class="nav-actions" style="display: flex; align-items: center;">
+                    <div class="userProfile-header">
+                        <div class="userimg"><img id="mobileUserAvatar" src="../images/user.webp" alt="User" /></div>
+                        <p id="mobileUserName" style="padding: 10px 15px; font-weight: 400; margin: 0;">Creator</p>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="dashboard-content">
+                <div class="container">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h1 class="dashboard-title" style="margin:0;">My <span>Uploaded Decks</span></h1>
+                        <a href="submit_deck.html" class="main-btn"
+                            style="text-decoration: none; padding: 10px 20px; font-size: 0.9rem;"><i
+                                class="fa-solid fa-plus"></i> Add New</a>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Banner</th>
+                                    <th>Deck Details</th>
+                                    <th>Type</th>
+                                    <th>Version</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="myDecksTableBody">
+                                <tr>
+                                    <td colspan="6" style="text-align: center;">Loading your decks...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <div class="container">
+                    <p>&copy; 2026 ASU Anki Flashcards.</p>
+                </div>
+            </footer>
+        </section>
+    </main>
+    <script type="module" src="../js/my_decks.js"></script>
+</body>
+
+</html>

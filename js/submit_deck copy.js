@@ -6,7 +6,6 @@ import {
     doc,
     getDoc,
     setDoc,
-    updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { showModal } from "./ui.js";
 import {
@@ -385,55 +384,11 @@ initPickers();
 });
 
 // ==========================================
-// 3. Form Submission, Native Canvas Export & Edit Mode
+// 3. Form Submission & Native Canvas Export
 // ==========================================
 const submitForm = document.getElementById("submitDeckForm");
 const submitBtn = document.getElementById("submitBtn");
 
-// 🔴 التحقق مما إذا كنا في وضع التعديل (Edit Mode) 🔴
-const urlParams = new URLSearchParams(window.location.search);
-const editDeckId = urlParams.get("id");
-const isEditMode = !!editDeckId;
-
-// إذا كان وضع تعديل، نقوم بجلب البيانات وتعبئة الخانات
-if (isEditMode) {
-    document.querySelector(".dashboard-title").innerHTML =
-        `Update <span>Deck</span>`;
-    if (submitBtn) {
-        submitBtn.innerHTML =
-            'Update Deck <i class="fa-solid fa-arrows-rotate fa-fw"></i>';
-        submitBtn.style.background = "#ff9800"; // تمييز لون زر التحديث
-    }
-
-    // جلب بيانات الكارت القديم
-    getDoc(doc(db, "decks", editDeckId))
-        .then((docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                document.getElementById("deckTitle").value = data.title;
-                document.getElementById("deckModule").value = data.module;
-                document.getElementById("deckYear").value = data.year;
-                document.getElementById("deckCategory").value = data.category;
-                if (document.getElementById("deckType"))
-                    document.getElementById("deckType").value =
-                        data.type || "Theoretical";
-                if (document.getElementById("deckVersion"))
-                    document.getElementById("deckVersion").value =
-                        data.version || "v1.0";
-                document.getElementById("driveLink").value = data.downloadUrl; // نعرض الرابط القديم كمرجع
-                document.getElementById("deckDesc").value =
-                    data.description || "";
-
-                // إعادة رسم الكانفاس بالبيانات الجديدة
-                setTimeout(drawCanvas, 500);
-            }
-        })
-        .catch((err) =>
-            console.error("Failed to fetch deck for editing:", err),
-        );
-}
-
-// 🔴 كود الإرسال المشترك (إنشاء جديد أو تحديث) 🔴
 if (submitForm) {
     submitForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -443,25 +398,18 @@ if (submitForm) {
             document.getElementById("deckModule")?.value.trim() || "";
         const year = document.getElementById("deckYear").value;
         const category = document.getElementById("deckCategory").value;
-        const type =
-            document.getElementById("deckType")?.value || "Theoretical";
-        const version =
-            document.getElementById("deckVersion")?.value.trim() || "v1.0";
         const driveLink = document.getElementById("driveLink").value.trim();
         const desc = document.getElementById("deckDesc").value.trim();
 
         const showCreatorCheckbox = document.getElementById("showCreatorName");
-        const finalCreatorName =
-            showCreatorCheckbox && showCreatorCheckbox.checked
-                ? currentCreatorName
-                : "ASU Students";
+        const isNameVisible = showCreatorCheckbox
+            ? showCreatorCheckbox.checked
+            : true;
+        const finalCreatorName = isNameVisible
+            ? currentCreatorName
+            : "ASU Students";
 
-        // إذا الرابط مش مباشر في وضع التعديل (يعني معدلوش)، هنحاول نحوله.
-        // ولو حولناه وطلع صح، ناخده، لو طلع غلط، نرفضه.
-        let directLink = driveLink;
-        if (driveLink.includes("/d/") || driveLink.includes("id=")) {
-            directLink = getDirectDriveLink(driveLink);
-        }
+        const directLink = getDirectDriveLink(driveLink);
 
         if (!directLink) {
             showModal(
@@ -473,32 +421,33 @@ if (submitForm) {
 
         if (submitBtn) {
             submitBtn.innerHTML =
-                'Processing... <i class="fa-solid fa-spinner fa-spin"></i>';
+                'Submitting... <i class="fa-solid fa-spinner fa-spin"></i>';
             submitBtn.disabled = true;
         }
 
         try {
-            // توليد الـ ID إذا كان كارت جديد، أو استخدام الـ ID القديم إذا كنا في وضع التعديل
-            const customDeckId = isEditMode
-                ? editDeckId
-                : `${title
-                      .toLowerCase()
-                      .replace(/[^a-zA-Z0-9\u0621-\u064A\s-]/g, "")
-                      .trim()
-                      .replace(
-                          /\s+/g,
-                          "-",
-                      )}-${Math.random().toString(36).substring(2, 7)}`;
+            const randomChars = Math.random().toString(36).substring(2, 7);
+            const cleanTitle = title
+                .toLowerCase()
+                .replace(/[^a-zA-Z0-9\u0621-\u064A\s-]/g, "")
+                .trim()
+                .replace(/\s+/g, "-");
+            const customDeckId = `${cleanTitle}-${randomChars}`;
 
-            // استخراج وتوليد الصورة مباشرة (سيتم تحديث الصورة في وضع التعديل أيضاً)
+            // استخراج وتوليد الصورة مباشرة (Native)
             canvas.toBlob(
                 async (blob) => {
+                    // 🔥 رسالة الخطأ دي مستحيل تظهر لو شغال Live Server
                     if (!blob) {
                         showModal(
                             "Error",
-                            "Canvas generated a blank image. Make sure you are using a Live Server.",
+                            "Canvas generated a blank image. You must run the site via Live Server to upload images.",
                         );
-                        resetBtn();
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML =
+                                'Submit for Review <i class="fa-solid fa-paper-plane fa-fw"></i>';
+                        }
                         return;
                     }
 
@@ -511,59 +460,60 @@ if (submitForm) {
                         const generatedBannerUrl =
                             await getDownloadURL(bannerRef);
 
-                        const deckData = {
+                        await setDoc(doc(db, "decks", customDeckId), {
                             title: title,
                             module: moduleName,
                             year: year,
                             category: category,
-                            type: type,
-                            version: version,
                             description: desc,
                             downloadUrl: directLink,
                             imageUrl: generatedBannerUrl,
+                            version: "v1.0",
                             creator: finalCreatorName,
                             creatorId: auth.currentUser.uid,
+                            status: "pending",
+                            createdAt: serverTimestamp(),
                             lastUpdate: new Date().toLocaleDateString("en-GB"),
+                            isDeleted: false,
                             isHidden: false,
-                        };
+                        });
 
-                        if (isEditMode) {
-                            // 🔴 وضع التحديث 🔴
-                            deckData.updatedAt = serverTimestamp();
-                            // ممكن نغير حالة الملف للـ pending تاني عشان يتدقق لو حابب، أو نسيبها زي ما هي
-                            // deckData.status = "pending";
-                            await updateDoc(
-                                doc(db, "decks", customDeckId),
-                                deckData,
-                            );
-                            showModal(
-                                "Success!",
-                                "Deck has been successfully updated.",
-                            );
-                            setTimeout(() => {
-                                window.location.href = "my_decks.html";
-                            }, 2000);
-                        } else {
-                            // 🔴 وضع إنشاء جديد 🔴
-                            deckData.status = "pending";
-                            deckData.createdAt = serverTimestamp();
-                            deckData.isDeleted = false;
-                            await setDoc(
-                                doc(db, "decks", customDeckId),
-                                deckData,
-                            );
-                            showModal(
-                                "Success!",
-                                "Deck submitted and is now pending admin review.",
-                            );
-                            submitForm.reset();
-                            drawCanvas();
-                            resetBtn();
+                        showModal(
+                            "Success!",
+                            "Deck submitted and is now pending admin review.",
+                        );
+
+                        submitForm.reset();
+                        texts[0].x = 300;
+                        texts[0].y = 520;
+                        texts[0].angle = 0;
+                        texts[1].x = 700;
+                        texts[1].y = 500;
+                        texts[1].angle = 0;
+
+                        if (document.getElementById("ctrlTitleSize"))
+                            document.getElementById("ctrlTitleSize").value =
+                                120;
+                        if (document.getElementById("ctrlPart1Angle"))
+                            document.getElementById("ctrlPart1Angle").value = 0;
+                        if (document.getElementById("ctrlPart2Angle"))
+                            document.getElementById("ctrlPart2Angle").value = 0;
+
+                        drawCanvas();
+
+                        if (submitBtn) {
+                            submitBtn.innerHTML =
+                                'Submit for Review <i class="fa-solid fa-paper-plane fa-fw"></i>';
+                            submitBtn.disabled = false;
                         }
                     } catch (uploadError) {
                         console.error("Upload Error:", uploadError);
-                        showModal("Error", "Failed to process data.");
-                        resetBtn();
+                        showModal("Error", "Failed to upload image to server.");
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML =
+                                'Submit for Review <i class="fa-solid fa-paper-plane fa-fw"></i>';
+                        }
                     }
                 },
                 "image/webp",
@@ -572,15 +522,10 @@ if (submitForm) {
         } catch (error) {
             console.error("Submission Error:", error);
             showModal("Error", "Something went wrong.");
-            resetBtn();
-        }
-
-        function resetBtn() {
             if (submitBtn) {
-                submitBtn.innerHTML = isEditMode
-                    ? 'Update Deck <i class="fa-solid fa-arrows-rotate fa-fw"></i>'
-                    : 'Submit for Review <i class="fa-solid fa-paper-plane fa-fw"></i>';
                 submitBtn.disabled = false;
+                submitBtn.innerHTML =
+                    'Submit for Review <i class="fa-solid fa-paper-plane fa-fw"></i>';
             }
         }
     });
