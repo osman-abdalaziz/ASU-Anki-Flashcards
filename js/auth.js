@@ -58,6 +58,9 @@ async function saveUserToFirestore(user) {
 // 1. الدخول عبر جوجل
 // =============================
 export async function handleGoogleLogin() {
+    const provider = new GoogleAuthProvider();
+    const auth = getAuth();
+
     try {
         const result = await signInWithRedirect(auth, provider); // تم تعديلها لاستلام النتيجة
         const user = result.user;
