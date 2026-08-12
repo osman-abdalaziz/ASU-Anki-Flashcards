@@ -1,5 +1,5 @@
 import {
-    signInWithPopup,
+    signInWithRedirect,
     signOut,
     onAuthStateChanged,
     createUserWithEmailAndPassword,
@@ -46,7 +46,7 @@ async function saveUserToFirestore(user) {
             await setDoc(
                 userRef,
                 { lastLogin: serverTimestamp() },
-                { merge: true }
+                { merge: true },
             );
         }
     } catch (error) {
@@ -59,7 +59,7 @@ async function saveUserToFirestore(user) {
 // =============================
 export async function handleGoogleLogin() {
     try {
-        const result = await signInWithPopup(auth, provider); // تم تعديلها لاستلام النتيجة
+        const result = await signInWithRedirect(auth, provider); // تم تعديلها لاستلام النتيجة
         const user = result.user;
 
         // 🔥 حفظ المستخدم في الداتابيز
@@ -81,7 +81,7 @@ export async function handleEmailSignUp(name, email, password) {
         const userCredential = await createUserWithEmailAndPassword(
             auth,
             email,
-            password
+            password,
         );
         const user = userCredential.user;
 
@@ -112,9 +112,10 @@ export async function handleEmailSignUp(name, email, password) {
             "Account Created Successfully! 🎉",
             "We have sent a verification link to your email. Please check your inbox or (Spam), activate your account, and then sign in.",
             "success",
+            "Done",
             () => {
                 window.location.href = "signin";
-            }
+            },
         );
 
         console.log("Account Created:", user.email);
@@ -145,7 +146,7 @@ export async function handleEmailSignIn(email, password) {
         const userCredential = await signInWithEmailAndPassword(
             auth,
             email,
-            password
+            password,
         );
         const user = userCredential.user;
 
@@ -165,10 +166,11 @@ export async function handleEmailSignIn(email, password) {
                 "Verification Required 🔒",
                 messageHTML,
                 "error",
+                "Close",
                 async () => {
                     await signOut(auth);
                     isLoggingIn = false;
-                }
+                },
             );
 
             return false;
@@ -191,7 +193,7 @@ export async function handleEmailSignIn(email, password) {
             showError(" Invalid email or password.");
         } else if (error.code === "auth/too-many-requests") {
             showError(
-                "Too many failed login attempts. Please try again later."
+                "Too many failed login attempts. Please try again later.",
             );
         } else if (error.code === "auth/invalid-email") {
             showError("The email address is not valid.");
