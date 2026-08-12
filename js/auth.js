@@ -2,6 +2,7 @@ import {
     signInWithRedirect,
     signOut,
     onAuthStateChanged,
+    GoogleAuthProvider,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     updateProfile,

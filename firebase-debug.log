@@ -1,0 +1,17 @@
+[debug] [2026-08-12T20:26:45.276Z] ----------------------------------------------------------------------
+[debug] [2026-08-12T20:26:45.278Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\acer\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy
+[debug] [2026-08-12T20:26:45.278Z] CLI Version:   15.26.0
+[debug] [2026-08-12T20:26:45.278Z] Platform:      win32
+[debug] [2026-08-12T20:26:45.278Z] Node Version:  v21.2.0
+[debug] [2026-08-12T20:26:45.279Z] Detected Agent: unknown
+[debug] [2026-08-12T20:26:45.279Z] Time:          Wed Aug 12 2026 23:26:45 GMT+0300 (Eastern European Summer Time)
+[debug] [2026-08-12T20:26:45.279Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-08-12T20:26:46.489Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-08-12T20:26:46.489Z] > authorizing via signed-in user (osmanabdalaziz2005@gmail.com)
+[debug] [2026-08-12T20:26:46.489Z] [iam] checking project asu-anki-flashcards for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-08-12T20:26:46.498Z] Checked if tokens are valid: true, expires at: 1786569908929
+[debug] [2026-08-12T20:26:46.498Z] Checked if tokens are valid: true, expires at: 1786569908929
+[debug] [2026-08-12T20:26:46.500Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/asu-anki-flashcards:testIamPermissions [none]
+[debug] [2026-08-12T20:26:46.500Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/asu-anki-flashcards:testIamPermissions  x-goog-user-project=asu-anki-flashcards
+[debug] [2026-08-12T20:26:46.500Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/asu-anki-flashcards:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
