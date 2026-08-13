@@ -1,8 +1,7 @@
 import {
-    signInWithRedirect,
+    signInWithPopup,
     signOut,
     onAuthStateChanged,
-    GoogleAuthProvider,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     updateProfile,
@@ -59,10 +58,8 @@ async function saveUserToFirestore(user) {
 // 1. الدخول عبر جوجل
 // =============================
 export async function handleGoogleLogin() {
-    const provider = new GoogleAuthProvider();
-
     try {
-        const result = await signInWithRedirect(auth, provider); // تم تعديلها لاستلام النتيجة
+        const result = await signInWithPopup(auth, provider); // تم تعديلها لاستلام النتيجة
         const user = result.user;
 
         // 🔥 حفظ المستخدم في الداتابيز
@@ -117,7 +114,7 @@ export async function handleEmailSignUp(name, email, password) {
             "success",
             "Done",
             () => {
-                window.location.href = "signin";
+                window.location.href = "signin.html";
             },
         );
 
@@ -244,9 +241,33 @@ export async function handleLogout() {
     }
 }
 
+const Preloader = {
+    progress: 0,
+    bar: document.getElementById("loader-progress"),
+    text: document.getElementById("loader-text"),
+    container: document.getElementById("global-preloader"),
+
+    update(percent, message) {
+        if (!this.container) return; // حماية إذا لم يكن موجوداً
+
+        this.progress = percent;
+        if (this.bar) this.bar.style.width = `${this.progress}%`;
+        if (this.text && message) this.text.textContent = message;
+
+        // إذا وصل 100%، أخفي اللودر بعد نصف ثانية
+        if (this.progress >= 100) {
+            setTimeout(() => {
+                this.container.classList.add("hidden");
+            }, 500);
+        }
+    },
+};
+
 export function initAuth() {
     onAuthStateChanged(auth, async (user) => {
+        Preloader.update(30, "Checking User..."); // خطوة 1
         if (user) {
+            Preloader.update(50, "Loading Decks...");
             if (!user.emailVerified) {
                 if (isLoggingIn) return;
                 signOut(auth);
@@ -270,26 +291,29 @@ export function initAuth() {
             saveUserToFirestore(user);
             loadFlashcards();
 
+            Preloader.update(100, "Done!"); // خطوة 3 (النهاية)
+
             const path = window.location.pathname;
             if (path.includes("signin") || path.includes("signup")) {
                 if (!isLoggingIn) window.location.replace("index.html");
             }
         } else {
+            Preloader.update(60, "Loading Public Decks...");
             // حالة الخروج
             updateNavbarUI(null, null);
-
             // قفل المحتوى
             const grid = document.getElementById("page-content");
             if (grid) {
                 grid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 60px; width: 100%; height: 100%; display:flex; justify-content:center; flex-direction:column; align-items:center;">
-                        <i class="fa-solid fa-lock" style="font-size: 4rem; color: var(--text-color); margin-bottom: 20px;"></i>
-                        <h2 style="color: var(--text-color)">Content Locked</h2>
-                        <p style="color: var(--text-secondary-color); margin-bottom: 30px;">You must be signed in to access the flashcards library.</p>
-                        <a href="signin.html" class="main-btn" style="padding: 8px 25px;">Sign In <i class="fa-solid fa-user fa-fw"aria-hidden="true"></i></a>
-                    </div>
+                <div style="grid-column: 1/-1; text-align: center; padding: 60px; width: 100%; height: 100%; display:flex; justify-content:center; flex-direction:column; align-items:center;">
+                <i class="fa-solid fa-lock" style="font-size: 4rem; color: var(--text-color); margin-bottom: 20px;"></i>
+                <h2 style="color: var(--text-color)">Content Locked</h2>
+                <p style="color: var(--text-secondary-color); margin-bottom: 30px;">You must be signed in to access the flashcards library.</p>
+                <a href="signin.html" class="main-btn" style="padding: 8px 25px;">Sign In <i class="fa-solid fa-user fa-fw"aria-hidden="true"></i></a>
+                </div>
                 `;
             }
+            Preloader.update(100, "Welcome!");
         }
     });
 }
@@ -299,7 +323,7 @@ function redirectIfSuccess() {
         window.location.pathname.includes("signin") ||
         window.location.pathname.includes("signup")
     ) {
-        window.location.href = "index";
+        window.location.href = "index.html";
     }
 }
 

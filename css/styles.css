@@ -166,6 +166,65 @@ a {
     }
 }
 
+/* ==========================================
+   🚀 Global Preloader Styles
+   ========================================== */
+#global-preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: var(--background-color); /* استخدام متغيراتك لو موجودة */
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition:
+        opacity 0.5s ease,
+        visibility 0.5s ease;
+}
+
+#global-preloader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.preloader-content {
+    text-align: center;
+    width: 80%;
+    max-width: 400px;
+}
+
+.preloader-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    color: var(--text-color, #333);
+}
+
+#loader-text {
+    font-size: 0.9rem;
+    color: var(--text-muted, #777);
+    margin-bottom: 20px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background-color: #eee;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#loader-progress {
+    height: 100%;
+    width: 0%; /* سيبدأ من 0 */
+    background: var(--main-color, #3498db);
+    border-radius: 10px;
+    transition: width 0.4s ease-out; /* حركة ناعمة جداً */
+}
+
 /* Framework styles */
 
 .main-btn {

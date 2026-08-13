@@ -7,7 +7,7 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.1/firebase
 
 const firebaseConfig = {
     apiKey: "AIzaSyAdmMKFEcCJvhKKv2no_ptgNve_vxPrSf4",
-    authDomain: "asu-anki-flashcards.firebaseapp.com",
+    authDomain: "asu-anki-flashcards.web.app",
     projectId: "asu-anki-flashcards",
     storageBucket: "asu-anki-flashcards.firebasestorage.app",
     messagingSenderId: "422843832096",

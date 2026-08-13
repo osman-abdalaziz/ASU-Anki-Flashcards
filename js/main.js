@@ -30,6 +30,33 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"; // كان 10.8.0 وجعلناه 10.7.1 ليتطابق مع config.js
 import { db } from "./config.js";
 
+// ==========================================
+// 🚀 Preloader Manager
+// ==========================================
+const Preloader = {
+    progress: 0,
+    bar: document.getElementById("loader-progress"),
+    text: document.getElementById("loader-text"),
+    container: document.getElementById("global-preloader"),
+
+    update(percent, message) {
+        if (!this.container) return; // حماية إذا لم يكن موجوداً
+
+        this.progress = percent;
+        if (this.bar) this.bar.style.width = `${this.progress}%`;
+        if (this.text && message) this.text.textContent = message;
+
+        // إذا وصل 100%، أخفي اللودر بعد نصف ثانية
+        if (this.progress >= 100) {
+            setTimeout(() => {
+                this.container.classList.add("hidden");
+            }, 500);
+        }
+    },
+};
+
+// أول ما السكريبت يشتغل، هنخليه 10%
+Preloader.update(10, "Initializing...");
 // تشغيل المراقب
 initAuth();
 
@@ -67,17 +94,17 @@ document.addEventListener("DOMContentLoaded", () => {
             const name = signupForm.querySelector('input[name="name"]').value;
             const email = signupForm.querySelector('input[name="email"]').value;
             const password = signupForm.querySelector(
-                'input[name="password"]'
+                'input[name="password"]',
             ).value;
             const confirmPassword = signupForm.querySelector(
-                'input[name="confirm-password"]'
+                'input[name="confirm-password"]',
             ).value;
 
             const emailRegex =
                 /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!emailRegex.test(email)) {
                 showError(
-                    "Please enter a valid email in English (e.g. name@domain.com)."
+                    "Please enter a valid email in English (e.g. name@domain.com).",
                 );
                 return;
             }
@@ -87,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const nameRegex = /^[\u0600-\u06FFa-zA-Z\s]{3,30}$/;
             if (!nameRegex.test(name)) {
                 showError(
-                    "Please enter a real name (letters only, at least 3 chars)."
+                    "Please enter a real name (letters only, at least 3 chars).",
                 );
                 return;
             }
@@ -129,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const submitBtn = signinForm.querySelector('button[type="submit"]');
             const email = signinForm.querySelector('input[name="email"]').value;
             const password = signinForm.querySelector(
-                'input[name="password"]'
+                'input[name="password"]',
             ).value;
 
             setButtonLoading(submitBtn, true);
@@ -395,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (mobileMenu) {
         const links = mobileMenu.querySelectorAll("a");
         links.forEach((lnk) =>
-            lnk.addEventListener("click", () => closeMobileMenu())
+            lnk.addEventListener("click", () => closeMobileMenu()),
         );
     }
 
@@ -420,7 +447,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // إغلاق قائمة إشعارات الموبايل (إلا إذا ضغطنا داخلها)
         const mobileNotifDropdown = document.getElementById(
-            "mobileNotifDropdown"
+            "mobileNotifDropdown",
         );
         const mobileNotifBtn = document.getElementById("mobileNotifBtn");
         if (mobileNotifDropdown && mobileNotifBtn) {
@@ -567,9 +594,8 @@ document.addEventListener("DOMContentLoaded", () => {
         currentRateDeckId = deckId;
 
         // أ) تحديث العنوان وإظهار المودل فوراً
-        document.querySelector(
-            "#ratingModal h3"
-        ).textContent = `Rate: ${deckTitle}`;
+        document.querySelector("#ratingModal h3").textContent =
+            `Rate: ${deckTitle}`;
         ratingModal.style.display = "flex";
         ratingModal.style.opacity = "1";
 
@@ -639,14 +665,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 showModal(
                     "Rating Required ⭐",
                     "Please select a star rating before submitting.",
-                    "error"
+                    "error",
                 );
                 return;
             }
 
-            const { submitDeckReview, loadFlashcards } = await import(
-                "./db.js"
-            );
+            const { submitDeckReview, loadFlashcards } =
+                await import("./db.js");
 
             // UI Loading
             const originalText = btn.innerText;
@@ -656,7 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const success = await submitDeckReview(
                 currentRateDeckId,
                 rating,
-                comment
+                comment,
             );
 
             if (success) {
@@ -675,7 +700,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 showModal(
                     "Error",
                     "Error submitting review. Please try again.",
-                    "error"
+                    "error",
                 );
             }
 
@@ -733,7 +758,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 deckId,
                 deckTitle,
                 reason,
-                details
+                details,
             );
 
             if (success) {
@@ -741,13 +766,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 showModal(
                     "Report Sent",
                     "Thanks for letting us know! We will check it soon.",
-                    "success"
+                    "success",
                 );
             } else {
                 showModal(
                     "Error",
                     "Could not send report. Try again.",
-                    "error"
+                    "error",
                 );
             }
 

@@ -18,7 +18,27 @@ import {
     onSnapshot,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { auth, db } from "./config.js";
+const Preloader = {
+    progress: 0,
+    bar: document.getElementById("loader-progress"),
+    text: document.getElementById("loader-text"),
+    container: document.getElementById("global-preloader"),
 
+    update(percent, message) {
+        if (!this.container) return; // حماية إذا لم يكن موجوداً
+
+        this.progress = percent;
+        if (this.bar) this.bar.style.width = `${this.progress}%`;
+        if (this.text && message) this.text.textContent = message;
+
+        // إذا وصل 100%، أخفي اللودر بعد نصف ثانية
+        if (this.progress >= 100) {
+            setTimeout(() => {
+                this.container.classList.add("hidden");
+            }, 500);
+        }
+    },
+};
 // ==========================================
 // مفاتيح التخزين (Caching Keys)
 // ==========================================
@@ -66,10 +86,13 @@ export async function loadFlashcards(isLoadMore = false) {
             const cachedData = localStorage.getItem(CACHED_DECKS_KEY);
             if (cachedData) {
                 try {
+                    Preloader.update(60, "Fetching data from server...");
                     allFlashcards = JSON.parse(cachedData);
+                    Preloader.update(90, "Rendering UI...");
                 } catch (e) {
                     console.error("Cache Parse Error", e);
                     allFlashcards = [];
+                    Preloader.update(100, "Loaded with errors");
                 }
             }
 
@@ -326,6 +349,7 @@ function renderCards(cardsList, shouldAppend = false) {
     grid.innerHTML = "";
 
     cardsList.forEach((data) => {
+        Preloader.update(90, "Rendering UI...");
         const rating =
             data.totalStars && data.totalReviews
                 ? data.totalStars / data.totalReviews
@@ -382,6 +406,7 @@ function renderCards(cardsList, shouldAppend = false) {
             </div>
         `;
     });
+    Preloader.update(100, "Done!");
 }
 
 // ==========================================
