@@ -254,7 +254,7 @@ a {
 }
 
 .main-btn i {
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 .text-center {
@@ -2784,4 +2784,254 @@ html[data-theme="light"] .report-btn:hover {
 
 .modal-header .close-modal:hover {
     transform: rotate(90deg);
+}
+
+/* ==========================================
+   Card New Buttons (Details & Share)
+   ========================================== */
+.secondary-btn {
+    background-color: transparent;
+    color: var(--text-color);
+    border: 2px solid var(--text-color);
+    padding: 6px 15px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.secondary-btn:hover {
+    border-color: var(--text-color);
+    color: var(--sec-background-color);
+    background-color: var(--text-color);
+}
+
+.share-btn {
+    font-size: 15px;
+    color: var(--text-secondary-color);
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.share-btn:hover {
+    color: var(--main-color);
+    transform: scale(1.1);
+}
+
+html[data-theme="light"] .share-btn:hover {
+    color: var(--main-color);
+}
+
+/* ==========================================
+   🚀 Bottom Sheet & Markdown Styles
+   ========================================== */
+.bottom-sheet-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 25000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+    display: flex;
+    align-items: flex-end; /* لجعله في الأسفل دائماً */
+    justify-content: center;
+}
+
+.bottom-sheet-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.bottom-sheet {
+    background: var(--card-color);
+    width: 100%;
+    max-width: 600px; /* ليكون مناسباً للكمبيوتر أيضاً */
+    height: 85vh; /* يغطي 85% من الشاشة */
+    border-radius: 20px 20px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.bottom-sheet-overlay.active .bottom-sheet {
+    transform: translateY(0);
+}
+
+.sheet-header {
+    padding: 20px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    /* border-bottom: 1px solid var(--ver-tag-color); */
+}
+
+.sheet-handle {
+    display: none;
+    width: 50px;
+    height: 5px;
+    background: var(--text-secondary-color);
+    border-radius: 10px;
+    opacity: 0.5;
+    cursor: grab;
+}
+
+.close-sheet {
+    display: block;
+    position: absolute;
+    right: 20px;
+    top: 5px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+@media (max-width: 1100px) {
+    .sheet-handle {
+        display: block;
+    }
+    .close-sheet {
+        display: none;
+    }
+}
+
+.close-sheet:hover {
+    rotate: 90deg;
+}
+
+.sheet-scrollable {
+    overflow-y: auto;
+    flex: 1;
+    padding-bottom: 10px;
+}
+
+.sheet-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%;
+    max-height: 250px;
+    margin: 5px 20px 20px 20px;
+    overflow: hidden;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    -ms-border-radius: 10px;
+    -o-border-radius: 10px;
+}
+
+.sheet-banner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sheet-content-wrapper {
+    padding: 0 20px 20px 20px;
+}
+
+.sheet-content-wrapper h2 {
+    margin: 0 0 10px 0;
+    color: var(--text-color);
+}
+
+.sheet-badges {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+/* التنسيق الجديد لحاوية الأزرار */
+.sheet-actions {
+    display: flex;
+    gap: 15px;
+    padding: 15px 20px 20px 20px; /* مسافات داخلية مريحة */
+    background-color: var(--card-color); /* نفس لون خلفية الشيت */
+    border-top: 1px solid var(--ver-tag-color); /* خط فاصل خفيف */
+    margin-top: auto; /* لضمان بقائها بالأسفل دائماً */
+    z-index: 10;
+}
+
+/* Markdown Rendering Styles */
+.markdown-body {
+    color: var(--text-color);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    color: var(--main-color);
+}
+.markdown-body ul,
+.markdown-body ol {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+.markdown-body strong {
+    color: var(--main-color);
+}
+
+/* ==========================================
+   🚀 EasyMDE Custom Theme (Dark/Light Sync)
+   ========================================== */
+.editor-toolbar {
+    border-color: var(--input-border) !important;
+    background-color: var(--card-color) !important;
+    border-radius: 10px 10px 0 0 !important;
+    opacity: 1 !important;
+}
+
+.editor-toolbar button {
+    color: var(--text-color) !important;
+    transition: 0.2s ease;
+}
+
+.editor-toolbar button.active,
+.editor-toolbar button:hover {
+    background-color: var(--ver-tag-color) !important;
+    border-color: transparent !important;
+}
+
+.CodeMirror {
+    background-color: var(--input-bg) !important;
+    color: var(--input-text) !important;
+    border-color: var(--input-border) !important;
+    border-radius: 0 0 10px 10px !important;
+    font-family: var(--font-sans) !important;
+}
+
+/* تنسيق الـ Cursor (مؤشر الكتابة) */
+.CodeMirror-cursor {
+    border-left-color: var(--text-color) !important;
+}
+
+/* وضع المعاينة (Preview) داخل المحرر */
+.editor-preview {
+    background-color: var(--sec-background-color) !important;
+    color: var(--text-color) !important;
+    padding: 20px !important;
+}
+
+.editor-preview h1,
+.editor-preview h2,
+.editor-preview h3 {
+    color: var(--main-color);
 }

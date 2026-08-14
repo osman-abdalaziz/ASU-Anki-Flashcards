@@ -395,14 +395,19 @@ function renderCards(cardsList, shouldAppend = false) {
                         data.version || "v1.0"
                     }</span>
                 </p>
-                <a href="${data.downloadUrl}" download target="_self"
-                   class="main-btn download-trigger" 
-                   data-id="${data.id}" 
-                   data-version="${
-                       data.version || "v1.0"
-                   }" onclick="animateDownload(this)">
-                    Download <i class="fa-solid fa-download fa-fw"></i>
-                </a>
+                <div class="card-actions" style="display: flex; gap: 10px; margin-top: 10px;">
+                    <a href="${data.downloadUrl}" download target="_self"
+                    class="main-btn download-trigger" 
+                    data-id="${data.id}" 
+                    data-version="${
+                        data.version || "v1.0"
+                    }" onclick="animateDownload(this)">
+                        Download <i class="fa-solid fa-download fa-fw"></i>
+                    </a>
+                    <button class="secondary-btn details-btn" style="flex: 1;" onclick="window.openCardDetails('${data.id}')">
+                        Details <i class="fa-solid fa-circle-info fa-fw" style="margin-left: 5px;"></i>
+                    </button>
+                </div>
             </div>
         `;
     });

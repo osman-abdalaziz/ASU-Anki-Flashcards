@@ -40,10 +40,14 @@ function incrementVersion(oldVersion) {
     }
     return oldVersion;
 }
+
+window.allDecksData = []; // أضف هذا السطر قبل الدالة لتخزين كل الكروت
+
 async function loadDecks() {
     tableBody.innerHTML =
         '<tr><td colspan="6" style="text-align:center;">Loading...</td></tr>';
     let pendingCount = 0; // لحساب عدد الملفات المعلقة
+    window.allDecksData = []; // قم بتفريغ المصفوفة مع كل تحميل جديد لتجنب التكرار
 
     try {
         const querySnapshot = await getDocs(collection(db, "decks"));
@@ -57,6 +61,9 @@ async function loadDecks() {
 
         querySnapshot.forEach((docSnap) => {
             const data = docSnap.data();
+
+            // حفظ بيانات الديك بالكامل مع الـ ID لاستخدامها في المعاينة
+            window.allDecksData.push({ id: docSnap.id, ...data });
 
             // 🔥 فلترة: تجاهل الملفات المحذوفة
             if (data.isDeleted === true) return;
@@ -93,10 +100,17 @@ async function loadDecks() {
                 `;
             } else {
                 // أزرار لوحة المراجعة (بتنسيق CSS الجديد)
+                // <a
+                //     href="${data.downloadUrl}"
+                //     target="_blank"
+                //     class="action-btn review"
+                //     style="text-decoration: none; display: inline-block;">
+                //     Review <i class="fa-solid fa-up-right-from-square"></i>
+                // </a>;
                 actionButtons = `
-                    <a href="${data.downloadUrl}" target="_blank" class="action-btn review" style="text-decoration: none; display: inline-block;">
-                        Review <i class="fa-solid fa-up-right-from-square"></i>
-                    </a>
+                    <button class="action-btn review" onclick="openAdminReview('${docSnap.id}')">
+                        Review Details <i class="fa-solid fa-eye"></i>
+                    </button>
                     <button class="action-btn approve" onclick="window.approveDeck('${docSnap.id}', '${data.title}')">
                         Approve <i class="fa-solid fa-check"></i>
                     </button>
@@ -469,3 +483,68 @@ window.rejectDeck = async function (id) {
 };
 
 document.addEventListener("DOMContentLoaded", loadDecks);
+
+const adminReviewModal = document.getElementById("adminReviewModal");
+let currentPendingDeckId = null;
+
+// دالة فتح نافذة المراجعة
+window.openAdminReview = function (deckId) {
+    // البحث في المصفوفة التي قمنا بتعبئتها
+    const deck = window.allDecksData.find((d) => d.id === deckId);
+    if (!deck) return;
+
+    currentPendingDeckId = deckId;
+
+    // تعبئة البيانات المرئية للأدمن
+    document.getElementById("reviewImage").src =
+        deck.imageUrl || "../images/default_banner.webp";
+    document.getElementById("reviewTitle").textContent = deck.title;
+    document.getElementById("reviewYear").innerHTML =
+        `<i class="fa-solid fa-calendar-days"></i> ${deck.year || "N/A"}`;
+    document.getElementById("reviewCategory").innerHTML =
+        `<i class="fa-solid fa-tag"></i> ${deck.category || "N/A"}`;
+    document.getElementById("reviewCreator").innerHTML =
+        `<i class="fa-solid fa-user"></i> ${deck.creator || "Unknown"}`;
+    document.getElementById("downloadReviewBtn").href = deck.downloadUrl;
+
+    const rawDescription = deck.description || "*No description provided.*";
+    document.getElementById("reviewDescription").innerHTML =
+        marked.parse(rawDescription);
+
+    adminReviewModal.classList.add("active");
+};
+
+// دالة إغلاق النافذة
+window.closeAdminReview = function () {
+    adminReviewModal.classList.remove("active");
+    currentPendingDeckId = null;
+};
+
+// دالة القبول من نافذة المراجعة
+window.approveFromReview = function () {
+    if (!currentPendingDeckId) return;
+
+    // 1. احفظ الـ ID في متغير منفصل قبل أي حاجة
+    const targetDeckId = currentPendingDeckId;
+    const deck = window.allDecksData.find((d) => d.id === targetDeckId);
+
+    // 2. اقفل النافذة (والتي ستصفر currentPendingDeckId لكن targetDeckId في أمان)
+    closeAdminReview();
+
+    // 3. أرسل المتغير المحفوظ لدالة القبول
+    window.approveDeck(targetDeckId, deck ? deck.title : "Deck");
+};
+
+// دالة الرفض من نافذة المراجعة
+window.rejectFromReview = function () {
+    if (!currentPendingDeckId) return;
+
+    // 1. احفظ الـ ID
+    const targetDeckId = currentPendingDeckId;
+
+    // 2. اقفل النافذة
+    closeAdminReview();
+
+    // 3. أرسل المتغير المحفوظ لدالة الرفض
+    window.rejectDeck(targetDeckId);
+};

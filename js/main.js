@@ -814,6 +814,161 @@ document.addEventListener("DOMContentLoaded", () => {
             closeActiveModals();
         }
     });
+
+    // ==========================================
+    // 🚀 Bottom Sheet & Markdown Logic
+    // ==========================================
+    const sheetOverlay = document.getElementById("detailsSheetOverlay");
+    const bottomSheet = document.getElementById("detailsSheet");
+    const closeSheetBtn = document.getElementById("closeSheetBtn");
+    const sheetScrollable = document.getElementById("sheetScrollable");
+
+    // دالة الفتح وتعبئة البيانات
+    window.openCardDetails = function (deckId) {
+        const deck = window.currentDecksData?.find((d) => d.id === deckId);
+        if (!deck) return;
+
+        document.getElementById("sheetImage").src =
+            deck.imageUrl || "images/default_banner.webp";
+        document.getElementById("sheetTitle").textContent = deck.title;
+        document.getElementById("sheetYear").innerHTML =
+            `<i class="fa-solid fa-calendar-days"></i> ${deck.year || "All"}`;
+        document.getElementById("sheetCategory").innerHTML =
+            `<i class="fa-solid fa-tag"></i> ${deck.category || "Theoretical"}`;
+        document.getElementById("sheetCreator").innerHTML =
+            `<i class="fa-solid fa-user-doctor"></i> ${deck.creator || "Unknown"}`;
+
+        const dlBtn = document.getElementById("sheetDownloadBtn");
+        dlBtn.href = deck.downloadUrl;
+        dlBtn.setAttribute("data-id", deck.id);
+        dlBtn.setAttribute("data-version", deck.version || "v1.0");
+
+        const shareBtn = document.getElementById("sheetShareBtn");
+        shareBtn.onclick = () => handleShare(deck.id, deck.title);
+
+        const rawDescription =
+            deck.description || "_No description provided for this deck._";
+        document.getElementById("sheetMarkdown").innerHTML =
+            marked.parse(rawDescription);
+
+        sheetOverlay.classList.add("active");
+        sheetScrollable.scrollTop = 0;
+
+        // 🔥 السر هنا: إيقاف السكرول في الموقع بالكامل
+        document.body.style.overflow = "hidden";
+    };
+
+    // دالة الإغلاق
+    function closeSheet() {
+        bottomSheet.style.transform = "";
+        sheetOverlay.classList.remove("active");
+
+        // 🔥 السر هنا: إعادة تشغيل السكرول للموقع بعد الإغلاق
+        document.body.style.overflow = "";
+    }
+
+    // الإغلاق عند النقر على الـ X أو خارج الشيت
+    if (closeSheetBtn) closeSheetBtn.addEventListener("click", closeSheet);
+    if (sheetOverlay) {
+        sheetOverlay.addEventListener("click", (e) => {
+            if (e.target === sheetOverlay) closeSheet();
+        });
+    }
+
+    // ------------------------------------------
+    // 🔥 السحب الذكي للموبايل (Smart Swipe Logic)
+    // ------------------------------------------
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+
+    // لا نبدأ السحب إلا إذا كان السكرول الداخلي عند القمة (أو السحب تم من الهيدر)
+    bottomSheet.addEventListener(
+        "touchstart",
+        (e) => {
+            if (sheetScrollable.scrollTop <= 0) {
+                startY = e.touches[0].clientY;
+                isDragging = true;
+                bottomSheet.style.transition = "none"; // نلغي النعومة أثناء سحب إصبع المستخدم لتكون الاستجابة فورية
+            }
+        },
+        { passive: true },
+    );
+
+    bottomSheet.addEventListener(
+        "touchmove",
+        (e) => {
+            if (!isDragging) return;
+            currentY = e.touches[0].clientY;
+            const deltaY = currentY - startY;
+
+            // لا نسمح بسحب الشيت لأعلى من حجمه الطبيعي، نسحب لأسفل فقط
+            if (deltaY > 0) {
+                bottomSheet.style.transform = `translateY(${deltaY}px)`;
+            }
+        },
+        { passive: true },
+    );
+
+    bottomSheet.addEventListener("touchend", (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        bottomSheet.style.transition =
+            "transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1)"; // نرجع النعومة
+
+        const deltaY = currentY - startY;
+
+        // إذا سحب لأكثر من 150 بيكسل، نغلق الشيت
+        if (deltaY > 150) {
+            closeSheet();
+        } else {
+            // غير كدا نرجعه مكانه
+            bottomSheet.style.transform = "translateY(0)";
+        }
+    });
+
+    // ------------------------------------------
+    // دالة المشاركة (Web Share API & Clipboard)
+    // ------------------------------------------
+    function handleShare(deckId, title) {
+        const shareUrl = `${window.location.origin}${window.location.pathname}?deck=${deckId}`;
+
+        // لو فاتح من موبايل وبيدعم المشاركة العادية (زي الواتساب وغيره)
+        if (navigator.share) {
+            navigator
+                .share({
+                    title: `ASU Anki: ${title}`,
+                    text: `Check out this flashcard deck: ${title}`,
+                    url: shareUrl,
+                })
+                .catch(console.error);
+        } else {
+            // لو فاتح من كمبيوتر (نسخ للـ Clipboard)
+            navigator.clipboard
+                .writeText(shareUrl)
+                .then(() => {
+                    const shareBtn = document.getElementById("sheetShareBtn");
+
+                    // حفظ المحتوى الأصلي للزر
+                    const originalHtml = shareBtn.innerHTML;
+
+                    // تغيير شكل الزر (علامة صح ولون أخضر)
+                    shareBtn.innerHTML = `Copied <i class="fa-solid fa-check"></i>`;
+                    shareBtn.style.color = "#33d9b2"; // أخضر مريح
+                    shareBtn.style.borderColor = "#33d9b2";
+
+                    // إرجاع الزر لحالته الأصلية بعد 1.5 ثانية
+                    setTimeout(() => {
+                        shareBtn.innerHTML = originalHtml;
+                        shareBtn.style.color = "";
+                        shareBtn.style.borderColor = "";
+                    }, 1500);
+                })
+                .catch((err) => {
+                    console.error("Failed to copy!", err);
+                });
+        }
+    }
 });
 
 window.markGeneralAsRead = function (notifId) {

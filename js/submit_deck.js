@@ -16,6 +16,36 @@ import {
     getDownloadURL,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+// ==========================================
+// 🚀 إعداد محرر الـ Markdown (EasyMDE)
+// ==========================================
+let easyMDE = null;
+
+document.addEventListener("DOMContentLoaded", () => {
+    const descElement = document.getElementById("deckDesc");
+    if (descElement) {
+        easyMDE = new EasyMDE({
+            element: descElement,
+            spellChecker: false, // تعطيل المصحح اللغوي لأنه مزعج أحياناً
+            placeholder: "What does this deck cover? (Markdown supported)",
+            status: false, // إخفاء الشريط السفلي
+            toolbar: [
+                "bold",
+                "italic",
+                "heading",
+                "|",
+                "quote",
+                "unordered-list",
+                "ordered-list",
+                "|",
+                "link",
+                "preview",
+                "guide",
+            ],
+        });
+    }
+});
+
 const storage = getStorage();
 
 // ==========================================
@@ -485,7 +515,10 @@ if (submitForm) {
         const version =
             document.getElementById("deckVersion")?.value.trim() || "v1.0";
         const driveLink = document.getElementById("driveLink").value.trim();
-        const desc = document.getElementById("deckDesc").value.trim();
+        // const desc = document.getElementById("deckDesc").value.trim();
+        const desc = easyMDE
+            ? easyMDE.value().trim()
+            : document.getElementById("deckDesc").value.trim();
 
         const showCreatorCheckbox = document.getElementById("showCreatorName");
         const finalCreatorName =

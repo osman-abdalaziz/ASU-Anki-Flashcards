@@ -237,6 +237,58 @@
             </div>
         </div>
     </div>
+
+    <!-- نافذة مراجعة الأدمن -->
+    <div id="adminReviewModal" class="edit-modal-overlay">
+        <div class="edit-modal-box" style="max-width: 650px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <div class="edit-modal-header"
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="color: white; margin: 0;">Deck Review</h3>
+                <button type="button" class="close-modal" onclick="closeAdminReview()"
+                    style="background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div style="padding-bottom: 10px;">
+                <img id="reviewImage" src="../images/default_banner.webp" alt="Deck Banner"
+                    style="width: 100%; height: 220px; object-fit: cover; border-radius: 8px;">
+                <div style="padding: 15px 0;">
+                    <h2 id="reviewTitle" style="margin-top: 10px; color: var(--text-color);">Deck Title</h2>
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                        <span id="reviewYear"
+                            style="background: var(--input-bg); padding: 5px 10px; border-radius: 5px; font-size: 0.85rem; color: var(--text-color);"></span>
+                        <span id="reviewCategory"
+                            style="background: var(--input-bg); padding: 5px 10px; border-radius: 5px; font-size: 0.85rem; color: var(--text-color);"></span>
+                        <span id="reviewCreator"
+                            style="background: var(--input-bg); padding: 5px 10px; border-radius: 5px; font-size: 0.85rem; color: var(--text-color);"></span>
+                    </div>
+
+                    <h4 style="color: var(--text-secondary-color); margin-bottom: 5px;">Description:</h4>
+                    <div id="reviewDescription" class="markdown-body"
+                        style="background: var(--input-bg); color: var(--text-color); padding: 15px; border-radius: 8px; border: 1px solid var(--input-border); min-height: 100px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- أزرار اتخاذ القرار -->
+            <div style="display: flex; gap: 10px; padding-top: 15px; border-top: 1px solid var(--input-border);">
+                <button type="button" class="action-btn approve" onclick="approveFromReview()" style="flex: 1;">
+                    Approve <i class="fa-solid fa-check"></i>
+                </button>
+                <button type="button" class="action-btn reject" onclick="rejectFromReview()" style="flex: 1;">
+                    Reject <i class="fa-solid fa-ban"></i>
+                </button>
+                <a href="#" id="downloadReviewBtn" download class="secondary-btn"
+                    style="flex: 0.3; display: flex; justify-content: center; align-items: center;"
+                    title="Download .apkg">
+                    <i class="fa-solid fa-download"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- مكتبة تحويل الماركدوان لفك تشفير الوصف -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script type="module" src="../js/main.js"></script>
     <script type="module" src="../js/manage_decks.js"></script>
     <!-- <script type="module" src="../js/theme.js"></script> -->

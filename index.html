@@ -439,6 +439,49 @@
             </form>
         </div>
     </div>
+
+    <!-- Bottom Sheet Structure -->
+    <div id="detailsSheetOverlay" class="bottom-sheet-overlay">
+        <div id="detailsSheet" class="bottom-sheet">
+            <div class="sheet-header">
+                <!-- هذا الخط الصغير للسحب في الموبايل -->
+                <div class="sheet-handle" id="sheetHandle"></div>
+                <!-- زر الإغلاق للديسكتوب -->
+                <button id="closeSheetBtn" class="close-sheet"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div id="sheetScrollable" class="sheet-scrollable">
+                <div class="sheet-image"><img id="sheetImage" src="" alt="Deck Banner" class="sheet-banner"></div>
+
+                <div class="sheet-content-wrapper">
+                    <h2 id="sheetTitle"></h2>
+
+                    <div class="sheet-badges">
+                        <span id="sheetYear" class="badge-download badge-gray"></span>
+                        <span id="sheetCategory" class="badge-download badge-gray"></span>
+                        <span id="sheetCreator" class="badge-download badge-gray"></span>
+                    </div>
+
+                    <!-- مساحة الـ Markdown -->
+                    <div id="sheetMarkdown" class="markdown-body"></div>
+
+
+                </div>
+            </div>
+            <!-- أزرار الإجراءات -->
+            <div class="sheet-actions">
+                <a href="#" id="sheetDownloadBtn" download target="_self" class="main-btn"
+                    style="flex: 2; display: flex; justify-content: center;">
+                    Download <i class="fa-solid fa-download fa-fw"></i>
+                </a>
+                <button id="sheetShareBtn" class="secondary-btn" style="flex: 1;">
+                    Share <i class="fa-solid fa-share-nodes"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- مكتبة تحويل الماركدوان -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="js/theme.js"></script>
     <script type="module" src="js/main.js"></script>
     <script>function animateDownload(btn) {
