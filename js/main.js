@@ -780,6 +780,40 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.disabled = false;
         });
     }
+    // ==========================================
+    // Smart Modal Closing Logic (ESC & Click Outside)
+    // ==========================================
+    const ratingModalElement = document.getElementById("ratingModal");
+    const reportModalElement = document.getElementById("reportModal");
+
+    // دالة موحدة لإغلاق المودال بشكل سلس
+    function closeActiveModals() {
+        if (ratingModalElement && ratingModalElement.style.display === "flex") {
+            ratingModalElement.style.opacity = "0";
+            setTimeout(() => (ratingModalElement.style.display = "none"), 300);
+        }
+        if (reportModalElement && reportModalElement.style.display === "flex") {
+            reportModalElement.style.opacity = "0";
+            setTimeout(() => (reportModalElement.style.display = "none"), 300);
+        }
+    }
+
+    // 1. الإغلاق عن طريق النقر خارج صندوق المودال
+    window.addEventListener("click", (e) => {
+        if (
+            e.target === ratingModalElement ||
+            e.target === reportModalElement
+        ) {
+            closeActiveModals();
+        }
+    });
+
+    // 2. الإغلاق عن طريق زر ESC في الكيبورد
+    window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+            closeActiveModals();
+        }
+    });
 });
 
 window.markGeneralAsRead = function (notifId) {

@@ -295,7 +295,7 @@
             <button id="modalOkBtn">OK</button>
         </div>
     </div>
-    <div id="ratingModal" class="modal-overlay">
+    <!-- <div id="ratingModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header" style="margin-bottom: 20px;">
                 <h3>Rate this Deck</h3>
@@ -360,6 +360,82 @@
 
                 <button type="submit" class="main-btn"
                     style="width: 100%; margin-top: 10px; background-color: #ff6b6b;">Submit Report</button>
+            </form>
+        </div>
+    </div> -->
+    <!-- Rating Modal -->
+    <div id="ratingModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3>Rate this Deck</h3>
+                <button class="close-modal" id="closeRatingModal" aria-label="Close">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <div class="star-rating-input" style="margin-bottom: 25px; font-size: 2.5rem;">
+                <i class="fa-regular fa-star" data-value="1"></i>
+                <i class="fa-regular fa-star" data-value="2"></i>
+                <i class="fa-regular fa-star" data-value="3"></i>
+                <i class="fa-regular fa-star" data-value="4"></i>
+                <i class="fa-regular fa-star" data-value="5"></i>
+            </div>
+            <input type="hidden" id="selectedRating" value="0">
+
+            <label class="field" style="text-align: left;">
+                <span class="field-label">Review (Optional)</span>
+                <div class="input-wrap">
+                    <textarea id="reviewComment" rows="4"
+                        placeholder="Is this deck helpful? Any missing topics?"></textarea>
+                </div>
+            </label>
+
+            <button id="submitReviewBtn" class="main-btn"
+                style="width: 100%; margin-top: 20px; padding: 12px; font-size: 1.1rem;">
+                Submit Review
+            </button>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 style="color: var(--red-color);">Report Issue <i class="fa-solid fa-flag"></i></h3>
+                <button class="close-modal" id="closeReportModal" aria-label="Close">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+
+            <p style="text-align: left; margin-bottom: 15px; color: var(--text-secondary-color);">What is the exact
+                issue
+                with this deck?</p>
+
+            <form id="reportForm">
+                <input type="hidden" id="reportDeckId">
+                <input type="hidden" id="reportDeckTitle">
+
+                <div class="filters" style="margin: 0 0 20px 0; display: block;">
+                    <select id="reportReason" style="width: 100%; padding: 12px;">
+                        <option value="Broken Link">Broken Link (Download doesn't work)</option>
+                        <option value="Outdated Content">Outdated Content</option>
+                        <option value="Wrong Information">Wrong Information</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <label class="field" style="text-align: left;">
+                    <span class="field-label">Details (Optional)</span>
+                    <div class="input-wrap">
+                        <textarea id="reportDetails" rows="4"
+                            placeholder="Please describe the issue in detail..."></textarea>
+                    </div>
+                </label>
+
+                <button type="submit" class="main-btn"
+                    style="width: 100%; margin-top: 20px; padding: 12px; font-size: 1.1rem; background-color: var(--red-color);">
+                    Submit Report
+                </button>
             </form>
         </div>
     </div>
