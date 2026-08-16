@@ -13,27 +13,11 @@ import {
 import { showConfirmModal } from "./ui.js";
 let currentUser = null;
 
-async function updateGlobalInboxBadge(userId) {
-    const badge = document.getElementById("sidebarInboxBadge");
-    if (!badge) return;
-
-    try {
-        const q = query(
-            collection(db, "decks"),
-            where("creatorId", "==", userId),
-            where("status", "==", "rejected"),
-        );
-        const snap = await getDocs(q);
-        badge.innerText = snap.size;
-        badge.style.display = snap.size > 0 ? "inline-block" : "none";
-    } catch (e) {}
-}
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
         document.getElementById("mobileUserName").innerText =
             user.displayName || "Creator";
-        updateGlobalInboxBadge(user.uid);
         loadMyDecks();
     } else {
         window.location.href = "../index.html";
@@ -68,46 +52,24 @@ async function loadMyDecks() {
             if (data.isDeleted === true) return;
             visibleCount++;
 
-            // 1. تحديد الحالة والألوان والنصوص ديناميكياً
-            let statusClass = "badge-yellow";
-            let statusText = "Pending";
-            let editBtnStyle = "";
-            let editBtnText = 'Edit <i class="fa-solid fa-pen-to-square"></i>';
-
-            if (data.status === "approved") {
-                statusClass = "badge-green";
-                statusText = "Approved";
-                editBtnText =
-                    'Update <i class="fa-solid fa-pen-to-square"></i>';
-            } else if (data.status === "rejected") {
-                statusClass = "badge-red";
-                statusText = "Rejected";
-                // جعل زر التعديل بارزاً باللون الأحمر في حالة الرفض
-                editBtnStyle =
-                    "background-color: #ff5252; border-color: #ff5252; color: #fff;";
-                editBtnText =
-                    'Fix & Resubmit <i class="fa-solid fa-screwdriver-wrench"></i>';
-            }
+            const statusClass =
+                data.status === "approved" ? "badge-green" : "badge-yellow";
+            const statusText =
+                data.status === "approved" ? "Approved" : "Pending";
 
             const row = document.createElement("tr");
             row.innerHTML = `
-                <td style="display: flex; align-items: center; justify-content: center;">
-                    <img src="${data.imageUrl}" class="banner-thumb" alt="Banner" onerror="this.src='../images/default_banner.webp'">
-                </td>
+                <td style="display: flex; align-items: center; justify-content: center;"><img src="${data.imageUrl}" class="banner-thumb" alt="Banner" onerror="this.src='../images/default_banner.webp'"></td>
                 <td>
                     <div style="font-weight: 600; color: #fff;">${data.title}</div>
                     <div style="font-size: 0.8rem; color: var(--text-secondary-color);">${data.module} - ${data.year}</div>
                 </td>
                 <td>${data.type || "Theoretical"}</td>
+                <td><span style="background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">${data.version || "v1.0"}</span></td>
+                <td style="text-align: center;"><span class="badge-download ${statusClass}">${statusText}</span></td>
                 <td>
-                    <span style="background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">${data.version || "v1.0"}</span>
-                </td>
-                <td style="text-align: center;">
-                    <span class="badge-download ${statusClass}" ${data.status === "rejected" ? 'style="background-color: #ff5252; color: white;"' : ""}>${statusText}</span>
-                </td>
-                <td>
-                    <a href="submit_deck.html?id=${id}" class="action-btn edit" style="${editBtnStyle}" title="Edit / Fix Deck">
-                        ${editBtnText}
+                    <a href="submit_deck.html?id=${id}" class="action-btn edit" title="Edit & Update">
+                        Edit <i class="fa-solid fa-pen-to-square"></i> 
                     </a>
                     <!-- 🔥 زر الحذف -->
                     <button style="margin-left: 5px;" class="action-btn delete" title="Delete Deck" onclick="window.confirmDeleteDeck('${id}')">

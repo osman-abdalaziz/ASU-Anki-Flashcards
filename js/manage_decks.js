@@ -114,7 +114,7 @@ async function loadDecks() {
                     <button class="action-btn approve" onclick="window.approveDeck('${docSnap.id}', '${data.title}')">
                         Approve <i class="fa-solid fa-check"></i>
                     </button>
-                    <button class="action-btn reject" onclick="window.rejectDeck('${docSnap.id}')">
+                    <button class="action-btn reject" onclick="window.openRejectionModal('${docSnap.id}')">
                         Reject <i class="fa-solid fa-xmark"></i>
                     </button>
                 `;
@@ -464,24 +464,6 @@ window.approveDeck = async function (id, title) {
     }
 };
 
-// رفض الملف المعلق (حذفه نهائياً)
-window.rejectDeck = async function (id) {
-    const isConfirmed = await window.showConfirm(
-        "Reject Deck?",
-        "Are you sure you want to reject this deck? It will be deleted permanently.",
-        "warning",
-    );
-    if (!isConfirmed) return;
-
-    try {
-        await deleteDoc(doc(db, "decks", id));
-        showModal("Deleted", "Deck has been rejected and removed.");
-        loadDecks();
-    } catch (error) {
-        console.error("Rejection Error:", error);
-    }
-};
-
 document.addEventListener("DOMContentLoaded", loadDecks);
 
 const adminReviewModal = document.getElementById("adminReviewModal");
@@ -535,16 +517,64 @@ window.approveFromReview = function () {
     window.approveDeck(targetDeckId, deck ? deck.title : "Deck");
 };
 
-// دالة الرفض من نافذة المراجعة
+let deckToReject = null;
+
+// 1. دالة تفتح نافذة الرفض مباشرة من زر الجدول
+window.openRejectionModal = function (id) {
+    deckToReject = id;
+    document.getElementById("rejectionModal").classList.add("active");
+};
+
+// تعديل دالة الرفض من نافذة المراجعة لتفتح نافذة الأسباب
 window.rejectFromReview = function () {
     if (!currentPendingDeckId) return;
-
-    // 1. احفظ الـ ID
-    const targetDeckId = currentPendingDeckId;
-
-    // 2. اقفل النافذة
+    deckToReject = currentPendingDeckId;
     closeAdminReview();
+    document.getElementById("rejectionModal").classList.add("active"); // فتح نافذة أسباب الرفض
+};
 
-    // 3. أرسل المتغير المحفوظ لدالة الرفض
-    window.rejectDeck(targetDeckId);
+window.closeRejectionModal = function () {
+    document.getElementById("rejectionModal").classList.remove("active");
+    deckToReject = null;
+    // مسح البيانات السابقة
+    document
+        .querySelectorAll(".reject-cb")
+        .forEach((cb) => (cb.checked = false));
+    document.getElementById("rejectionNote").value = "";
+};
+
+window.submitRejection = async function () {
+    if (!deckToReject) return;
+
+    // تجميع الأسباب المحددة
+    const reasons = Array.from(
+        document.querySelectorAll(".reject-cb:checked"),
+    ).map((cb) => cb.value);
+    const note = document.getElementById("rejectionNote").value.trim();
+
+    if (reasons.length === 0 && note === "") {
+        alert("Please select at least one reason or write a note.");
+        return;
+    }
+
+    try {
+        // تحديث حالة الـ Deck بدلاً من حذفه
+        await updateDoc(doc(db, "decks", deckToReject), {
+            status: "rejected",
+            rejectionReasons: reasons,
+            rejectionNote: note,
+            updatedAt: serverTimestamp(),
+        });
+
+        closeRejectionModal();
+        showModal(
+            "Rejected",
+            "Deck marked as rejected and feedback sent to creator.",
+            "success",
+        );
+        loadDecks(); // تحديث الجدول
+    } catch (error) {
+        console.error("Error rejecting deck:", error);
+        showModal("Error", "Failed to reject deck.", "error");
+    }
 };

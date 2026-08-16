@@ -147,6 +147,8 @@ const availableIcons = [
     { id: "icon-stomach", preview: "../images/icons/stomach.png" },
     { id: "icon-thyroid", preview: "../images/icons/thyroid.png" },
     { id: "icon-virus", preview: "../images/icons/virus.png" },
+    { id: "icon-scalpel", preview: "../images/icons/scalpel.png" },
+    { id: "icon-uterus", preview: "../images/icons/uterus.png" },
 ];
 const availablePatterns = [
     { id: "pattern-1", preview: "../images/templates/template (1).png" },
@@ -487,10 +489,52 @@ if (isEditMode) {
                     document.getElementById("deckVersion").value =
                         data.version || "v1.0";
                 document.getElementById("driveLink").value = data.downloadUrl;
-                document.getElementById("deckDesc").value =
-                    data.description || "";
+
+                // تعبئة الوصف حسب وجود المحرر
+                if (easyMDE) {
+                    easyMDE.value(data.description || "");
+                } else {
+                    document.getElementById("deckDesc").value =
+                        data.description || "";
+                }
 
                 if (staticImagePreview) staticImagePreview.src = data.imageUrl;
+
+                // 🔥 النظام الجديد: التعامل مع الكروت المرفوضة
+                if (data.status === "rejected") {
+                    document.querySelector(".dashboard-title").innerHTML =
+                        `Fix & Resubmit <span>Deck</span>`;
+                    if (submitBtn) {
+                        submitBtn.innerHTML =
+                            'Resubmit for Review <i class="fa-solid fa-paper-plane fa-fw"></i>';
+                        submitBtn.style.background = "#ff5252"; // لون أحمر للتنبيه
+                    }
+
+                    // إنشاء صندوق التنبيه بأسباب الرفض
+                    const rejectionDiv = document.createElement("div");
+                    rejectionDiv.style.cssText =
+                        "background: rgba(255, 82, 82, 0.1); border-left: 4px solid #ff5252; padding: 15px; margin-bottom: 20px; border-radius: 4px;";
+
+                    let reasonsHTML = "";
+                    if (
+                        data.rejectionReasons &&
+                        data.rejectionReasons.length > 0
+                    ) {
+                        reasonsHTML = `<ul style="margin: 5px 0 10px 20px; color: #ff5252;">
+                            ${data.rejectionReasons.map((r) => `<li>${r}</li>`).join("")}
+                        </ul>`;
+                    }
+
+                    rejectionDiv.innerHTML = `
+                        <h4 style="color: #ff5252; margin-top: 0;">⚠️ Action Required: Your deck needs some fixes</h4>
+                        ${reasonsHTML}
+                        <p style="margin: 0; color: var(--text-color);"><strong>Admin Note:</strong> ${data.rejectionNote || "No specific note provided."}</p>
+                    `;
+
+                    document
+                        .getElementById("submitDeckForm")
+                        .prepend(rejectionDiv);
+                }
 
                 setTimeout(drawCanvas, 500);
             }
@@ -574,6 +618,7 @@ if (submitForm) {
                     downloadUrl: directLink,
                     creator: finalCreatorName,
                     lastUpdate: new Date().toLocaleDateString("en-GB"),
+                    status: "pending", // 🔥 إعادة الكارت للمراجعة
                     updatedAt: serverTimestamp(),
                 });
 
@@ -626,6 +671,7 @@ if (submitForm) {
 
                         if (isEditMode) {
                             deckData.updatedAt = serverTimestamp();
+                            deckData.status = "pending"; // 🔥 إعادة الكارت للمراجعة
                             await updateDoc(
                                 doc(db, "decks", customDeckId),
                                 deckData,

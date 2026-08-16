@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Creator | Inbox & Notifications</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="../css/styles.css" />
+    <style>
+        .inbox-card {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .inbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--input-border);
+            padding-bottom: 10px;
+        }
+
+        .inbox-title {
+            color: #ff5252;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .inbox-date {
+            color: var(--text-secondary-color);
+            font-size: 0.85rem;
+        }
+
+        .reasons-list {
+            margin: 0;
+            padding-left: 20px;
+            color: var(--text-color);
+        }
+
+        .reasons-list li {
+            margin-bottom: 5px;
+        }
+
+        .admin-note {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text-secondary-color);
+        }
+
+        .inbox-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="dashboard-container">
+        <aside>
+            <div class="admin-logo">
+                <a href="../index.html"><img src="../images/logo.webp" alt="" /></a>
+            </div>
+            <ul class="admin-nav">
+                <li><a href="index.html"><i class="fa-solid fa-layer-group fa-fw"></i> My Decks</a>
+                <li>
+                    <a href="inbox.html" class="active"
+                        style="display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="fa-solid fa-inbox fa-fw" style="margin-right: 9px;"></i> Inbox</span>
+                        <span id="sidebarInboxBadge"
+                            style="background: #ff5252; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; display: none;">0</span>
+                    </a>
+                </li>
+                <li><a href="submit_deck.html"><i class="fa-solid fa-cloud-arrow-up fa-fw"></i> Submit
+                        Deck</a></li>
+                </li>
+            </ul>
+        </aside>
+
+        <section class="dashboard-main">
+            <nav>
+                <div class="search" style="opacity:0;"></div>
+                <div class="nav-actions" style="display: flex; align-items: center;">
+                    <div class="userProfile-header">
+                        <div class="userimg"><img id="mobileUserAvatar" src="../images/user.webp" alt="User" /></div>
+                        <p id="mobileUserName" style="padding: 10px 15px; font-weight: 400; margin: 0;">Creator</p>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="dashboard-content">
+                <div class="container">
+                    <h1 class="dashboard-title" style="margin-bottom: 30px;">Your <span>Inbox</span></h1>
+
+                    <!-- حاوية الرسائل -->
+                    <div id="inboxMessagesContainer">
+                        <div style="text-align: center; color: var(--text-secondary-color); padding: 50px;">
+                            <i class="fa-solid fa-spinner fa-spin fa-2x"></i>
+                            <p style="margin-top: 15px;">Loading messages...</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="../js/inbox.js"></script>
+    <script type="module" src="../js/main_creators.js"></script>
+    <script type="module" src="../js/main.js"></script>
+</body>
+
+</html>
